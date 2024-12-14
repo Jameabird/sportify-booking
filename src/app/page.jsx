@@ -20,11 +20,15 @@ export default function Home() {
           }}
         />
         <div className="relative h-full w-full">
-          <div className="grid grid-rows-auto gap-2">
+        {/* เมื่อมีการใช้ครบ 12 ช่องแล้วจะสร้าง row ใหม่(บรรทัดใหม่) */}
+          <div className="grid grid-rows-auto gap-2">  
+            {/* สร้าง grid ให้มีขนาด 12 ช่องเท่าๆกัน ต่อ 1 บรรทัด  สามารถปรับลด ช่องได้ */}
             <div className="grid grid-cols-12">
+              {/* จองพื้นที่ไว้ 12 คอลัมภ์ */}
               <div className="col-span-12">
                 <TopBar textColor={"white"} />
               </div>
+             
             </div>
           </div>
         </div>
