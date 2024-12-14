@@ -2,7 +2,8 @@
 import React,{useState,useEffect} from "react";
 import "@app/globals.css";
 import { Box, useTheme } from "@mui/material";
-import TopBar from "@components/Topbar";
+// import TopBar from "@components/Topbar";
+import TopBar_Admin from "@components/Topbar_Admin";
 
 export default function AdminHome() {
   return (
@@ -23,7 +24,7 @@ export default function AdminHome() {
           <div className="grid grid-rows-auto gap-2">
             <div className="grid grid-cols-12">
               <div className="col-span-12">
-                <TopBar textColor={"white"} />
+                <TopBar_Admin textColor={"white"} />
               </div>
             </div>
           </div>
