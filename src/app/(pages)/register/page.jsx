@@ -1,13 +1,34 @@
 "use client";
 import React, { useState } from "react";
-import { Box, TextField, Button, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
 
 const RegisterPage = () => {
   const [bank, setBank] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleBankChange = (event) => {
     setBank(event.target.value);
+  };
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleToggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -59,17 +80,43 @@ const RegisterPage = () => {
                 />
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 <TextField
                   label="Confirm Password"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleToggleConfirmPasswordVisibility}
+                          edge="end"
+                          aria-label="toggle confirm password visibility"
+                        >
+                          {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 {/* Dropdown เลือกธนาคาร */}
                 <FormControl fullWidth sx={{ marginBottom: "16px" }}>
@@ -85,13 +132,12 @@ const RegisterPage = () => {
                     <MenuItem value="K-Bank">K-Bank</MenuItem>
                     <MenuItem value="Krungthai">Krungthai</MenuItem>
                     <MenuItem value="TTB">TTB</MenuItem>
-                    <MenuItem value="Promptpay">Promptpay</MenuItem>
                   </Select>
                 </FormControl>
                 {/* ช่องกรอกเลขบัญชี */}
                 <TextField
                   label="Account Number"
-                  type="text" // เปลี่ยนจาก number เป็น text
+                  type="text"
                   variant="outlined"
                   fullWidth
                   inputProps={{

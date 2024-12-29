@@ -1,9 +1,16 @@
 "use client";
-import React from "react";
-import { Box, TextField, Button } from "@mui/material";
+import React, { useState } from "react";
+import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
 
 const LoginPage = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="app" style={{ display: "flex", height: "100vh" }}>
       <main className="content" style={{ flex: 1, overflowY: "auto" }}>
@@ -47,10 +54,23 @@ const LoginPage = () => {
                 />
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"} // เปลี่ยน type ตาม state
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 <Button
                   variant="contained"
