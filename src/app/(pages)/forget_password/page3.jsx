@@ -4,17 +4,26 @@ import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/materia
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
 
-const LoginPage = () => {
+const ResetPasswordPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleResetPassword = () => {
+    if (newPassword === confirmPassword) {
+      alert("Password reset successfully!");
+    } else {
+      alert("Passwords do not match.");
+    }
+  };
+
   return (
     <div className="app" style={{ display: "flex", height: "100vh" }}>
       <main className="content" style={{ flex: 1, overflowY: "auto" }}>
-        {/* พื้นหลังเลเยอร์ */}
         <div
           className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
           style={{
@@ -26,12 +35,10 @@ const LoginPage = () => {
           }}
         />
         <div className="relative h-full w-full">
-          {/* Grid สำหรับ TopBar */}
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12">
               <TopBar textColor={"white"} />
             </div>
-            {/* กล่องสำหรับ Login */}
             <div className="col-span-12 flex justify-center items-center">
               <Box
                 sx={{
@@ -44,19 +51,15 @@ const LoginPage = () => {
                 }}
               >
                 <h2 style={{ marginBottom: "16px", color: "rgba(70, 80, 100, 0.9)" }}>
-                  Welcome Back!
+                  Reset Password
                 </h2>
                 <TextField
-                  label="Email Address"
+                  label="New Password"
+                  type={showPassword ? "text" : "password"}
                   variant="outlined"
                   fullWidth
-                  sx={{ marginBottom: "16px" }}
-                />
-                <TextField
-                  label="Password"
-                  type={showPassword ? "text" : "password"} // เปลี่ยน type ตาม state
-                  variant="outlined"
-                  fullWidth
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   sx={{ marginBottom: "16px" }}
                   InputProps={{
                     endAdornment: (
@@ -72,22 +75,33 @@ const LoginPage = () => {
                     ),
                   }}
                 />
-                <Box sx={{ textAlign: "right", marginBottom: "16px" }}>
-                  <a
-                    href="/forget_password"
-                    style={{
-                      color: "#f57c00",
-                      textDecoration: "none",
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    Forget Password?
-                  </a>
-                </Box>
+                <TextField
+                  label="Confirm Password"
+                  type={showPassword ? "text" : "password"}
+                  variant="outlined"
+                  fullWidth
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  sx={{ marginBottom: "16px" }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
                 <Button
                   variant="contained"
                   color="primary"
                   fullWidth
+                  onClick={handleResetPassword}
                   sx={{
                     backgroundColor: "#f57c00",
                     "&:hover": {
@@ -95,21 +109,8 @@ const LoginPage = () => {
                     },
                   }}
                 >
-                  Login
+                  Reset Password
                 </Button>
-                <Box
-                  sx={{
-                    marginTop: "16px",
-                    color: "rgba(70, 80, 100, 0.9)",
-                  }}
-                >
-                  <p>
-                    Don't have an account?{" "}
-                    <a href="/register" style={{ color: "#f57c00", textDecoration: "none" }}>
-                      Sign up
-                    </a>
-                  </p>
-                </Box>
               </Box>
             </div>
           </div>
@@ -119,4 +120,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ResetPasswordPage;
