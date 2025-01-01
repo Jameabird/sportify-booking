@@ -4,16 +4,15 @@ import { Box, TextField, Button } from "@mui/material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
 
-const ForgetPasswordPage = () => {
-  const [email, setEmail] = useState("");
-  const router = useRouter(); // สร้าง router object
+const OtpPage = () => {
+  const [otp, setOtp] = useState("");
+  const router = useRouter();
 
-  const handleSendLink = () => {
-    if (email) {
-      // คุณสามารถเพิ่มการตรวจสอบรูปแบบอีเมลได้ที่นี่
-      router.push("/forget_password/page2"); // นำทางไปยังหน้า OTP
+  const handleVerify = () => {
+    if (otp.length === 6) {
+      router.push("/forget_password/Reset"); // เปลี่ยนเส้นทางไปหน้า reset password
     } else {
-      alert("Please enter your email.");
+      alert("Please enter a valid 6-digit OTP.");
     }
   };
 
@@ -47,21 +46,22 @@ const ForgetPasswordPage = () => {
                 }}
               >
                 <h2 style={{ marginBottom: "16px", color: "rgba(70, 80, 100, 0.9)" }}>
-                  Reset Your Password
+                  Enter OTP
                 </h2>
                 <TextField
-                  label="Enter Your Email"
+                  label="6-digit OTP"
                   variant="outlined"
                   fullWidth
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)} // อัปเดต state เมื่อกรอกอีเมล
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  inputProps={{ maxLength: 6 }}
                   sx={{ marginBottom: "16px" }}
                 />
                 <Button
                   variant="contained"
                   color="primary"
                   fullWidth
-                  onClick={handleSendLink} // เมื่อคลิกจะไปที่หน้า OTP
+                  onClick={handleVerify}
                   sx={{
                     backgroundColor: "#f57c00",
                     "&:hover": {
@@ -69,7 +69,7 @@ const ForgetPasswordPage = () => {
                     },
                   }}
                 >
-                  Send Reset Link
+                  Verify OTP
                 </Button>
               </Box>
             </div>
@@ -80,4 +80,4 @@ const ForgetPasswordPage = () => {
   );
 };
 
-export default ForgetPasswordPage;
+export default OtpPage;

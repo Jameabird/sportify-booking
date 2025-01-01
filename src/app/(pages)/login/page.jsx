@@ -74,7 +74,7 @@ const LoginPage = () => {
                 />
                 <Box sx={{ textAlign: "right", marginBottom: "16px" }}>
                   <a
-                    href="/forget_password"
+                    href="/forget_password/main"
                     style={{
                       color: "#f57c00",
                       textDecoration: "none",
