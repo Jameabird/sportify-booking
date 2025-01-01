@@ -4,7 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar = (props) => {
+const TopBar = props => {
   const currentPath = usePathname();
   console.log("currentPath", currentPath);
   return (
@@ -17,7 +17,6 @@ const TopBar = (props) => {
         backdropFilter: "blur(7px)", // เบลอพื้นหลัง
         WebkitBackdropFilter: "blur(7px)", // Safari
         boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)"
-        
       }}
     >
       <Box
@@ -26,10 +25,12 @@ const TopBar = (props) => {
         // bgcolor={"red"}
         borderRadius="3px"
       >
-        <div className="text-3xl font-bold flex pl-10">
-          <div style={{color:props.textColor}}>SPORTIFY</div>
-          <div className="pl-2 text-orange-500">BOOKING</div>
-        </div>
+        <Link href="/">
+          <div className="text-3xl font-bold flex pl-10">
+            <div style={{ color: props.textColor }}>SPORTIFY</div>
+            <div className="pl-2 text-orange-500">BOOKING</div>
+          </div>
+        </Link>
       </Box>
       <Box display="flex">
         <Link href="/">
@@ -37,16 +38,14 @@ const TopBar = (props) => {
             sx={{
               padding: "0 10px",
               paddingTop: "4px",
-              color: currentPath === "/" ? "orange":props.textColor,
-              cursor: "pointer" ,
+              color: currentPath === "/" ? "orange" : props.textColor,
+              cursor: "pointer",
               "&:hover": {
-                    color: "#868dfb ",
-                  },
+                color: "#868dfb "
+              }
             }}
           >
-            <div className="font-bold text-xl">
-              Home
-              </div>
+            <div className="font-bold text-xl">Home</div>
           </Box>
         </Link>
         <Link href="/category">
@@ -54,12 +53,12 @@ const TopBar = (props) => {
             sx={{
               padding: "0 10px",
               paddingTop: "4px",
-              cursor: "pointer" ,
+              cursor: "pointer",
               color: currentPath === "/category" ? "orange" : props.textColor,
               //WebkitTextStroke: "px black",
               "&:hover": {
-                color: "#868dfb ",
-              },
+                color: "#868dfb "
+              }
             }}
           >
             <div className="font-bold text-xl">Category</div>
@@ -73,8 +72,8 @@ const TopBar = (props) => {
               cursor: "pointer",
               color: currentPath === "/history" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb ",
-              },
+                color: "#868dfb "
+              }
             }}
           >
             <div className="font-bold text-xl">History</div>
@@ -89,8 +88,8 @@ const TopBar = (props) => {
               paddingRight: "50px",
               color: currentPath === "/admin" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb ",
-              },
+                color: "#868dfb "
+              }
             }}
           >
             <div className="font-bold text-xl">Admin</div>
