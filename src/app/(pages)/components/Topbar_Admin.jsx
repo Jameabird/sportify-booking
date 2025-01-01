@@ -26,10 +26,12 @@ const TopBar_Admin = (props) => {
         // bgcolor={"red"}
         borderRadius="3px"
       >
+      <Link href="/">
         <div className="text-3xl font-bold flex pl-10">
           <div style={{color:props.textColor}}>SPORTIFY</div>
           <div className="pl-2 text-orange-500">BOOKING</div>
         </div>
+        </Link>
       </Box>
       <Box display="flex">
         <Link href="/admin">
@@ -37,7 +39,7 @@ const TopBar_Admin = (props) => {
             sx={{
               padding: "0 10px",
               paddingTop: "4px",
-              color: currentPath === "/" ? "orange":props.textColor,
+              color: currentPath === "/admin" ? "orange":props.textColor,
               cursor: "pointer" ,
               "&:hover": {
                     color: "#868dfb ",
@@ -49,13 +51,13 @@ const TopBar_Admin = (props) => {
               </div>
           </Box>
         </Link>
-        <Link href="admin/category">
+        <Link href="/admin/category">
           <Box
             sx={{
               padding: "0 10px",
               paddingTop: "4px",
               cursor: "pointer" ,
-              color: currentPath === "/category" ? "orange" : props.textColor,
+              color: currentPath === "/admin/category" ? "orange" : props.textColor,
               //WebkitTextStroke: "px black",
               "&:hover": {
                 color: "#868dfb ",
@@ -65,13 +67,13 @@ const TopBar_Admin = (props) => {
             <div className="font-bold text-xl">Category</div>
           </Box>
         </Link>
-        <Link href="admin/history">
+        <Link href="/admin/history">
           <Box
             sx={{
               padding: "0 10px",
               paddingTop: "4px",
               cursor: "pointer",
-              color: currentPath === "/history" ? "orange" : props.textColor,
+              color: currentPath === "/admin/history" ? "orange" : props.textColor,
               "&:hover": {
                 color: "#868dfb ",
               },
