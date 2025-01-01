@@ -4,7 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar = (props) => {
+const TopBar_Admin = (props) => {
   const currentPath = usePathname();
   console.log("currentPath", currentPath);
   return (
@@ -32,7 +32,7 @@ const TopBar = (props) => {
         </div>
       </Box>
       <Box display="flex">
-        <Link href="/">
+        <Link href="/admin">
           <Box
             sx={{
               padding: "0 10px",
@@ -49,7 +49,7 @@ const TopBar = (props) => {
               </div>
           </Box>
         </Link>
-        <Link href="/category">
+        <Link href="admin/category">
           <Box
             sx={{
               padding: "0 10px",
@@ -65,7 +65,7 @@ const TopBar = (props) => {
             <div className="font-bold text-xl">Category</div>
           </Box>
         </Link>
-        <Link href="/history">
+        <Link href="/admin/history">
           <Box
             sx={{
               padding: "0 10px",
@@ -80,7 +80,7 @@ const TopBar = (props) => {
             <div className="font-bold text-xl">History</div>
           </Box>
         </Link>
-        <Link href="/admin">
+        {/* <Link href="/">
           <Box
             sx={{
               padding: "0 10px",
@@ -95,7 +95,7 @@ const TopBar = (props) => {
           >
             <div className="font-bold text-xl">Admin</div>
           </Box>
-        </Link>
+        </Link> */}
         <Box sx={{ padding: "0 3px" }}>
           <Button variant="contained" color="primary">
             Sign In
@@ -105,4 +105,4 @@ const TopBar = (props) => {
     </Box>
   );
 };
-export default TopBar;
+export default TopBar_Admin;
