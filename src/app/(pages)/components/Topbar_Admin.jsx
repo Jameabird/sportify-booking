@@ -65,7 +65,7 @@ const TopBar_Admin = (props) => {
             <div className="font-bold text-xl">Category</div>
           </Box>
         </Link>
-        <Link href="admin/history">
+        <Link href="/admin/history">
           <Box
             sx={{
               padding: "0 10px",
