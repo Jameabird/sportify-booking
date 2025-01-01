@@ -49,7 +49,7 @@ const TopBar_Admin = (props) => {
               </div>
           </Box>
         </Link>
-        <Link href="admin/category">
+        <Link href="/admin/category">
           <Box
             sx={{
               padding: "0 10px",
