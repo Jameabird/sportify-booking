@@ -37,7 +37,7 @@ const TopBar_Admin = (props) => {
             sx={{
               padding: "0 10px",
               paddingTop: "4px",
-              color: currentPath === "/" ? "orange":props.textColor,
+              color: currentPath === "/admin" ? "orange":props.textColor,
               cursor: "pointer" ,
               "&:hover": {
                     color: "#868dfb ",
@@ -55,7 +55,7 @@ const TopBar_Admin = (props) => {
               padding: "0 10px",
               paddingTop: "4px",
               cursor: "pointer" ,
-              color: currentPath === "/category" ? "orange" : props.textColor,
+              color: currentPath === "/admin/category" ? "orange" : props.textColor,
               //WebkitTextStroke: "px black",
               "&:hover": {
                 color: "#868dfb ",
@@ -71,7 +71,7 @@ const TopBar_Admin = (props) => {
               padding: "0 10px",
               paddingTop: "4px",
               cursor: "pointer",
-              color: currentPath === "/history" ? "orange" : props.textColor,
+              color: currentPath === "/admin/history" ? "orange" : props.textColor,
               "&:hover": {
                 color: "#868dfb ",
               },
