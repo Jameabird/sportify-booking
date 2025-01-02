@@ -96,11 +96,14 @@ const TopBar = (props) => {
             <div className="font-bold text-xl">Admin</div>
           </Box>
         </Link>
+        <Link href="/user-setting/profile">
         <Box sx={{ padding: "0 3px" }}>
-          <Button variant="contained" color="primary">
-            Sign In
-          </Button>
+            <Button variant="contained" color="primary">
+              Sign In
+            </Button>
         </Box>
+</Link>
+
       </Box>
     </Box>
   );
