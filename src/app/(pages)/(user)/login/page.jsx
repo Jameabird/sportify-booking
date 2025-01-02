@@ -3,12 +3,23 @@ import React, { useState } from "react";
 import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-
+  const [email, setEmail] = useState(""); // Manage email state
+  const [password, setPassword] = useState(""); // Manage password state
+  const router = useRouter(); // Get router object to navigate
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  // Handle login form submission
+  const handleLogin = () => {
+    // Here, you can add your authentication logic (e.g., verify credentials)
+    // For now, we'll just assume login is successful
+    // Simulating a successful login and then redirecting to Home page
+    router.push("/home"); // Navigate to the Home page
   };
 
   return (
@@ -51,6 +62,8 @@ const LoginPage = () => {
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)} // Update email state
                 />
                 <TextField
                   label="Password"
@@ -58,6 +71,8 @@ const LoginPage = () => {
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)} // Update password state
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -94,6 +109,7 @@ const LoginPage = () => {
                       backgroundColor: "#ff9800",
                     },
                   }}
+                  onClick={handleLogin} // Handle login button click
                 >
                   Login
                 </Button>
