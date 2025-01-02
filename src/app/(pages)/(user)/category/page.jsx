@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./ChooseField.css";
-import TopBar_User from "@components/Topbar_User";
+import TopBar from "@components/Topbar";
 
 const ChooseField = () => {
   const [isClient, setIsClient] = useState(false);
@@ -45,7 +45,7 @@ const ChooseField = () => {
 
   return (
     <div
-     className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
+      className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
       style={{
         backgroundImage: "url('/gym_bg2.jpg')",
         backgroundColor: "rgba(70, 80, 100, 0.7)",
@@ -54,7 +54,7 @@ const ChooseField = () => {
         zIndex: -1
       }}
     >
-      <TopBar_User textColor={"white"}/>
+      <TopBar textColor={"white"} />
       <div className="choose-field-container">
         <h1 className="title">CHOOSE FIELD</h1>
         <div className="fields">
