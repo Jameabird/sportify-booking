@@ -9,6 +9,30 @@
     align-items: center;
     padding: 20px;
   }
+
+  .add-category-button {
+    background-color: #FF0000;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: calc(50% - 50px);
+    box-sizing: border-box;
+    min-width: 180px;
+    text-align: center;
+  }
+  .add-category-button:hover {
+    background-color: #FF3B3B;
+    transform: scale(1.05);
+  }
+  
+  .add-category-button:active {
+    transform: scale(0.95);
+  }
   
   .title {
     color: white;
@@ -26,7 +50,7 @@
     justify-content: flex-start;
     gap: 65px;
     width: 100%;
-    max-width: 700px;/* เพิ่มความสูงเต็มหน้าจอ2222 */
+    max-width: 700px;
   }
   
   .field-button {
@@ -69,7 +93,13 @@
       width: 100%;
       margin-bottom: 20px;
     }
+
+  .add-category-button {
+    width: 100%;
+    margin-bottom: 20px;
   }
+}
+
   
   @media (max-width: 768px) {
     .title {

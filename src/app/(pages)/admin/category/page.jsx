@@ -30,6 +30,10 @@ const category_page_admin = () => {
         router.push("/search");
       }
     };
+
+    const handleAddCategory = () => {
+        console.log("เพิ่มหมวดหมู่กีฬา");
+      };
   
     if (!isClient) {
       return null;
@@ -55,10 +59,17 @@ const category_page_admin = () => {
           zIndex: -1
         }}
       >
+
         <TopBar_Admin textColor={"white"} />
         <div className="choose-field-container">
           <h1 className="title">CHOOSE FIELD</h1>
           <div className="fields">
+             
+          <button
+            className="add-category-button"
+            onClick={handleAddCategory}
+          > เพิ่มหมวดหมู่ </button>
+
             {Array.from(fields).map((field, index) =>
               <button
                 key={index}
