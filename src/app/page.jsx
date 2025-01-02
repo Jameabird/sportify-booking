@@ -28,7 +28,6 @@ export default function Home() {
               <div className="col-span-12">
                 <TopBar textColor={"white"} />
               </div>
-             
             </div>
           </div>
         </div>

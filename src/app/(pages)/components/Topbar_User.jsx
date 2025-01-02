@@ -4,14 +4,14 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar_User = (props) => {
+const TopBar_User = props => {
   const [anchorEl, setAnchorEl] = useState(null); // State for menu anchor element
   const [isOpen, setIsOpen] = useState(false); // State for dropdown visibility
   const currentPath = usePathname(); // Use to check the current path
   const router = useRouter(); // Use for navigation
 
   // Open the menu when the avatar is clicked
-  const handleAvatarClick = (event) => {
+  const handleAvatarClick = event => {
     setAnchorEl(event.currentTarget);
     setIsOpen(true);
   };
@@ -33,7 +33,7 @@ const TopBar_User = (props) => {
     router.push("/setting");
   };
 
-  const getLinkStyle = (path) => ({
+  const getLinkStyle = path => ({
     padding: "0 15px", // Consistent padding with TopBar.jsx
     color: currentPath === path ? "orange" : props.textColor,
     fontSize: "1.25rem", // Match font size
@@ -41,8 +41,8 @@ const TopBar_User = (props) => {
     cursor: "pointer",
     textDecoration: "none",
     "&:hover": {
-      color: "#868dfb",
-    },
+      color: "#868dfb"
+    }
   });
 
   return (
@@ -90,11 +90,11 @@ const TopBar_User = (props) => {
         onClose={handleClose}
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "right",
+          horizontal: "right"
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "right",
+          horizontal: "right"
         }}
       >
         <MenuItem onClick={handleSettingsClick}>
