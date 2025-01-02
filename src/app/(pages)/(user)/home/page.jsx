@@ -2,7 +2,7 @@
 import React,{useState,useEffect} from "react";
 import "@app/globals.css";
 import { Box, useTheme } from "@mui/material";
-import TopBar from "@components/Topbar";
+import TopBar_User from "@components/Topbar_User";
 
 export default function Home() {
   return (
@@ -26,9 +26,9 @@ export default function Home() {
             <div className="grid grid-cols-12">
               {/* จองพื้นที่ไว้ 12 คอลัมภ์ */}
               <div className="col-span-12">
-                <TopBar textColor={"white"} />
-                ////
+                <TopBar_User textColor={"white"} />
               </div>
+             
             </div>
           </div>
         </div>
