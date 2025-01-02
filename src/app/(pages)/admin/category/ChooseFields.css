@@ -26,11 +26,11 @@
     justify-content: flex-start;
     gap: 65px;
     width: 100%;
-    max-width: 700px;
+    max-width: 700px;/* เพิ่มความสูงเต็มหน้าจอ2222 */
   }
   
   .field-button {
-    background-color: #03468F; 
+    background-color: #03468F;
     color: white;
     font-size: 1.2rem;
     font-weight: bold;
@@ -46,7 +46,7 @@
   }
   
   .field-button:hover {
-    background-color: #2064bd; 
+    background-color: #2064bd;
     transform: scale(1.05);
   }
   
@@ -54,48 +54,44 @@
     transform: scale(0.95);
   }
   
-  
- 
   @media (max-width: 600px) {
     .title {
-      font-size: 2rem; 
+      font-size: 2rem;
       margin-top: 10px;
       margin-bottom: 15px;
     }
   
     .fields {
-      gap: 40px; 
+      gap: 40px;
     }
   
     .field-button {
-      width: 100%; 
-      margin-bottom: 20px; 
+      width: 100%;
+      margin-bottom: 20px;
     }
   }
   
- 
   @media (max-width: 768px) {
     .title {
-      font-size: 2.5rem; 
+      font-size: 2.5rem;
     }
   
     .fields {
-      gap: 50px; 
+      gap: 50px;
     }
   
     .field-button {
-      width: calc(50% - 30px); 
+      width: calc(50% - 30px);
     }
   }
   
- 
   @media (min-width: 1024px) {
     .title {
-      font-size: 3rem; 
+      font-size: 3rem;
     }
   
     .fields {
-      gap: 65px; 
+      gap: 65px;
     }
   
     .field-button {
