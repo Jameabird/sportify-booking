@@ -54,7 +54,7 @@ const ChooseField = () => {
         zIndex: -1
       }}
     >
-      <TopBar />
+      <TopBar textColor={"white"}/>
       <div className="choose-field-container">
         <h1 className="title">CHOOSE FIELD</h1>
         <div className="fields">
