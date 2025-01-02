@@ -27,6 +27,7 @@ export default function Home() {
               {/* จองพื้นที่ไว้ 12 คอลัมภ์ */}
               <div className="col-span-12">
                 <TopBar textColor={"white"} />
+                ////
               </div>
              
             </div>
