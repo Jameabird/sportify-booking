@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import TopBar from "../../components/Topbar";
+import TopBar_User from "../../components/Topbar_User";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -66,13 +66,24 @@ export default function Profile() {
   };
 
   return (
-    <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4" }}>
-      <TopBar />
+    <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
+      {/* Set fixed background */}
+      <Box sx={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#f4f4f4", // Same color as the page background
+        zIndex: -1,
+      }} />
+
+      <TopBar_User />
       
       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" height="100%" sx={{ paddingTop: "80px" }}>
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" maxWidth="400px" sx={{ backgroundColor: "#fff", borderRadius: "8px", padding: "20px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
-          {/* Only show the profile information if we're not in the Change Password mode */}
-          {!isChangingPassword && (
+          {/* Profile or Change Password content */}
+          {!isChangingPassword ? (
             <>
               <Box position="relative" textAlign="center" mb={2}>
                 <Avatar src={profileImage} alt="Profile Picture" sx={{ width: "100px", height: "100px", border: "2px solid #ddd", margin: "0 auto" }} />
@@ -85,7 +96,6 @@ export default function Profile() {
                     <CameraAltIcon />
                   </IconButton>
                 )}
-                {/* Hidden file input */}
                 <input 
                   id="profile-image-input"
                   type="file"
@@ -180,44 +190,48 @@ export default function Profile() {
                 </Box>
               </Box>
             </>
-          )}
-
-          {/* Change Password Form */}
-          {isChangingPassword && (
-            <Box width="100%" display="flex" flexDirection="column" gap={2}>
-              <TextField
-                label="Old Password"
-                type="password"
-                fullWidth
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                sx={{ marginBottom: "20px" }}
-              />
-              <TextField
-                label="New Password"
-                type="password"
-                fullWidth
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                sx={{ marginBottom: "20px" }}
-              />
-              <TextField
-                label="Confirm Password"
-                type="password"
-                fullWidth
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                sx={{ marginBottom: "20px" }}
-              />
-              {error && <Typography color="error">{error}</Typography>}
-
-              <Button variant="contained" color="success" fullWidth sx={{ fontSize: "13px" }} onClick={handleChangePassword}>
+          ) : (
+            <>
+              <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
                 Change Password
-              </Button>
-              <Button variant="contained" color="error" fullWidth sx={{ marginTop: "10px", fontSize: "13px" }} onClick={() => setIsChangingPassword(false)}>
-                Cancel
-              </Button>
-            </Box>
+              </Typography>
+
+              {/* Change Password Form */}
+              <Box width="100%" display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Old Password"
+                  type="password"
+                  fullWidth
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  sx={{ marginBottom: "20px" }}
+                />
+                <TextField
+                  label="New Password"
+                  type="password"
+                  fullWidth
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  sx={{ marginBottom: "20px" }}
+                />
+                <TextField
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  sx={{ marginBottom: "20px" }}
+                />
+                {error && <Typography color="error">{error}</Typography>}
+
+                <Button variant="contained" color="success" fullWidth sx={{ fontSize: "13px" }} onClick={handleChangePassword}>
+                  Change Password
+                </Button>
+                <Button variant="contained" color="error" fullWidth sx={{ marginTop: "10px", fontSize: "13px" }} onClick={() => setIsChangingPassword(false)}>
+                  Cancel
+                </Button>
+              </Box>
+            </>
           )}
         </Box>
       </Box>

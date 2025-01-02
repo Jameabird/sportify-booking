@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import "./Search.css";
 import places from "./places"; 
 import TopBar from "../../components/Topbar";
+import TopBar_User from "../../components/Topbar_User";
 
 function SearchPages() {
   const [search, setSearch] = useState("");
@@ -13,7 +14,7 @@ function SearchPages() {
 
   return (
     <div>
-      <TopBar />
+      <TopBar_User />
       <div className="container">
         <h2 className="header">Your location: Pattaya</h2>
         <div className="main-content">
