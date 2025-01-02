@@ -105,6 +105,8 @@ const TopBar = (props) => {
             Sign In
           </Button>
         </Box>
+</Link>
+
       </Box>
     </Box>
   );
