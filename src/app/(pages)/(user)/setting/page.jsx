@@ -1,149 +1,240 @@
 "use client";
 import React, { useState } from "react";
-import TopBar from "@components/Topbar";
-import "./setting.css";
+import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import TopBar_User from "../../components/Topbar_User";
 
-const UserSettings = () => {
-  const [formData, setFormData] = useState({
+export default function Profile() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [profileData, setProfileData] = useState({
     name: "Jennie Lee",
     email: "SE@gmail.com",
-    phone: "+66123456789",
-    bankAccount: "1112131415",
-    bank: "SCB",
-    profileImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSy_JmafxKbli9Es5QUvL6d-qIdOd5RmExsvA&s",
+    phone: "0123456789",
+    bankAccount: "1234567890",
+    bankName: "SCB",
   });
 
-  const banks = ["SCB", "KBANK", "KTB", "BBL",""];
+  const [oldPassword, setOldPassword] = useState(""); // State for the old password
+  const [newPassword, setNewPassword] = useState(""); // State for the new password
+  const [confirmPassword, setConfirmPassword] = useState(""); // State for confirming the new password
+  const [error, setError] = useState(""); // Error message
+  const [profileImage, setProfileImage] = useState("/default-profile.png"); // State for profile image
 
-  const [isEditing, setIsEditing] = useState(false);
+  const handleEditClick = () => setIsEditing(true);
+  const handleSaveClick = () => {
+    setIsEditing(false);
+    alert("Changes saved successfully!");
+  };
+  const handleCancelClick = () => setIsEditing(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setProfileData((prevState) => ({
+      ...prevState,
       [name]: value,
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleChangePasswordClick = () => setIsChangingPassword(true); // Switch to Change Password view
+
+  const handleChangePassword = () => {
+    if (oldPassword !== "currentPassword") { // Check if the old password is correct
+      setError("Old password is incorrect!");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    alert("Password changed successfully!");
+    setIsChangingPassword(false); // Return to profile view after successful password change
+  };
+
+  // Function to handle the profile image change
+  const handleProfileImageChange = (event) => {
+    const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = () => {
-        setFormData((prev) => ({
-          ...prev,
-          profileImage: reader.result,
-        }));
+      reader.onloadend = () => {
+        setProfileImage(reader.result); // Set the new profile image
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Read the file as a data URL
     }
   };
 
-  const handleSave = () => {
-    console.log("Saved data:", formData);
-    alert("Profile updated successfully!");
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
-
   return (
-    <div>
-      <TopBar />
-      <div className="settings-container">
-        <h2>Profile Settings</h2>
-        <div className="profile-image-container">
-          <img
-            src={formData.profileImage}
-            alt="Profile"
-            className="profile-image"
-          />
-          {isEditing && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="image-upload"
-            />
-          )}
-        </div>
-        <form>
+    <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
+      {/* Set fixed background */}
+      <Box sx={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#f4f4f4", // Same color as the page background
+        zIndex: -1,
+      }} />
 
-          <div>
-            <label>Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
-          </div>
+      <TopBar_User />
+      
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" height="100%" sx={{ paddingTop: "80px" }}>
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" maxWidth="400px" sx={{ backgroundColor: "#fff", borderRadius: "8px", padding: "20px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
+          {/* Profile or Change Password content */}
+          {!isChangingPassword ? (
+            <>
+              <Box position="relative" textAlign="center" mb={2}>
+                <Avatar src={profileImage} alt="Profile Picture" sx={{ width: "100px", height: "100px", border: "2px solid #ddd", margin: "0 auto" }} />
+                {isEditing && (
+                  <IconButton 
+                    color="primary" 
+                    sx={{ position: "absolute", bottom: 0, right: "calc(50% - 20px)", backgroundColor: "#fff", boxShadow: 1, border: "1px solid #ddd" }}
+                    onClick={() => document.getElementById("profile-image-input").click()} // Trigger file input click
+                  >
+                    <CameraAltIcon />
+                  </IconButton>
+                )}
+                <input 
+                  id="profile-image-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleProfileImageChange} // Handle image selection
+                />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
+                {isEditing ? "Edit Profile" : "Profile"}
+              </Typography>
 
-          <div>
-            <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
-          </div>
+              {/* Profile Form */}
+              <Box width="100%" display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Name"
+                  name="name"
+                  fullWidth
+                  value={profileData.name}
+                  disabled={!isEditing}
+                  onChange={handleInputChange}
+                  InputProps={{ sx: { fontSize: "14px" } }}
+                  InputLabelProps={{ sx: { fontSize: "14px" } }}
+                />
+                <TextField
+                  label="Email"
+                  name="email"
+                  fullWidth
+                  value={profileData.email}
+                  disabled={!isEditing}
+                  onChange={handleInputChange}
+                  InputProps={{ sx: { fontSize: "14px" } }}
+                  InputLabelProps={{ sx: { fontSize: "14px" } }}
+                />
+                <TextField
+                  label="Phone"
+                  name="phone"
+                  fullWidth
+                  value={profileData.phone}
+                  disabled={!isEditing}
+                  onChange={handleInputChange}
+                  InputProps={{ sx: { fontSize: "14px" } }}
+                  InputLabelProps={{ sx: { fontSize: "14px" } }}
+                />
+                <TextField
+                  label="Bank Account"
+                  name="bankAccount"
+                  fullWidth
+                  value={profileData.bankAccount}
+                  disabled={!isEditing}
+                  onChange={handleInputChange}
+                  InputProps={{ sx: { fontSize: "14px" } }}
+                  InputLabelProps={{ sx: { fontSize: "14px" } }}
+                />
+                <FormControl fullWidth variant="outlined" sx={{ fontSize: "14px", marginTop: "8px" }}>
+                  <InputLabel sx={{ fontSize: "14px" }}>Bank Name</InputLabel>
+                  <Select
+                    name="bankName"
+                    value={profileData.bankName}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    label="Bank Name"
+                    sx={{ fontSize: "14px" }}
+                  >
+                    <MenuItem value="SCB">SCB</MenuItem>
+                    <MenuItem value="KBANK">KBANK</MenuItem>
+                    <MenuItem value="BAY">BAY</MenuItem>
+                    <MenuItem value="BKK">BKK</MenuItem>
+                  </Select>
+                </FormControl>
 
-          <div>
-            <label>Phone:</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div>
-            <label>Bank Account:</label>
-            <input
-              type="text"
-              name="bankAccount"
-              value={formData.bankAccount}
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
-          </div>
-
-          <div>
-            <label>Bank:</label>
-            <select
-              name="bank"
-              value={formData.bank}
-              onChange={handleChange}
-              disabled={!isEditing}
-            >
-            {banks.map((bank, index) => (
-                <option key={index} value={bank}>
-                  {bank}
-                </option>
-            ))}
-            </select>
-          </div>
-
-          {isEditing ? (
-            <div className="buttons">
-              <button type="button" onClick={handleSave} className="save-button"> Save </button>
-              <button type="button" onClick={handleCancel} className="cancel-button"> Cancel </button>
-            </div>
+                <Box display="flex" justifyContent="space-between" mt={2}>
+                  {isEditing ? (
+                    <>
+                      <Button variant="contained" color="success" sx={{ width: "48%", fontSize: "13px" }} onClick={handleSaveClick}>
+                        Save
+                      </Button>
+                      <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleCancelClick}>
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="contained" color="success" sx={{ width: "48%", fontSize: "13px" }} onClick={handleChangePasswordClick}>
+                        Change Password
+                      </Button>
+                      <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleEditClick}>
+                        Edit
+                      </Button>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            </>
           ) : (
-            <button type="button" onClick={() => setIsEditing(true)} className="edit-button"> Edit </button>
-          )}
-        </form>
-        
-      </div>
-    </div>
-  );
-};
+            <>
+              <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
+                Change Password
+              </Typography>
 
-export default UserSettings;
+              {/* Change Password Form */}
+              <Box width="100%" display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Old Password"
+                  type="password"
+                  fullWidth
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  sx={{ marginBottom: "20px" }}
+                />
+                <TextField
+                  label="New Password"
+                  type="password"
+                  fullWidth
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  sx={{ marginBottom: "20px" }}
+                />
+                <TextField
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  sx={{ marginBottom: "20px" }}
+                />
+                {error && <Typography color="error">{error}</Typography>}
+
+                <Button variant="contained" color="success" fullWidth sx={{ fontSize: "13px" }} onClick={handleChangePassword}>
+                  Change Password
+                </Button>
+                <Button variant="contained" color="error" fullWidth sx={{ marginTop: "10px", fontSize: "13px" }} onClick={() => setIsChangingPassword(false)}>
+                  Cancel
+                </Button>
+              </Box>
+            </>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
