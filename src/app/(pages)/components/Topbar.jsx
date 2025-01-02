@@ -25,10 +25,12 @@ const TopBar = (props) => {
         display="flex"
         borderRadius="3px"
       >
-        <div className="text-3xl font-bold flex pl-10">
-          <div style={{ color: props.textColor }}>SPORTIFY</div>
-          <div className="pl-2 text-orange-500">BOOKING</div>
-        </div>
+        <Link href="/">
+          <div className="text-3xl font-bold flex pl-10">
+            <div style={{ color: props.textColor }}>SPORTIFY</div>
+            <div className="pl-2 text-orange-500">BOOKING</div>
+          </div>
+        </Link>
       </Box>
       <Box display="flex">
         {/* ลิงก์แต่ละหน้า */}
