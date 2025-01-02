@@ -1,8 +1,23 @@
 "use client";
-import React,{useState,useEffect} from "react";
-const booking_page = () => { 
-    return (
-        <div>booking_page</div>
-    )
-}
-export default booking_page;
+import React from "react";
+import TopBar from '../../components/Topbar';
+import './booking.css'
+
+const Booking = () => {
+    return(
+        <div>
+            <div className="booking"> 
+                <TopBar  />
+                <div className="container">
+                        <div className="block">Building 1</div>
+                        <div className="block">Building 2</div>
+                        <div className="block">Building 3</div>
+                        <div className="block">Building 4</div>
+                </div>
+            </div>
+
+        </div>
+    );
+};
+
+export default Booking;
