@@ -1,12 +1,50 @@
 "use client";
-import { Box, IconButton, useTheme, styled, Button } from "@mui/material";
+import { Box, Button, Avatar, Menu, MenuItem, Typography } from "@mui/material";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Admin = props => {
-  const currentPath = usePathname();
-  console.log("currentPath", currentPath);
+  const currentPath = usePathname(); // ใช้สำหรับตรวจสอบเส้นทางปัจจุบัน
+  const router = useRouter(); // ใช้สำหรับนำทาง
+  const [isLogin, setisLogin] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // State for menu anchor element
+  const [isOpen, setIsOpen] = useState(false); // State for dropdown visibility
+
+  // Open the menu when the avatar is clicked
+  const handleAvatarClick = event => {
+    setAnchorEl(event.currentTarget);
+    setIsOpen(true);
+  };
+
+  // Close the menu
+  const handleClose = () => {
+    setIsOpen(false);
+    setAnchorEl(null);
+  };
+
+  // Handle Sign Out
+  const handleSignOut = () => {
+    localStorage.removeItem("userToken");
+    router.push("/login");
+  };
+
+  // Handle Settings Click
+  const handleSettingsClick = () => {
+    router.push("/setting");
+  };
+
+  const getLinkStyle = path => ({
+    padding: "0 15px", // Consistent padding with TopBar.jsx
+    color: currentPath === path ? "orange" : props.textColor,
+    fontSize: "1.25rem", // Match font size
+    fontWeight: "bold",
+    cursor: "pointer",
+    textDecoration: "none",
+    "&:hover": {
+      color: "#868dfb"
+    }
+  });
   return (
     <Box
       display="flex"
@@ -97,12 +135,45 @@ const TopBar_Admin = props => {
             <div className="font-bold text-xl">Admin</div>
           </Box>
         </Link> */}
-        <Box sx={{ padding: "0 3px" }}>
-          <Button variant="contained" color="primary">
-            Sign In
-          </Button>
-        </Box>
+        {isLogin
+          ? <Box sx={{ padding: "0 15px" }}>
+              <Avatar
+                sx={{ cursor: "pointer", width: 35, height: 35 }}
+                onClick={handleAvatarClick}
+                alt="User Logo"
+              />
+            </Box>
+          : <Box sx={{ padding: "0 3px" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => router.push("/login")} // นำทางไปยัง "/login"
+              >
+                Sign In
+              </Button>
+            </Box>}
+        {/* </Link> */}
       </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={isOpen}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right"
+        }}
+      >
+        <MenuItem onClick={handleSettingsClick}>
+          <Typography variant="body1">Settings</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleSignOut}>
+          <Typography variant="body1">Sign Out</Typography>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
