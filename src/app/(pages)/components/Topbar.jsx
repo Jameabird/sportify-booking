@@ -1,12 +1,13 @@
 "use client";
-import { Box, IconButton, useTheme, styled, Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import Link from "next/link";
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar = props => {
-  const currentPath = usePathname();
-  console.log("currentPath", currentPath);
+const TopBar = (props) => {
+  const currentPath = usePathname(); // ใช้สำหรับตรวจสอบเส้นทางปัจจุบัน
+  const router = useRouter(); // ใช้สำหรับนำทาง
+
   return (
     <Box
       display="flex"
@@ -15,14 +16,13 @@ const TopBar = props => {
       sx={{
         backgroundColor: "rgba(255, 255, 255, 0.1)", // สีโปร่งใส
         backdropFilter: "blur(7px)", // เบลอพื้นหลัง
-        WebkitBackdropFilter: "blur(7px)", // Safari
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)"
+        WebkitBackdropFilter: "blur(7px)", // สำหรับ Safari
+        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)", // เพิ่มเงา
       }}
     >
       <Box
         component="div"
         display="flex"
-        // bgcolor={"red"}
         borderRadius="3px"
       >
         <Link href="/">
@@ -33,6 +33,7 @@ const TopBar = props => {
         </Link>
       </Box>
       <Box display="flex">
+        {/* ลิงก์แต่ละหน้า */}
         <Link href="/">
           <Box
             sx={{
@@ -41,8 +42,8 @@ const TopBar = props => {
               color: currentPath === "/" ? "orange" : props.textColor,
               cursor: "pointer",
               "&:hover": {
-                color: "#868dfb "
-              }
+                color: "#868dfb",
+              },
             }}
           >
             <div className="font-bold text-xl">Home</div>
@@ -55,10 +56,9 @@ const TopBar = props => {
               paddingTop: "4px",
               cursor: "pointer",
               color: currentPath === "/category" ? "orange" : props.textColor,
-              //WebkitTextStroke: "px black",
               "&:hover": {
-                color: "#868dfb "
-              }
+                color: "#868dfb",
+              },
             }}
           >
             <div className="font-bold text-xl">Category</div>
@@ -72,8 +72,8 @@ const TopBar = props => {
               cursor: "pointer",
               color: currentPath === "/history" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb "
-              }
+                color: "#868dfb",
+              },
             }}
           >
             <div className="font-bold text-xl">History</div>
@@ -88,15 +88,20 @@ const TopBar = props => {
               paddingRight: "50px",
               color: currentPath === "/admin" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb "
-              }
+                color: "#868dfb",
+              },
             }}
           >
             <div className="font-bold text-xl">Admin</div>
           </Box>
         </Link>
+        {/* ปุ่ม Sign In */}
         <Box sx={{ padding: "0 3px" }}>
-          <Button variant="contained" color="primary">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => router.push("/login")} // นำทางไปยัง "/login"
+          >
             Sign In
           </Button>
         </Box>
@@ -104,4 +109,5 @@ const TopBar = props => {
     </Box>
   );
 };
+
 export default TopBar;
