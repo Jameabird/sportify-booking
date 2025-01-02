@@ -4,7 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar = (props) => {
+const TopBar = props => {
   const currentPath = usePathname(); // ใช้สำหรับตรวจสอบเส้นทางปัจจุบัน
   const router = useRouter(); // ใช้สำหรับนำทาง
 
@@ -17,14 +17,10 @@ const TopBar = (props) => {
         backgroundColor: "rgba(255, 255, 255, 0.1)", // สีโปร่งใส
         backdropFilter: "blur(7px)", // เบลอพื้นหลัง
         WebkitBackdropFilter: "blur(7px)", // สำหรับ Safari
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)", // เพิ่มเงา
+        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" // เพิ่มเงา
       }}
     >
-      <Box
-        component="div"
-        display="flex"
-        borderRadius="3px"
-      >
+      <Box component="div" display="flex" borderRadius="3px">
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
             <div style={{ color: props.textColor }}>SPORTIFY</div>
@@ -42,8 +38,8 @@ const TopBar = (props) => {
               color: currentPath === "/" ? "orange" : props.textColor,
               cursor: "pointer",
               "&:hover": {
-                color: "#868dfb",
-              },
+                color: "#868dfb"
+              }
             }}
           >
             <div className="font-bold text-xl">Home</div>
@@ -57,8 +53,8 @@ const TopBar = (props) => {
               cursor: "pointer",
               color: currentPath === "/category" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb",
-              },
+                color: "#868dfb"
+              }
             }}
           >
             <div className="font-bold text-xl">Category</div>
@@ -72,8 +68,8 @@ const TopBar = (props) => {
               cursor: "pointer",
               color: currentPath === "/history" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb",
-              },
+                color: "#868dfb"
+              }
             }}
           >
             <div className="font-bold text-xl">History</div>
@@ -88,8 +84,8 @@ const TopBar = (props) => {
               paddingRight: "50px",
               color: currentPath === "/admin" ? "orange" : props.textColor,
               "&:hover": {
-                color: "#868dfb",
-              },
+                color: "#868dfb"
+              }
             }}
           >
             <div className="font-bold text-xl">Admin</div>
@@ -105,6 +101,7 @@ const TopBar = (props) => {
             Sign In
           </Button>
         </Box>
+        {/* </Link> */}
       </Box>
     </Box>
   );
