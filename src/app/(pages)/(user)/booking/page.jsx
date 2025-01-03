@@ -2,16 +2,32 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "@components/Topbar";
 import { Box, Button } from "@mui/material";
-import { mockBuilding, mockDataCort } from "./mockdata";
+import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
+import Header from "@components/Header";
+import Image from "next/image";
+import badminton_img from "@assets/badminton.png";
+import { data } from "autoprefixer";
+import { Dropdown, DatePicker, Space } from "antd";
+import { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 
 const Booking = () => {
   const [currentBuilding, setCurrentBuilding] = useState("Building1");
-  const [CortNames, setCortNames] = useState([]);
+  const [currentCourt, setCurrentCourt] = useState("Court1");
+  const [courtNames, setCourtNames] = useState([]);
+  const [CourtData, setCourtData] = useState([]);
+  const [SelectCourt, setSelectCourt] = useState("ALL");
   const placeName = sessionStorage.getItem("booking_place");
+  const SportType = sessionStorage.getItem("SportType");
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  // console.log(placeName);
 
   useEffect(
     () => {
-      setCortNames([]);
+      setCourtData([]);
+      setCourtNames([]);
       const current = mockBuilding.find(
         building => building.name === currentBuilding
       );
@@ -25,62 +41,185 @@ const Booking = () => {
       }
 
       // Filter ข้อมูลจาก currentBuilding
-      const filteredCortData = mockDataCort.filter(
+      if (SelectCourt === "ALL") {
+        const filteredCoortData = mockDataCourt.filter(
+          item => item.building === currentBuilding
+        );
+        setCourtData(filteredCoortData);
+      } else {
+        const filteredCoortData = mockDataCourt.filter(
+          item => item.building === currentBuilding && item.name === SelectCourt
+        );
+        setCourtData(filteredCoortData);
+      }
+
+      const filteredCoortName = mockCourt.filter(
         item => item.building === currentBuilding
       );
 
-      // สร้างผลลัพธ์ของชื่อที่ไม่ซ้ำ
-      const uniqueCortNames = filteredCortData
-        .map(item => item.name)
-        .filter((value, index, self) => self.indexOf(value) === index);
-
-      setCortNames(uniqueCortNames);
+      setCourtNames(filteredCoortName);
+      // console.log(filteredCoortName);
     },
     [currentBuilding]
   );
 
+  useEffect(
+    () => {
+      if (courtNames.length > 0) {
+        const current = courtNames.find(court => court.name === currentCourt);
+
+        if (current && !current.booking) {
+          const nextAvailable = courtNames.find(court => court.booking);
+
+          if (nextAvailable) {
+            setCurrentCourt(nextAvailable.name);
+          }
+        }
+      }
+    },
+    [courtNames]
+  );
+
   const handleClickedBuilding = building => {
-    setCurrentBuilding(building);
+    if (building.booking) {
+      setCurrentBuilding(building.name);
+    }
+  };
+  const handleClickedCourt = court => {
+    if (court.booking) {
+      setCurrentCourt(court.name);
+    }
   };
 
-  console.log(CortNames);
+  const changeDate = date => {
+    console.log(date);
+    setSelectedDate(dayjs(date).format("DD-MM-YYYY"));
+  };
+
+  const items = [
+    {
+      key: "1",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.antgroup.com"
+        >
+          1st menu item
+        </a>
+      )
+    },
+    {
+      key: "2",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.aliyun.com"
+        >
+          2nd menu item (disabled)
+        </a>
+      ),
+      icon: <SmileOutlined />,
+      disabled: true
+    },
+    {
+      key: "3",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.luohanacademy.com"
+        >
+          3rd menu item (disabled)
+        </a>
+      ),
+      disabled: true
+    },
+    {
+      key: "4",
+      danger: true,
+      label: "a danger item"
+    }
+  ];
 
   return (
-    <div className="app">
-      <TopBar />
-      <main className="container pt-3 m-3">
-        <div className="grid grid-rows-auto gap-2">
-          <div className="grid grid-cols-9 gap-2">
-            <div className="text-xl pt-1 col-span-1 font-bold">
-              Building Name :
+    <div className="absolute top-0 left-0 h-full w-full bg-cover bg-center">
+      <TopBar textColor={"black"} />
+      <div style={{ backgroundColor: "#a2d8f5" }}>
+        <main className="container">
+          <div className="pt-3 pl-5 h-40">
+            <div className="font-medium">
+              {`Home > ${SportType} > ${placeName} > Booking`}
             </div>
-            <div className="col-span-8 grid grid-cols-12 gap-4 ">
-              {mockBuilding.map((data, index) =>
-                <div key={index} className="col-span-1">
-                  <Button
-                    variant="contained"
-                    // color= {currentBuilding === data ? "success" :"#bdbdbd"}
+            <div className="grid grid-rows-auto gap-2 pt-7">
+              <div className="grid grid-cols-12 gap-2">
+                <div className="col-start-4 col-span-5">
+                  <Box
                     sx={{
-                      fontSize: "14px",
-                      borderRadius: "10px",
-                      backgroundColor:
-                        data.booking && currentBuilding === data.name
-                          ? "primary"
-                          : data.booking && currentBuilding !== data.name
-                            ? "success.main"
-                            : "#bdbdbd"
+                      // border: "1px solid black",
+                      borderRadius: "30px",
+                      padding: "5px",
+                      backgroundColor: "white",
+                      display: "flex",
+                      boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)"
                     }}
-                    onClick={() => handleClickedBuilding(data.name)}
                   >
-                    {data.name}
+                    <div className="pl-2 py-1">
+                      <Space direction="vertical">
+                        <DatePicker
+                          style={{ border: "none" }}
+                          onChange={changeDate}
+                        />
+                      </Space>
+                    </div>
+                    <div className="pl-3 text-2xl font-light">|</div>
+                    <div className="pl-3 pt-2.5 text-sm">
+                      <Dropdown menu={{ items }}>
+                        <Space>
+                          Select Building
+                          <div className="pl-20 text-xs">
+                            <DownOutlined />
+                          </div>
+                        </Space>
+                      </Dropdown>
+                    </div>
+                    <div className="pl-3 text-2xl font-light">|</div>
+                    <div className="pl-3 pt-2.5 text-sm">
+                      <Dropdown menu={{ items }}>
+                        <Space>
+                          Select Court
+                          <div className="pl-20 text-xs">
+                            <DownOutlined />
+                          </div>
+                        </Space>
+                      </Dropdown>
+                    </div>
+                  </Box>
+                </div>
+
+                <div className="col-span-1 pl-3 pt-1">
+                  <Button
+                    sx={{
+                      backgroundColor: "#051f2e",
+                      borderRadius: "30px",
+                      boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#2f6380"
+                      },
+                      textTransform: "none"
+                    }}
+                  >
+                    <div className="px-4 py-1 font-semibold">Search</div>
                   </Button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
-          <div>test</div>
-        </div>
-      </main>
+          <div />
+        </main>
+      </div>
     </div>
   );
 };
