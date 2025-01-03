@@ -7,8 +7,10 @@ import TopBar_Admin from "@components/Topbar_Admin";
 const category_page_admin = () => { 
     const [isClient, setIsClient] = useState(false);
     const [selectedField, setSelectedField] = useState(null);
+    const [customFields, setCustomFields] = useState([]);
+    const [showDropdown, setShowDropdown] = useState(false);
     const router = useRouter(); // ใช้ useRouter
-    const fields = new Set([
+    const fields = [
       "Badminton",
       "Football",
       "Basketball",
@@ -18,7 +20,9 @@ const category_page_admin = () => {
       "Table Tennis",
       "Hiking",
       "Ice Skate"
-    ]);
+    ];
+
+    const dropdownOptions = ["Gymnastics", "Muay Thai", "Bowling"];
   
     useEffect(() => {
       setIsClient(true);
@@ -32,9 +36,16 @@ const category_page_admin = () => {
     };
 
     const handleAddCategory = () => {
-        console.log("เพิ่มหมวดหมู่กีฬา");
+        setShowDropdown(!showDropdown); 
       };
   
+    const handleSelectCategory = (newField) => {
+        if (!customFields.includes(newField)) {
+          setCustomFields([...customFields, newField]);
+        }
+        setShowDropdown(false);
+      };
+
     if (!isClient) {
       return null;
     }
@@ -70,15 +81,39 @@ const category_page_admin = () => {
             onClick={handleAddCategory}
           > เพิ่มหมวดหมู่ </button>
 
-            {Array.from(fields).map((field, index) =>
+            {showDropdown && (
+            <div className="dropdown">
+              {dropdownOptions.map((option, index) => (
+                <button
+                  key={index}
+                  className="dropdown-item"
+                  onClick={() => handleSelectCategory(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+
+            {fields.map((field, index) => (
+            <button
+              key={index}
+              className="field-button"
+              onClick={() => handleFieldSelection(field)}
+            >
+              {field}
+            </button>
+          ))}
+
+            {customFields.map((field, index) => (
               <button
-                key={index}
+                key={fields.length + index}
                 className="field-button"
                 onClick={() => handleFieldSelection(field)}
               >
                 {field}
               </button>
-            )}
+            ))}
           </div>
         </div>
       </div>
