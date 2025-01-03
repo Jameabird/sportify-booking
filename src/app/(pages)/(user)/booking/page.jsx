@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import TopBar from "@components/Topbar";
 import { Box, Button } from "@mui/material";
 import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
@@ -11,56 +11,69 @@ import { Dropdown, DatePicker, Space } from "antd";
 import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { DownOutlined, SmileOutlined } from "@ant-design/icons";
+import SportsTennisIcon from "@mui/icons-material/SportsTennis";
+import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 
 const Booking = () => {
+  const [buildingNames, setBuildingNames] = useState([]);
   const [currentBuilding, setCurrentBuilding] = useState("Building1");
   const [currentCourt, setCurrentCourt] = useState("Court1");
   const [courtNames, setCourtNames] = useState([]);
   const [CourtData, setCourtData] = useState([]);
-  const [SelectCourt, setSelectCourt] = useState("ALL");
   const placeName = sessionStorage.getItem("booking_place");
   const SportType = sessionStorage.getItem("SportType");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [getSearch, setSearch] = useState(true);
 
   // console.log(placeName);
 
+  useEffect(() => {
+    if (mockBuilding.length > 0) {
+      setBuildingNames(mockBuilding);
+    }
+  }, []);
+
   useEffect(
     () => {
-      setCourtData([]);
-      setCourtNames([]);
-      const current = mockBuilding.find(
-        building => building.name === currentBuilding
-      );
+      if (getSearch) {
+        setCourtData([]);
+        setCourtNames([]);
+        const current = mockBuilding.find(
+          building => building.name === currentBuilding
+        );
 
-      if (current && !current.booking) {
-        const nextAvailable = mockBuilding.find(building => building.booking);
+        if (current && !current.booking) {
+          const nextAvailable = mockBuilding.find(building => building.booking);
 
-        if (nextAvailable) {
-          setCurrentBuilding(nextAvailable.name);
+          if (nextAvailable) {
+            setCurrentBuilding(nextAvailable.name);
+          }
         }
-      }
 
-      // Filter ข้อมูลจาก currentBuilding
-      if (SelectCourt === "ALL") {
-        const filteredCoortData = mockDataCourt.filter(
+        // Filter ข้อมูลจาก currentBuilding
+        if (currentCourt === "ALL") {
+          const filteredCoortData = mockDataCourt.filter(
+            item => item.building === currentBuilding
+          );
+          setCourtData(filteredCoortData);
+        } else {
+          const filteredCoortData = mockDataCourt.filter(
+            item =>
+              item.building === currentBuilding && item.name === currentCourt
+          );
+          setCourtData(filteredCoortData);
+        }
+
+        const filteredCoortName = mockCourt.filter(
           item => item.building === currentBuilding
         );
-        setCourtData(filteredCoortData);
-      } else {
-        const filteredCoortData = mockDataCourt.filter(
-          item => item.building === currentBuilding && item.name === SelectCourt
-        );
-        setCourtData(filteredCoortData);
+
+        setCourtNames(filteredCoortName);
+        // console.log(filteredCoortName);
+        setSearch(false);
       }
-
-      const filteredCoortName = mockCourt.filter(
-        item => item.building === currentBuilding
-      );
-
-      setCourtNames(filteredCoortName);
-      // console.log(filteredCoortName);
     },
-    [currentBuilding]
+    [currentBuilding, getSearch]
   );
 
   useEffect(
@@ -80,68 +93,28 @@ const Booking = () => {
     [courtNames]
   );
 
-  const handleClickedBuilding = building => {
-    if (building.booking) {
-      setCurrentBuilding(building.name);
-    }
-  };
-  const handleClickedCourt = court => {
-    if (court.booking) {
-      setCurrentCourt(court.name);
-    }
-  };
-
   const changeDate = date => {
-    console.log(date);
+    // console.log(date);
     setSelectedDate(dayjs(date).format("DD-MM-YYYY"));
   };
 
-  const items = [
-    {
-      key: "1",
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.antgroup.com"
-        >
-          1st menu item
-        </a>
-      )
-    },
-    {
-      key: "2",
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.aliyun.com"
-        >
-          2nd menu item (disabled)
-        </a>
-      ),
-      icon: <SmileOutlined />,
-      disabled: true
-    },
-    {
-      key: "3",
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          3rd menu item (disabled)
-        </a>
-      ),
-      disabled: true
-    },
-    {
-      key: "4",
-      danger: true,
-      label: "a danger item"
-    }
-  ];
+  const itemsBuilding = buildingNames.map((val, index) => ({
+    key: (index + 1).toString(),
+    onClick: () => setCurrentBuilding(val.name),
+    label: val.name,
+    icon: <MapsHomeWorkIcon />,
+    disabled: !val.booking
+  }));
+
+  const itemsCourt = courtNames.map((val, index) => ({
+    key: (index + 1).toString(),
+    onClick: () => setCurrentCourt(val.name),
+    label: val.name,
+    icon: <SportsTennisIcon />,
+    disabled: !val.booking
+  }));
+
+  // console.log(CourtData);
 
   return (
     <div className="absolute top-0 left-0 h-full w-full bg-cover bg-center">
@@ -153,8 +126,8 @@ const Booking = () => {
               {`Home > ${SportType} > ${placeName} > Booking`}
             </div>
             <div className="grid grid-rows-auto gap-2 pt-7">
-              <div className="grid grid-cols-12 gap-2">
-                <div className="col-start-4 col-span-5">
+              <div className="grid grid-cols-11 gap-2">
+                <div className="col-start-4 col-span-4">
                   <Box
                     sx={{
                       // border: "1px solid black",
@@ -175,9 +148,9 @@ const Booking = () => {
                     </div>
                     <div className="pl-3 text-2xl font-light">|</div>
                     <div className="pl-3 pt-2.5 text-sm">
-                      <Dropdown menu={{ items }}>
+                      <Dropdown menu={{ items: itemsBuilding }}>
                         <Space>
-                          Select Building
+                          {currentBuilding}
                           <div className="pl-20 text-xs">
                             <DownOutlined />
                           </div>
@@ -186,9 +159,9 @@ const Booking = () => {
                     </div>
                     <div className="pl-3 text-2xl font-light">|</div>
                     <div className="pl-3 pt-2.5 text-sm">
-                      <Dropdown menu={{ items }}>
+                      <Dropdown menu={{ items: itemsCourt }}>
                         <Space>
-                          Select Court
+                          {currentCourt}
                           <div className="pl-20 text-xs">
                             <DownOutlined />
                           </div>
@@ -210,6 +183,7 @@ const Booking = () => {
                       },
                       textTransform: "none"
                     }}
+                    onClick={() => setSearch(true)}
                   >
                     <div className="px-4 py-1 font-semibold">Search</div>
                   </Button>
@@ -240,6 +214,19 @@ const Booking = () => {
               }}
             />
           </Box>
+        </div>
+        <div className="pt-10">
+          <div className="grid grid-cols-12 gap-2">
+            <div className="col-start-2 col-span-3">
+              <div className="text-3xl font-bold text-black">Court 1</div>
+              <div className="text-md font-medium text-black">
+                {`${placeName}, ${currentBuilding}, ${SportType}`}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="pt-6">
+          Test
         </div>
       </div>
     </div>
