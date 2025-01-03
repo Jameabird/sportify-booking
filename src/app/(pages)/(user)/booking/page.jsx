@@ -220,6 +220,28 @@ const Booking = () => {
           <div />
         </main>
       </div>
+      {/* Main Content */}
+      <div className="m-6">
+        <div className="flex items-center align-center justify-center">
+          <Box
+            sx={{
+              width: "720px",
+              height: "500px"
+            }}
+          >
+            <Image
+              src={badminton_img}
+              alt="sport_img"
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "20px",
+                boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)"
+              }}
+            />
+          </Box>
+        </div>
+      </div>
     </div>
   );
 };
