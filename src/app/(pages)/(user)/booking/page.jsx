@@ -13,7 +13,8 @@ import {
   useTheme,
   TextField,
   TablePagination,
-  TableSortLabel
+  TableSortLabel,
+  Checkbox
 } from "@mui/material";
 import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
 import Header from "@components/Header";
@@ -307,10 +308,21 @@ const Booking = () => {
           </div>
           {/*End Search */}
         </div>
-        <div className="grid grid-cols-12 gap-2 pt-6">
+        <div className="grid grid-cols-12 gap-2">
           <div className="m-12 col-span-12">
-            <Box>
-              <TableContainer className="pt-1">
+            <Box
+              sx={{
+                boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
+                borderRadius: "8px"
+              }}
+            >
+              <TableContainer
+                className="pt-1"
+                sx={{
+                  boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
+                  borderRadius: "8px"
+                }}
+              >
                 <Table
                   stickyHeader
                   aria-label="sticky table"
@@ -325,13 +337,13 @@ const Booking = () => {
                           // style={{ minWidth: 20 }}
                           colSpan={column === "Select" ? 1 : 2}
                           sx={{
-                            border: "1px solid #000",
+                            // border: "1px solid #000",
                             borderTopRightRadius: column === "Time" && "10px",
                             borderTopLeftRadius: column === "Select" && "10px",
-                            borderRight: column !== "Time" && "1px solid #000",
-                            borderLeft:
-                              column === "Select" ? "1px solid #000" : "0px",
-                            borderBottom: "1px solid #000",
+                            // borderRight: column !== "Time" && "1px solid #000",
+                            // borderLeft:
+                            //   column === "Select" ? "1px solid #000" : "0px",
+                            // borderBottom: "1px solid #000",
                             // backgroundColor: "#C0E0FF",
                             fontWeight: "bold",
                             fontSize: "16px",
@@ -374,13 +386,39 @@ const Booking = () => {
                                       // colSpan={2}
                                       sx={{
                                         ...Table_Styles.styletablebody,
-                                        borderLeft: "1px solid #000",
-                                        borderBottom:
-                                          rowIndex === lastIndex &&
-                                          "1px solid #000"
+                                        "&.MuiTableCell-root": {
+                                          padding: 0.65,
+                                          margin: 0
+                                        }
+                                        // borderLeft: "1px solid #000",
+                                        // borderBottom:
+                                        //   rowIndex === lastIndex &&
+                                        //   "1px solid #000"
                                       }}
                                     >
-                                      {row.booking === true ? "ture" : "false"}
+                                      <div className="text-base font-bold">
+                                        <Checkbox
+                                          disabled={!row.booking}
+                                          // checked={selectedDataBaking.includes(
+                                          //   rowIndex
+                                          // )}
+                                          // onChange={() =>
+                                          //   handleRowSelectBaking(
+                                          //     rowIndex,
+                                          //     row
+                                          //   )} // Handle row selection
+                                          // sx={{
+                                          //   color: selectedDataBaking.includes(
+                                          //     rowIndex
+                                          //   )
+                                          //     ? "#1FAB89"
+                                          //     : "grey",
+                                          //   "&.Mui-checked": {
+                                          //     color: "#1FAB89"
+                                          //   }
+                                          // }}
+                                        />
+                                      </div>
                                     </TableCell>
                                   : column === "Court"
                                     ? <TableCell
@@ -389,9 +427,13 @@ const Booking = () => {
                                         colSpan={2}
                                         sx={{
                                           ...Table_Styles.styletablebody,
-                                          borderBottom:
-                                            rowIndex === lastIndex &&
-                                            "1px solid #000"
+                                          "&.MuiTableCell-root": {
+                                            padding: 0.65,
+                                            margin: 0
+                                          }
+                                          // borderBottom:
+                                          //   rowIndex === lastIndex &&
+                                          //   "1px solid #000"
                                         }}
                                       >
                                         {row.name}
@@ -403,9 +445,13 @@ const Booking = () => {
                                           colSpan={2}
                                           sx={{
                                             ...Table_Styles.styletablebody,
-                                            borderBottom:
-                                              rowIndex === lastIndex &&
-                                              "1px solid #000"
+                                            "&.MuiTableCell-root": {
+                                              padding: 0.65,
+                                              margin: 0
+                                            }
+                                            // borderBottom:
+                                            //   rowIndex === lastIndex &&
+                                            //   "1px solid #000"
                                           }}
                                         >
                                           {row.price}
@@ -416,10 +462,14 @@ const Booking = () => {
                                           colSpan={2}
                                           sx={{
                                             ...Table_Styles.styletablebody,
-                                            borderRight: "1px solid #000",
-                                            borderBottom:
-                                              rowIndex === lastIndex &&
-                                              "1px solid #000"
+                                            "&.MuiTableCell-root": {
+                                              padding: 0.65,
+                                              margin: 0
+                                            }
+                                            // borderRight: "1px solid #000",
+                                            // borderBottom:
+                                            //   rowIndex === lastIndex &&
+                                            //   "1px solid #000"
                                           }}
                                         >
                                           {row.time}
@@ -430,12 +480,12 @@ const Booking = () => {
                       })}
                   </TableBody>
                 </Table>
-                <div className="grid grid-cols-12 ">
+                <div className="grid grid-cols-12 pt-1">
                   <Box className="col-span-4 col-start-9">
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25, 100]}
                       component="div"
-                      count={data.length}
+                      count={CourtData.length}
                       rowsPerPage={rowsPerPage}
                       page={page}
                       onPageChange={handleChangePage}
@@ -445,6 +495,20 @@ const Booking = () => {
                 </div>
               </TableContainer>
             </Box>
+          </div>
+          <div className="col-span-1 col-start-6">
+            <Button
+              sx={{ backgroundColor: "green", color: "white", width: "100%" }}
+            >
+              Booking
+            </Button>
+          </div>
+          <div className="col-span-1 col-start-7">
+            <Button
+              sx={{ backgroundColor: "red", color: "white", width: "100%" }}
+            >
+              Clear
+            </Button>
           </div>
         </div>
       </div>
