@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"; // Import useRouter
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"; // Import GoogleOAuthProvider
 import "./loginPage.css"; // Import CSS
 
-const Page = () => {
+const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +43,7 @@ const Page = () => {
             </div>
             <div className="col-span-12 flex justify-center items-center">
               <Box className="login-box">
-                <h2 className="welcome-text">Welcome Back!</h2>
+                <h2 className="welcome-text">Welcome to Sportify Booking</h2>
                 <TextField
                   label="Email Address"
                   variant="outlined"
@@ -89,12 +89,12 @@ const Page = () => {
                       backgroundColor: "#ff9800",
                     },
                   }}
+                  className="login-button"
                   onClick={handleLogin}
                 >
                   Login
                 </Button>
 
-                {/* ห่อด้วย GoogleOAuthProvider */}
                 <GoogleOAuthProvider clientId="160660169940-jovtts08pu9olgt12494uc3sc5oo7u1c.apps.googleusercontent.com">
                   <GoogleLogin
                     onSuccess={handleGoogleLogin}
@@ -103,6 +103,7 @@ const Page = () => {
                     size="large"
                     shape="pill"
                     theme="outline"
+                    className="google-login" // เพิ่ม class นี้
                   />
                 </GoogleOAuthProvider>
 
@@ -123,4 +124,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default LoginPage;

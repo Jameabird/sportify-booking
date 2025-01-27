@@ -63,3 +63,11 @@
     color: rgba(70, 80, 100, 0.9);
   }
   
+  /* เพิ่มระยะห่างระหว่างปุ่ม LOGIN และปุ่ม Google */
+.login-button {
+  margin-bottom: 16px; /* เพิ่มระยะห่างที่ด้านล่าง */
+}
+
+.google-login {
+  margin-top: 16px; /* เพิ่มระยะห่างที่ด้านบนของปุ่ม Google */
+}
