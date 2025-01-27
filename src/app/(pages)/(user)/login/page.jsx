@@ -4,75 +4,62 @@ import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/materia
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation"; // Import useRouter
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"; // Import GoogleOAuthProvider
+import "./loginPage.css"; // Import CSS
 
-const LoginPage = () => {
+const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState(""); // Manage email state
-  const [password, setPassword] = useState(""); // Manage password state
-  const router = useRouter(); // Get router object to navigate
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // Handle login form submission
   const handleLogin = () => {
-    // Here, you can add your authentication logic (e.g., verify credentials)
-    // For now, we'll just assume login is successful
-    // Simulating a successful login and then redirecting to Home page
-    router.push("/home"); // Navigate to the Home page
+    router.push("/home");
+  };
+
+  const handleGoogleLogin = (response) => {
+    // Handle the response from Google login
+    console.log(response);
+    if (response?.credential) {
+      // Handle successful Google login
+      router.push("/home");
+    } else {
+      console.log("Google login failed");
+    }
   };
 
   return (
-    <div className="app" style={{ display: "flex", height: "100vh" }}>
-      <main className="content" style={{ flex: 1, overflowY: "auto" }}>
-        {/* พื้นหลังเลเยอร์ */}
-        <div
-          className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
-          style={{
-            backgroundImage: "url('/gym_bg2.jpg')",
-            backgroundColor: "rgba(70, 80, 100, 0.7)",
-            backgroundBlendMode: "multiply",
-            opacity: 0.9,
-            zIndex: -1,
-          }}
-        />
-        <div className="relative h-full w-full">
-          {/* Grid สำหรับ TopBar */}
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-12">
+    <div className="app">
+      <main className="content">
+        <div className="background" />
+        <div className="relative-container">
+          <div className="grid-container">
+            <div className="top-bar">
               <TopBar textColor={"white"} />
             </div>
-            {/* กล่องสำหรับ Login */}
             <div className="col-span-12 flex justify-center items-center">
-              <Box
-                sx={{
-                  width: "400px",
-                  padding: "24px",
-                  borderRadius: "10px",
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
-                  textAlign: "center",
-                }}
-              >
-                <h2 style={{ marginBottom: "16px", color: "rgba(70, 80, 100, 0.9)" }}>
-                  Welcome Back!
-                </h2>
+              <Box className="login-box">
+                <h2 className="welcome-text">Welcome Back!</h2>
                 <TextField
                   label="Email Address"
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)} // Update email state
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <TextField
                   label="Password"
-                  type={showPassword ? "text" : "password"} // เปลี่ยน type ตาม state
+                  type={showPassword ? "text" : "password"}
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)} // Update password state
+                  onChange={(e) => setPassword(e.target.value)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -88,14 +75,7 @@ const LoginPage = () => {
                   }}
                 />
                 <Box sx={{ textAlign: "right", marginBottom: "16px" }}>
-                  <a
-                    href="/forget_password/main"
-                    style={{
-                      color: "#f57c00",
-                      textDecoration: "none",
-                      fontSize: "0.875rem",
-                    }}
-                  >
+                  <a href="/forget_password/main" className="link">
                     Forget Password?
                   </a>
                 </Box>
@@ -109,19 +89,27 @@ const LoginPage = () => {
                       backgroundColor: "#ff9800",
                     },
                   }}
-                  onClick={handleLogin} // Handle login button click
+                  onClick={handleLogin}
                 >
                   Login
                 </Button>
-                <Box
-                  sx={{
-                    marginTop: "16px",
-                    color: "rgba(70, 80, 100, 0.9)",
-                  }}
-                >
+
+                {/* ห่อด้วย GoogleOAuthProvider */}
+                <GoogleOAuthProvider clientId="160660169940-jovtts08pu9olgt12494uc3sc5oo7u1c.apps.googleusercontent.com">
+                  <GoogleLogin
+                    onSuccess={handleGoogleLogin}
+                    onError={handleGoogleLogin}
+                    useOneTap
+                    size="large"
+                    shape="pill"
+                    theme="outline"
+                  />
+                </GoogleOAuthProvider>
+
+                <Box className="sign-up">
                   <p>
                     Don't have an account?{" "}
-                    <a href="/register" style={{ color: "#f57c00", textDecoration: "none" }}>
+                    <a href="/register" className="link">
                       Sign up
                     </a>
                   </p>
@@ -135,4 +123,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Page;
