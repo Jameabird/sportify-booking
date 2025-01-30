@@ -6,7 +6,8 @@ export const users = [
       time: "13.00-15.00",      
       email: "tony.reichert@example.com",      
       location: "aaaaaaaaaaaaaaaaaa",
-      status: "cancel",   
+      status: "cancel",
+      price:"1000",   
     },
     {
       id: 2,
@@ -15,7 +16,8 @@ export const users = [
       time: "13.00-15.00",      
       email: "zoey.lang@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
-      status: "cancel", 
+      status: "refund",
+      price:"2000",  
     },
     {
       id: 3,
@@ -24,7 +26,8 @@ export const users = [
       time: "13.00-15.00",     
       email: "jane.fisher@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
-      status: "cancel",      
+      status: "refund",
+      price:"4000",       
     },
     {
       id: 4,
@@ -33,7 +36,8 @@ export const users = [
       time: "13.00-15.00",         
       email: "william.howard@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
-      status: "cancel", 
+      status: "cancel",
+      price:"1000",  
     },
     {
       id: 5,
@@ -43,6 +47,7 @@ export const users = [
       email: "kristen.cooper@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "cancel",
+      price:"1000", 
     },
     {
       id: 6,
@@ -52,6 +57,7 @@ export const users = [
       email: "brian.kim@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 7,
@@ -61,6 +67,7 @@ export const users = [
       email: "michael.hunt@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1500", 
     },
     {
       id: 8,
@@ -70,6 +77,7 @@ export const users = [
       email: "samantha.brooks@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1600", 
     },
     {
       id: 9,
@@ -79,6 +87,7 @@ export const users = [
       email: "frank.harrison@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1050", 
     },
     {
       id: 10,
@@ -88,6 +97,7 @@ export const users = [
       email: "emma.adams@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1100", 
     },
     {
       id: 11,
@@ -97,6 +107,7 @@ export const users = [
       email: "brandon.stevens@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 12,
@@ -106,6 +117,7 @@ export const users = [
       email: "megan.richards@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 13,
@@ -115,6 +127,7 @@ export const users = [
       email: "oliver.scott@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 14,
@@ -124,6 +137,7 @@ export const users = [
       email: "grace.allen@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 15,
@@ -133,6 +147,7 @@ export const users = [
       email: "noah.carter@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 16,
@@ -142,6 +157,7 @@ export const users = [
       email: "ava.perez@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 17,
@@ -151,6 +167,7 @@ export const users = [
       email: "liam.johnson@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 18,
@@ -160,6 +177,7 @@ export const users = [
       email: "sophia.taylor@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 19,
@@ -169,6 +187,7 @@ export const users = [
       email: "lucas.harris@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
     {
       id: 20,
@@ -178,5 +197,6 @@ export const users = [
       email: "mia.robinson@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
+      price:"1000", 
     },
   ];
