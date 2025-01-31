@@ -15,21 +15,31 @@ export default function Profile() {
     lastName: "Lee",
     bankAccount: "1234567890",
     bankName: "SCB",
-    bankAccountImage: null, // State to store bank account image
+    bankAccountImage: null,
   });
-
+  
+  const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });  
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [profileImage, setProfileImage] = useState("/default-profile.png");
 
-  const handleEditClick = () => setIsEditing(true);
+  const handleEditClick = () => {
+    setOriginalProfileData(profileData); // เก็บค่าเดิมไว้
+    setIsEditing(true);
+  };
+  
   const handleSaveClick = () => {
     setIsEditing(false);
     alert("Changes saved successfully!");
   };
-  const handleCancelClick = () => setIsEditing(false);
+  
+  const handleCancelClick = () => {
+    setProfileData(originalProfileData);
+    setIsEditing(false);
+  };
+  
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -197,65 +207,63 @@ export default function Profile() {
                   </Select>
                 </FormControl>
 
-                {/* Bank Account Image Upload (Only in Edit Mode) */}
-                {isEditing && (
-                  <>
-                    <Typography variant="body1" sx={{ marginTop: "20px" }}>
-                      Upload Bank Account Image
-                    </Typography>
-                    <Box position="relative" textAlign="center" mb={2}>
-                      {profileData.bankAccountImage ? (
-                        <Avatar
-                          src={profileData.bankAccountImage}
-                          alt="Bank Account"
-                          sx={{
-                            width: "100px",
-                            height: "100px",
-                            border: "2px solid #ddd",
-                            margin: "0 auto",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <Box
-                          sx={{
-                            width: "100px",
-                            height: "100px",
-                            borderRadius: "8px",
-                            backgroundColor: "#f4f4f4",
-                            border: "2px solid #ddd",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ color: "#888" }}>No Image</Typography>
-                        </Box>
-                      )}
-                      <IconButton
-                        color="primary"
-                        sx={{
-                          position: "absolute",
-                          bottom: 0,
-                          right: "calc(50% - 20px)",
-                          backgroundColor: "#fff",
-                          boxShadow: 1,
-                          border: "1px solid #ddd",
-                        }}
-                        onClick={() => document.getElementById("bank-account-image-input").click()}
-                      >
-                        <CameraAltIcon />
-                      </IconButton>
-                      <input
-                        id="bank-account-image-input"
-                        type="file"
-                        accept="image/*"
-                        style={{ display: "none" }}
-                        onChange={handleBankAccountImageChange}
-                      />
+                {/* Bank Account Image (Always visible, allows upload even in view mode) */}
+                <Typography variant="body1" sx={{ marginTop: "20px" }}>
+                  Bank Account Image
+                </Typography>
+                <Box display="flex" justifyContent="center" alignItems="center" position="relative" textAlign="center" mb={2}>
+                  {profileData.bankAccountImage ? (
+                    <Avatar
+                      src={profileData.bankAccountImage}
+                      alt="Bank Account"
+                      sx={{
+                        width: "100px",
+                        height: "100px",
+                        border: "2px solid #ddd",
+                        margin: "0 auto",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        width: "100px",
+                        height: "100px",
+                        borderRadius: "8px",
+                        backgroundColor: "#f4f4f4",
+                        border: "2px solid #ddd",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ color: "#888" }}>No Image</Typography>
                     </Box>
-                  </>
-                )}
+                  )}
+                  {isEditing && (
+                    <IconButton
+                      color="primary"
+                      sx={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: "calc(50% - 20px)",
+                        backgroundColor: "#fff",
+                        boxShadow: 1,
+                        border: "1px solid #ddd",
+                      }}
+                      onClick={() => document.getElementById("bank-account-image-input").click()}
+                    >
+                      <CameraAltIcon />
+                    </IconButton>
+                  )}
+                  <input
+                    id="bank-account-image-input"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleBankAccountImageChange}
+                  />
+                </Box>
 
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
