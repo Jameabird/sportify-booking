@@ -67,7 +67,7 @@ const HistoryPageAdmin = () => {
 
   return (
     <>
-      <TopBar_Admin textColor={"blue"} />
+      <TopBar_Admin textColor={"black"} />
       <div className="background-page">
         <div className="filter-and-search">
         <div>

@@ -2,16 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-// import styled from "styled-components"; /* npm install styled-components */
-import { users } from "@app/(pages)/admin/history/Users";
-import "@app/(pages)/admin/history/CssHistory.css";
+import { users } from "@app/(pages)/owner/history/Users";
+import "@app/(pages)/owner/history/CssHistory.css";
 
 import { Search } from "lucide-react";
-const TopBar_Admin = dynamic(() => import("@components/Topbar_Admin"), {
+const TopBar_Owner = dynamic(() => import("@components/Topbar_Owner"), {
   ssr: false,
 });
 
-const HistoryPageAdmin = () => {
+const HistoryPageOwner = () => {
   const [statusFilter, setStatusFilter] = useState("refund");
   const [searchQuery, setSearchQuery] = useState("");
   const [usersData, setUsersData] = useState([]);
@@ -47,7 +46,7 @@ const HistoryPageAdmin = () => {
 
   return (
     <>
-      <TopBar_Admin textColor={"black"} />
+      <TopBar_Owner textColor={"black"} />
       <div className="background-page">
         <div className="filter-and-search">
           <div className="DropDown">
@@ -117,4 +116,4 @@ const HistoryPageAdmin = () => {
   );
 };
 
-export default HistoryPageAdmin;
+export default HistoryPageOwner;
