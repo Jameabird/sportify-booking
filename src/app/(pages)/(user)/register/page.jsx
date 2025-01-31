@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
+import "./registerPage.css";
 
 const RegisterPage = () => {
   const [bank, setBank] = useState("");
@@ -32,40 +33,17 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="app" style={{ display: "flex", height: "100vh" }}>
-      <main className="content" style={{ flex: 1, overflowY: "auto" }}>
-        {/* พื้นหลังเลเยอร์ */}
-        <div
-          className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
-          style={{
-            backgroundImage: "url('/gym_bg2.jpg')",
-            backgroundColor: "rgba(70, 80, 100, 0.7)",
-            backgroundBlendMode: "multiply",
-            opacity: 0.9,
-            zIndex: -1,
-          }}
-        />
+    <div className="app">
+      <main className="content">
+        <div className="background-layer" />
         <div className="relative h-full w-full">
-          {/* Grid สำหรับ TopBar */}
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12">
               <TopBar textColor={"white"} />
             </div>
-            {/* กล่องสำหรับ Register */}
             <div className="col-span-12 flex justify-center items-center">
-              <Box
-                sx={{
-                  width: "400px",
-                  padding: "24px",
-                  borderRadius: "10px",
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
-                  textAlign: "center",
-                }}
-              >
-                <h2 style={{ marginBottom: "16px", color: "rgba(70, 80, 100, 0.9)" }}>
-                  Create an Account
-                </h2>
+              <Box className="register-container">
+                <h2 className="register-title">Create an Account</h2>
                 <TextField
                   label="Username"
                   variant="outlined"
@@ -118,7 +96,24 @@ const RegisterPage = () => {
                     ),
                   }}
                 />
-                {/* Dropdown เลือกธนาคาร */}
+
+                {/* เพิ่มข้อความ Bank Details ตรงนี้ */}
+                <h2 className="register-title">Bank Details</h2>
+
+                {/* เพิ่มฟิลด์สำหรับชื่อจริงและนามสกุล */}
+                <TextField
+                  label="First Name"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginBottom: "16px" }}
+                />
+                <TextField
+                  label="Last Name"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ marginBottom: "16px" }}
+                />
+
                 <FormControl fullWidth sx={{ marginBottom: "16px" }}>
                   <InputLabel id="bank-select-label">Bank</InputLabel>
                   <Select
@@ -134,7 +129,6 @@ const RegisterPage = () => {
                     <MenuItem value="TTB">TTB</MenuItem>
                   </Select>
                 </FormControl>
-                {/* ช่องกรอกเลขบัญชี */}
                 <TextField
                   label="Account Number"
                   type="text"
@@ -149,29 +143,20 @@ const RegisterPage = () => {
                   variant="contained"
                   color="primary"
                   fullWidth
-                  sx={{
-                    backgroundColor: "#f57c00",
-                    "&:hover": {
-                      backgroundColor: "#ff9800",
-                    },
-                  }}
+                  className="register-button"
                 >
                   Register
                 </Button>
-                <Box
-                  sx={{
-                    marginTop: "16px",
-                    color: "rgba(70, 80, 100, 0.9)",
-                  }}
-                >
+                <Box className="register-footer">
                   <p>
                     Already have an account?{" "}
-                    <a href="/login" style={{ color: "#f57c00", textDecoration: "none" }}>
+                    <a href="/login" className="link">
                       Login
                     </a>
                   </p>
                 </Box>
               </Box>
+
             </div>
           </div>
         </div>
