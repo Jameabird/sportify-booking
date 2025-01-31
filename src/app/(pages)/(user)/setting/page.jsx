@@ -197,26 +197,65 @@ export default function Profile() {
                   </Select>
                 </FormControl>
 
-                {/* Bank Account Image Upload */}
-                <Typography variant="body1" sx={{ marginTop: "20px" }}>
-                  Upload Bank Account Image
-                </Typography>
-                {profileData.bankAccountImage && (
-                  <Box textAlign="center" sx={{ marginBottom: "10px" }}>
-                    <img
-                      src={profileData.bankAccountImage}
-                      alt="Bank Account"
-                      style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }}
-                    />
-                  </Box>
+                {/* Bank Account Image Upload (Only in Edit Mode) */}
+                {isEditing && (
+                  <>
+                    <Typography variant="body1" sx={{ marginTop: "20px" }}>
+                      Upload Bank Account Image
+                    </Typography>
+                    <Box position="relative" textAlign="center" mb={2}>
+                      {profileData.bankAccountImage ? (
+                        <Avatar
+                          src={profileData.bankAccountImage}
+                          alt="Bank Account"
+                          sx={{
+                            width: "100px",
+                            height: "100px",
+                            border: "2px solid #ddd",
+                            margin: "0 auto",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "8px",
+                            backgroundColor: "#f4f4f4",
+                            border: "2px solid #ddd",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: "#888" }}>No Image</Typography>
+                        </Box>
+                      )}
+                      <IconButton
+                        color="primary"
+                        sx={{
+                          position: "absolute",
+                          bottom: 0,
+                          right: "calc(50% - 20px)",
+                          backgroundColor: "#fff",
+                          boxShadow: 1,
+                          border: "1px solid #ddd",
+                        }}
+                        onClick={() => document.getElementById("bank-account-image-input").click()}
+                      >
+                        <CameraAltIcon />
+                      </IconButton>
+                      <input
+                        id="bank-account-image-input"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleBankAccountImageChange}
+                      />
+                    </Box>
+                  </>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBankAccountImageChange}
-                  disabled={!isEditing}
-                  style={{ marginTop: "10px" }}
-                />
 
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
