@@ -11,15 +11,18 @@ export default function Profile() {
     name: "Jennie Lee",
     email: "SE@gmail.com",
     phone: "0123456789",
+    firstName: "Jennie",
+    lastName: "Lee",
     bankAccount: "1234567890",
     bankName: "SCB",
+    bankAccountImage: null, // State to store bank account image
   });
 
-  const [oldPassword, setOldPassword] = useState(""); // State for the old password
-  const [newPassword, setNewPassword] = useState(""); // State for the new password
-  const [confirmPassword, setConfirmPassword] = useState(""); // State for confirming the new password
-  const [error, setError] = useState(""); // Error message
-  const [profileImage, setProfileImage] = useState("/default-profile.png"); // State for profile image
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [profileImage, setProfileImage] = useState("/default-profile.png");
 
   const handleEditClick = () => setIsEditing(true);
   const handleSaveClick = () => {
@@ -36,10 +39,10 @@ export default function Profile() {
     }));
   };
 
-  const handleChangePasswordClick = () => setIsChangingPassword(true); // Switch to Change Password view
+  const handleChangePasswordClick = () => setIsChangingPassword(true);
 
   const handleChangePassword = () => {
-    if (oldPassword !== "currentPassword") { // Check if the old password is correct
+    if (oldPassword !== "currentPassword") {
       setError("Old password is incorrect!");
       return;
     }
@@ -50,7 +53,7 @@ export default function Profile() {
     }
 
     alert("Password changed successfully!");
-    setIsChangingPassword(false); // Return to profile view after successful password change
+    setIsChangingPassword(false);
   };
 
   // Function to handle the profile image change
@@ -59,56 +62,70 @@ export default function Profile() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result); // Set the new profile image
+        setProfileImage(reader.result);
       };
-      reader.readAsDataURL(file); // Read the file as a data URL
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Function to handle the bank account image change
+  const handleBankAccountImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileData((prevState) => ({
+          ...prevState,
+          bankAccountImage: reader.result, // Store the uploaded image
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   return (
     <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
-      {/* Set fixed background */}
+      {/* Background Box */}
       <Box sx={{
         position: "fixed",
         top: 0,
         left: 0,
         width: "100%",
         height: "100%",
-        backgroundColor: "#f4f4f4", // Same color as the page background
-        zIndex: -1,
+        backgroundColor: "#f4f4f4",
+        zIndex: -1, // Keeps the background below the profile section
       }} />
-
-      <TopBar_User />
       
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" height="100%" sx={{ paddingTop: "80px" }}>
+      <TopBar_User /> {/* Fixed top bar */}
+
+      {/* Profile Section */}
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" maxWidth="400px" sx={{ backgroundColor: "#fff", borderRadius: "8px", padding: "20px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
-          {/* Profile or Change Password content */}
           {!isChangingPassword ? (
             <>
               <Box position="relative" textAlign="center" mb={2}>
                 <Avatar src={profileImage} alt="Profile Picture" sx={{ width: "100px", height: "100px", border: "2px solid #ddd", margin: "0 auto" }} />
                 {isEditing && (
-                  <IconButton 
-                    color="primary" 
+                  <IconButton
+                    color="primary"
                     sx={{ position: "absolute", bottom: 0, right: "calc(50% - 20px)", backgroundColor: "#fff", boxShadow: 1, border: "1px solid #ddd" }}
-                    onClick={() => document.getElementById("profile-image-input").click()} // Trigger file input click
+                    onClick={() => document.getElementById("profile-image-input").click()}
                   >
                     <CameraAltIcon />
                   </IconButton>
                 )}
-                <input 
+                <input
                   id="profile-image-input"
                   type="file"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={handleProfileImageChange} // Handle image selection
+                  onChange={handleProfileImageChange}
                 />
               </Box>
               <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
                 {isEditing ? "Edit Profile" : "Profile"}
               </Typography>
 
-              {/* Profile Form */}
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Name"
@@ -117,18 +134,13 @@ export default function Profile() {
                   value={profileData.name}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  InputProps={{ sx: { fontSize: "14px" } }}
-                  InputLabelProps={{ sx: { fontSize: "14px" } }}
                 />
                 <TextField
                   label="Email"
                   name="email"
                   fullWidth
                   value={profileData.email}
-                  disabled={!isEditing}
-                  onChange={handleInputChange}
-                  InputProps={{ sx: { fontSize: "14px" } }}
-                  InputLabelProps={{ sx: { fontSize: "14px" } }}
+                  disabled={true}
                 />
                 <TextField
                   label="Phone"
@@ -137,9 +149,30 @@ export default function Profile() {
                   value={profileData.phone}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  InputProps={{ sx: { fontSize: "14px" } }}
-                  InputLabelProps={{ sx: { fontSize: "14px" } }}
                 />
+                
+                {/* Bank Information Section */}
+                <Typography variant="h8" sx={{ fontWeight: "bold", marginTop: "px" }}>
+                  Bank Information
+                </Typography>
+                <Box display="flex" gap={2}>
+                  <TextField
+                    label="First Name"
+                    name="firstName"
+                    fullWidth
+                    value={profileData.firstName}
+                    disabled={!isEditing}
+                    onChange={handleInputChange}
+                  />
+                  <TextField
+                    label="Last Name"
+                    name="lastName"
+                    fullWidth
+                    value={profileData.lastName}
+                    disabled={!isEditing}
+                    onChange={handleInputChange}
+                  />
+                </Box>
                 <TextField
                   label="Bank Account"
                   name="bankAccount"
@@ -147,8 +180,6 @@ export default function Profile() {
                   value={profileData.bankAccount}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  InputProps={{ sx: { fontSize: "14px" } }}
-                  InputLabelProps={{ sx: { fontSize: "14px" } }}
                 />
                 <FormControl fullWidth variant="outlined" sx={{ fontSize: "14px", marginTop: "8px" }}>
                   <InputLabel sx={{ fontSize: "14px" }}>Bank Name</InputLabel>
@@ -158,7 +189,6 @@ export default function Profile() {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     label="Bank Name"
-                    sx={{ fontSize: "14px" }}
                   >
                     <MenuItem value="SCB">SCB</MenuItem>
                     <MenuItem value="KBANK">KBANK</MenuItem>
@@ -166,6 +196,66 @@ export default function Profile() {
                     <MenuItem value="BKK">BKK</MenuItem>
                   </Select>
                 </FormControl>
+
+                {/* Bank Account Image Upload (Only in Edit Mode) */}
+                {isEditing && (
+                  <>
+                    <Typography variant="body1" sx={{ marginTop: "20px" }}>
+                      Upload Bank Account Image
+                    </Typography>
+                    <Box position="relative" textAlign="center" mb={2}>
+                      {profileData.bankAccountImage ? (
+                        <Avatar
+                          src={profileData.bankAccountImage}
+                          alt="Bank Account"
+                          sx={{
+                            width: "100px",
+                            height: "100px",
+                            border: "2px solid #ddd",
+                            margin: "0 auto",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "8px",
+                            backgroundColor: "#f4f4f4",
+                            border: "2px solid #ddd",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: "#888" }}>No Image</Typography>
+                        </Box>
+                      )}
+                      <IconButton
+                        color="primary"
+                        sx={{
+                          position: "absolute",
+                          bottom: 0,
+                          right: "calc(50% - 20px)",
+                          backgroundColor: "#fff",
+                          boxShadow: 1,
+                          border: "1px solid #ddd",
+                        }}
+                        onClick={() => document.getElementById("bank-account-image-input").click()}
+                      >
+                        <CameraAltIcon />
+                      </IconButton>
+                      <input
+                        id="bank-account-image-input"
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleBankAccountImageChange}
+                      />
+                    </Box>
+                  </>
+                )}
 
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
@@ -195,8 +285,6 @@ export default function Profile() {
               <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
                 Change Password
               </Typography>
-
-              {/* Change Password Form */}
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Old Password"
@@ -223,7 +311,6 @@ export default function Profile() {
                   sx={{ marginBottom: "20px" }}
                 />
                 {error && <Typography color="error">{error}</Typography>}
-
                 <Button variant="contained" color="success" fullWidth sx={{ fontSize: "13px" }} onClick={handleChangePassword}>
                   Change Password
                 </Button>
