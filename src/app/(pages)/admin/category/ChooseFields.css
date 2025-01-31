@@ -9,6 +9,59 @@
     align-items: center;
     padding: 20px;
   }
+
+  .add-category-button {
+    background-color: #FF0000;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: calc(50% - 50px);
+    box-sizing: border-box;
+    min-width: 180px;
+    text-align: center;
+  }
+  .add-category-button:hover {
+    background-color: #FF3B3B;
+    transform: scale(1.05);
+  }
+  
+  .add-category-button:active {
+    transform: scale(0.95);
+  }
+
+  .dropdown {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 80px;
+    z-index: 1;
+  }
+  
+  .dropdown-item {
+    background-color: #03468f;
+    color: white;
+    font-size: 1rem;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #2064bd;
+  }
+  
   
   .title {
     color: white;
@@ -30,7 +83,7 @@
   }
   
   .field-button {
-    background-color: #03468F; 
+    background-color: #03468F;
     color: white;
     font-size: 1.2rem;
     font-weight: bold;
@@ -46,7 +99,7 @@
   }
   
   .field-button:hover {
-    background-color: #2064bd; 
+    background-color: #2064bd;
     transform: scale(1.05);
   }
   
@@ -54,48 +107,50 @@
     transform: scale(0.95);
   }
   
-  
- 
   @media (max-width: 600px) {
     .title {
-      font-size: 2rem; 
+      font-size: 2rem;
       margin-top: 10px;
       margin-bottom: 15px;
     }
   
     .fields {
-      gap: 40px; 
+      gap: 40px;
     }
   
     .field-button {
-      width: 100%; 
-      margin-bottom: 20px; 
+      width: 100%;
+      margin-bottom: 20px;
     }
+
+  .add-category-button {
+    width: 100%;
+    margin-bottom: 20px;
   }
+}
+
   
- 
   @media (max-width: 768px) {
     .title {
-      font-size: 2.5rem; 
+      font-size: 2.5rem;
     }
   
     .fields {
-      gap: 50px; 
+      gap: 50px;
     }
   
     .field-button {
-      width: calc(50% - 30px); 
+      width: calc(50% - 30px);
     }
   }
   
- 
   @media (min-width: 1024px) {
     .title {
-      font-size: 3rem; 
+      font-size: 3rem;
     }
   
     .fields {
-      gap: 65px; 
+      gap: 65px;
     }
   
     .field-button {
