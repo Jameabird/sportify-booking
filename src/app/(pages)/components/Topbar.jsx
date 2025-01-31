@@ -55,7 +55,8 @@ const TopBar = props => {
         backgroundColor: "rgba(255, 255, 255, 0.1)", // สีโปร่งใส
         backdropFilter: "blur(7px)", // เบลอพื้นหลัง
         WebkitBackdropFilter: "blur(7px)", // สำหรับ Safari
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" // เพิ่มเงา
+        // boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" // เพิ่มเงา
+        boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)"
       }}
     >
       <Box component="div" display="flex" borderRadius="3px">
