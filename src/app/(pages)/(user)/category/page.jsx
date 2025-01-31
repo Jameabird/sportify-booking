@@ -27,6 +27,8 @@ const ChooseField = () => {
   const handleFieldSelection = field => {
     setSelectedField(field);
     if (isClient) {
+      // console.log("Field selected: ", field);
+      sessionStorage.setItem("SportType", field);
       router.push("/search");
     }
   };
