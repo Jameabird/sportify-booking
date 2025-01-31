@@ -28,7 +28,12 @@ const TopBar_User = props => {
     router.push("/login");
   };
 
-  // Handle Settings Click
+  // Handle History Click
+  const handleHistoryClick = () => {
+    router.push("/history"); // Navigate to the History page
+  };
+
+  // Handle Settings Click (if needed)
   const handleSettingsClick = () => {
     router.push("/setting");
   };
@@ -73,8 +78,8 @@ const TopBar_User = props => {
         <Link href="/category" style={getLinkStyle("/category")}>
           Category
         </Link>
-        <Link href="/history" style={getLinkStyle("/history")}>
-          History
+        <Link href="/booking" style={getLinkStyle("/booking")}>
+          Booking
         </Link>
         <Box sx={{ padding: "0 15px" }}>
           <Avatar
@@ -97,6 +102,9 @@ const TopBar_User = props => {
           horizontal: "right"
         }}
       >
+        <MenuItem onClick={handleHistoryClick}> {/* Change to History */}
+          <Typography variant="body1">History</Typography>
+        </MenuItem>
         <MenuItem onClick={handleSettingsClick}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
