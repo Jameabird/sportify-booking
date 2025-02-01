@@ -147,7 +147,7 @@ const TopBar_Admin = props => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => router.push("/login")} // นำทางไปยัง "/login"
+                onClick={() => router.push("/admin/login")} // นำทางไปยัง "/login"
               >
                 Sign In
               </Button>
