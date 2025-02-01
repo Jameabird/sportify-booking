@@ -4,40 +4,35 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar_Owner = props => {
-  const currentPath = usePathname(); // ใช้สำหรับตรวจสอบเส้นทางปัจจุบัน
-  const router = useRouter(); // ใช้สำหรับนำทาง
-  const [isLogin, setisLogin] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null); // State for menu anchor element
-  const [isOpen, setIsOpen] = useState(false); // State for dropdown visibility
+const TopBar_Admin = ({ isLoggedIn, textColor }) => {  // เพิ่ม prop isLoggedIn
+  const currentPath = usePathname();
+  const router = useRouter();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Open the menu when the avatar is clicked
   const handleAvatarClick = event => {
     setAnchorEl(event.currentTarget);
     setIsOpen(true);
   };
 
-  // Close the menu
   const handleClose = () => {
     setIsOpen(false);
     setAnchorEl(null);
   };
 
-  // Handle Sign Out
   const handleSignOut = () => {
     localStorage.removeItem("userToken");
-    router.push("/login");
+    router.push("/admin/login");
   };
 
-  // Handle Settings Click
   const handleSettingsClick = () => {
     router.push("/setting");
   };
 
   const getLinkStyle = path => ({
-    padding: "0 15px", // Consistent padding with TopBar.jsx
-    color: currentPath === path ? "orange" : props.textColor,
-    fontSize: "1.25rem", // Match font size
+    padding: "0 15px",
+    color: currentPath === path ? "orange" : textColor,
+    fontSize: "1.25rem",
     fontWeight: "bold",
     cursor: "pointer",
     textDecoration: "none",
@@ -45,98 +40,64 @@ const TopBar_Owner = props => {
       color: "#868dfb"
     }
   });
+
   return (
     <Box
       display="flex"
       justifyContent="space-between"
       p={2}
       sx={{
-        backgroundColor: "rgba(255, 255, 255, 0.1)", // สีโปร่งใส
-        backdropFilter: "blur(7px)", // เบลอพื้นหลัง
-        WebkitBackdropFilter: "blur(7px)", // Safari
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        backdropFilter: "blur(7px)",
+        WebkitBackdropFilter: "blur(7px)",
         boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)"
       }}
     >
-      <Box
-        component="div"
-        display="flex"
-        // bgcolor={"red"}
-        borderRadius="3px"
-      >
+      <Box component="div" display="flex" borderRadius="3px">
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
-            <div style={{ color: props.textColor }}>SPORTIFY</div>
+            <div style={{ color: textColor }}>SPORTIFY</div>
             <div className="pl-2 text-orange-500">BOOKING</div>
           </div>
         </Link>
       </Box>
       <Box display="flex">
-        <Link href="/owner">
-          <Box
-            sx={{
-              padding: "0 10px",
-              paddingTop: "4px",
-              color: currentPath === "/owner" ? "orange" : props.textColor,
-              cursor: "pointer",
-              "&:hover": {
-                color: "#868dfb "
-              }
-            }}
-          >
+        <Link href="/admin">
+          <Box sx={{ padding: "0 10px", paddingTop: "4px", color: currentPath === "/admin" ? "orange" : textColor, cursor: "pointer", "&:hover": { color: "#868dfb" } }}>
             <div className="font-bold text-xl">Home</div>
           </Box>
         </Link>
-        <Link href="/owner/category">
-          <Box
-            sx={{
-              padding: "0 10px",
-              paddingTop: "4px",
-              cursor: "pointer",
-              color:
-                currentPath === "/owner/category" ? "orange" : props.textColor,
-              //WebkitTextStroke: "px black",
-              "&:hover": {
-                color: "#868dfb "
-              }
-            }}
-          >
+        <Link href="/admin/category">
+          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/admin/category" ? "orange" : textColor, "&:hover": { color: "#868dfb" } }}>
             <div className="font-bold text-xl">Category</div>
           </Box>
         </Link>
-        <Link href="/owner/history">
-          <Box
-            sx={{
-              padding: "0 10px",
-              paddingTop: "4px",
-              cursor: "pointer",
-              color:
-                currentPath === "/owner/history" ? "orange" : props.textColor,
-              "&:hover": {
-                color: "#868dfb "
-              }
-            }}
-          >
+        <Link href="/admin/history">
+          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/admin/history" ? "orange" : textColor, "&:hover": { color: "#868dfb" } }}>
             <div className="font-bold text-xl">History</div>
           </Box>
-        </Link>        
-        {isLogin
-          ? <Box sx={{ padding: "0 15px" }}>
-              <Avatar
-                sx={{ cursor: "pointer", width: 35, height: 35 }}
-                onClick={handleAvatarClick}
-                alt="User Logo"
-              />
-            </Box>
-          : <Box sx={{ padding: "0 3px" }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => router.push("/owner/login")} // นำทางไปยัง "/login"
-              >
-                Sign In
-              </Button>
-            </Box>}
-        {/* </Link> */}
+        </Link>
+        
+        {/* หากล็อกอินแล้วจะแสดง Avatar ถ้ายังไม่ล็อกอินจะแสดงปุ่ม Sign In */}
+        {isLoggedIn ? (
+          <Box sx={{ padding: "0 15px" }}>
+            <Avatar
+              sx={{ cursor: "pointer", width: 35, height: 35 }}
+              onClick={handleAvatarClick}
+              alt="User Logo"
+            />
+          </Box>
+        ) : (
+          <Box sx={{ padding: "0 3px" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => router.push("/admin/login")}
+            >
+              Sign In
+            </Button>
+          </Box>
+        )}
       </Box>
       <Menu
         anchorEl={anchorEl}
@@ -161,4 +122,5 @@ const TopBar_Owner = props => {
     </Box>
   );
 };
-export default TopBar_Owner;
+
+export default TopBar_Admin;
