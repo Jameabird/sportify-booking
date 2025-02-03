@@ -1,51 +1,63 @@
 "use client";
-import { Box, Button, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar_Admin = props => {
+const TopBar_Owner = (props) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isLogin, setIsLogin] = useState(false);
   const currentPath = usePathname();
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true); // สมมติว่า login แล้ว
-  const [anchorEl, setAnchorEl] = useState(null);
 
-  // เปิด dropdown
-  const handleAdminClick = event => {
+  useEffect(() => {
+    const token = localStorage.getItem("userToken");
+    setIsLogin(!!token); // Check if there is a token
+  }, []);
+
+  // Open menu when clicking Avatar
+  const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // ปิด dropdown
+  // Close menu
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // ไปหน้า settings
-  const handleSettingsClick = () => {
-    router.push("/admin/setting");
+  // Navigate to different pages
+  const navigateTo = (path) => {
+    router.push(path);
     handleClose();
   };
 
-  // ออกจากระบบ
-  const handleSignOut = () => {
-    localStorage.removeItem("userToken");
-    router.push("/login");
-    handleClose();
-  };
+  const getLinkStyle = (path) => ({
+    padding: "0 15px",
+    color: currentPath.startsWith(path) ? "orange" : props.textColor,
+    fontSize: "1.25rem",
+    fontWeight: "bold",
+    cursor: "pointer",
+    textDecoration: "none",
+    "&:hover": {
+      color: "#868dfb",
+    },
+  });
 
   return (
     <Box
       display="flex"
       justifyContent="space-between"
+      alignItems="center"
       p={2}
       sx={{
         backgroundColor: "rgba(255, 255, 255, 0.1)",
         backdropFilter: "blur(7px)",
         WebkitBackdropFilter: "blur(7px)",
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)"
+        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)",
       }}
     >
-      <Box component="div" display="flex">
+      {/* LOGO */}
+      <Box display="flex" alignItems="center">
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
             <div style={{ color: props.textColor }}>SPORTIFY</div>
@@ -54,37 +66,27 @@ const TopBar_Admin = props => {
         </Link>
       </Box>
 
-      <Box display="flex">
-        <Link href="/admin">
-          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/onwer" ? "orange" : props.textColor, "&:hover": { color: "#868dfb" } }}>
-            <div className="font-bold text-xl">Home</div>
-          </Box>
+      {/* Main Menu */}
+      <Box display="flex" alignItems="center">
+        <Link href="/admin" style={getLinkStyle("/admin")}>
+          Home
         </Link>
-        <Link href="/admin/history">
-          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/owner/history" ? "orange" : props.textColor, "&:hover": { color: "#868dfb" } }}>
-            <div className="font-bold text-xl">History</div>
-          </Box>
+        <Link href="/admin/promotion" style={getLinkStyle("/admin/promotion")}>
+          Promotion
+        </Link>
+        <Link href="/admin/history" style={getLinkStyle("/admin/history")}>
+          History
         </Link>
 
-        {/* ปุ่ม Admin + Dropdown */}
-        <Box sx={{ padding: "0 3px" }}>
+        {/* Avatar User */}
+        <Box sx={{ padding: "0 15px" }}>
           {isLogin ? (
             <>
-              <Button
-                variant="contained"
-                onClick={handleAdminClick}
-                sx={{
-                  backgroundColor: "#007BFF", // สีฟ้า
-                  borderRadius: "20px", // มุมมน
-                  padding: "8px 20px",
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  "&:hover": { backgroundColor: "#0056b3" } // สีเข้มขึ้นเมื่อ hover
-                }}
-              >
-                Owner
-              </Button>
+              <Avatar
+                sx={{ cursor: "pointer", width: 35, height: 35 }}
+                onClick={handleAvatarClick}
+                alt="Admin Logo"
+              />
               <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -92,23 +94,39 @@ const TopBar_Admin = props => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                <MenuItem onClick={handleSettingsClick}>
+                <MenuItem onClick={() => navigateTo("/admin/setting")}>
                   <Typography variant="body1">Settings</Typography>
                 </MenuItem>
-                <MenuItem onClick={handleSignOut}>
+                <MenuItem onClick={() => navigateTo("/login")}>
                   <Typography variant="body1">Sign Out</Typography>
                 </MenuItem>
               </Menu>
             </>
           ) : (
-            <Button variant="contained" color="primary" onClick={() => router.push("/login")}>
-              Sign In
-            </Button>
+            <Avatar
+              sx={{ cursor: "pointer", width: 35, height: 35 }}
+              onClick={handleAvatarClick}
+              alt="Admin Logo"
+            />
           )}
         </Box>
       </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem onClick={() => navigateTo("/admin/setting")}>
+          <Typography variant="body1">Settings</Typography>
+        </MenuItem>
+        <MenuItem onClick={() => navigateTo("/login")}>
+          <Typography variant="body1">Sign Out</Typography>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
 
-export default TopBar_Admin;
+export default TopBar_Owner;

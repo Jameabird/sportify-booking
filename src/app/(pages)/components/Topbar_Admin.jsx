@@ -1,51 +1,57 @@
 "use client";
-import { Box, Button, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar_Admin = props => {
+const TopBar_Admin = (props) => {
+  const [anchorEl, setAnchorEl] = useState(null);
   const currentPath = usePathname();
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true); // สมมติว่า login แล้ว
-  const [anchorEl, setAnchorEl] = useState(null);
 
-  // เปิด dropdown
-  const handleAdminClick = event => {
+  // เปิดเมนูเมื่อคลิก Avatar
+  const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // ปิด dropdown
+  // ปิดเมนู
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // ไปหน้า settings
-  const handleSettingsClick = () => {
-    router.push("/admin/setting");
+  // ฟังก์ชันเปลี่ยนหน้า
+  const navigateTo = (path) => {
+    router.push(path);
     handleClose();
   };
 
-  // ออกจากระบบ
-  const handleSignOut = () => {
-    localStorage.removeItem("userToken");
-    router.push("/login");
-    handleClose();
-  };
+  const getLinkStyle = (path) => ({
+    padding: "0 15px",
+    color: currentPath.startsWith(path) ? "orange" : props.textColor,
+    fontSize: "1.25rem",
+    fontWeight: "bold",
+    cursor: "pointer",
+    textDecoration: "none",
+    "&:hover": {
+      color: "#868dfb",
+    },
+  });
 
   return (
     <Box
       display="flex"
       justifyContent="space-between"
+      alignItems="center"
       p={2}
       sx={{
         backgroundColor: "rgba(255, 255, 255, 0.1)",
         backdropFilter: "blur(7px)",
         WebkitBackdropFilter: "blur(7px)",
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)"
+        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)",
       }}
     >
-      <Box component="div" display="flex">
+      {/* LOGO */}
+      <Box display="flex" alignItems="center">
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
             <div style={{ color: props.textColor }}>SPORTIFY</div>
@@ -54,64 +60,40 @@ const TopBar_Admin = props => {
         </Link>
       </Box>
 
-      <Box display="flex">
-        <Link href="/admin">
-          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/admin" ? "orange" : props.textColor, "&:hover": { color: "#868dfb" } }}>
-            <div className="font-bold text-xl">Home</div>
-          </Box>
+      {/* เมนูหลัก */}
+      <Box display="flex" alignItems="center">
+        <Link href="/admin" style={getLinkStyle("/admin")}>
+          Home
         </Link>
-        <Link href="/admin/category">
-          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/admin/promottion" ? "orange" : props.textColor, "&:hover": { color: "#868dfb" } }}>
-            <div className="font-bold text-xl">Promotion</div>
-          </Box>
-        </Link>
-        <Link href="/admin/history">
-          <Box sx={{ padding: "0 10px", paddingTop: "4px", cursor: "pointer", color: currentPath === "/admin/history" ? "orange" : props.textColor, "&:hover": { color: "#868dfb" } }}>
-            <div className="font-bold text-xl">History</div>
-          </Box>
+        <Link href="/admin/history" style={getLinkStyle("/admin/history")}>
+          History
         </Link>
 
-        {/* ปุ่ม Admin + Dropdown */}
-        <Box sx={{ padding: "0 3px" }}>
-          {isLogin ? (
-            <>
-              <Button
-                variant="contained"
-                onClick={handleAdminClick}
-                sx={{
-                  backgroundColor: "#007BFF", // สีฟ้า
-                  borderRadius: "20px", // มุมมน
-                  padding: "8px 20px",
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  "&:hover": { backgroundColor: "#0056b3" } // สีเข้มขึ้นเมื่อ hover
-                }}
-              >
-                Admin
-              </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-              >
-                <MenuItem onClick={handleSettingsClick}>
-                  <Typography variant="body1">Settings</Typography>
-                </MenuItem>
-                <MenuItem onClick={handleSignOut}>
-                  <Typography variant="body1">Sign Out</Typography>
-                </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Button variant="contained" color="primary" onClick={() => router.push("/login")}>
-              Sign In
-            </Button>
-          )}
+        {/* Avatar User */}
+        <Box sx={{ padding: "0 15px" }}>
+          <Avatar
+            sx={{ cursor: "pointer", width: 35, height: 35 }}
+            onClick={handleAvatarClick}
+            alt="Admin Logo"
+          />
         </Box>
       </Box>
+
+      {/* Dropdown Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem onClick={() => navigateTo("/admin/setting")}>
+          <Typography variant="body1">Settings</Typography>
+        </MenuItem>
+        <MenuItem onClick={() => navigateTo("/login")}>
+          <Typography variant="body1">Sign Out</Typography>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
