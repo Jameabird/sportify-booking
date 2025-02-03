@@ -6,24 +6,27 @@ import TopBar_Admin from "@components/Topbar_Admin";
 
 export default function AdminHome() {
   return (
-    <div className="app" style={{ display: "flex", minHeight: "100vh" }}>
+    <div
+      className="app"
+      style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}
+    >
       <main
         className="content"
         style={{
           flex: 1,
-          overflowY: "auto",
+          overflow: "hidden", // Prevent vertical scrolling
           position: "relative",
         }}
       >
-        {/* พื้นหลังเลเยอร์ */}
+        {/* Background Layer */}
         <div
           className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
           style={{
             backgroundImage: "url('/gym_bg2.jpg')",
             backgroundColor: "rgba(70, 80, 100, 0.7)",
-            backgroundBlendMode: "multiply", 
-            opacity: 0.9, // Adjusted opacity for better blending
-            zIndex: -1
+            backgroundBlendMode: "multiply",
+            opacity: 0.9,
+            zIndex: -1,
           }}
         />
 
@@ -35,7 +38,7 @@ export default function AdminHome() {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(70, 80, 100, 0.7)", // Keeping the same dark overlay
+            backgroundColor: "rgba(70, 80, 100, 0.7)",
             zIndex: -1,
           }}
         />
@@ -49,11 +52,10 @@ export default function AdminHome() {
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
-          minHeight="100vh"
           gap={6}
-          sx={{ position: "relative", zIndex: 1 }}
+          sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
         >
-          {/* กลุ่มปุ่มแยกเป็นหมวดหมู่ */}
+          {/* Category Buttons */}
           {[{
             title: "Financial Management",
             buttons: ["Confirm Payment", "Refund"],
@@ -71,7 +73,7 @@ export default function AdminHome() {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: 3,
-                backgroundColor: "rgba(0, 0, 0, 0.6)", // Keeping dark background
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
                 width: "90%",
                 maxWidth: "550px",
                 transition: "0.3s ease-in-out",
@@ -112,7 +114,7 @@ export default function AdminHome() {
                       },
                     }}
                   >
-                    {text} {/* ✅ ลบ textTransform: "uppercase" ออกไปแล้ว */}
+                    {text}
                   </Box>
                 ))}
               </Box>

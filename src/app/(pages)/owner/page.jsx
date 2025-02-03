@@ -6,24 +6,32 @@ import TopBar_Admin from "@components/Topbar_Owner";
 
 export default function AdminHome() {
   return (
-    <div className="app" style={{ display: "flex", minHeight: "100vh" }}>
+    <div
+      className="app"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        overflow: "hidden", // Prevent vertical scrolling
+      }}
+    >
       <main
         className="content"
         style={{
           flex: 1,
-          overflowY: "auto",
+          overflow: "hidden", // Prevent overflow inside content
           position: "relative",
         }}
       >
-        {/* พื้นหลังเลเยอร์ */}
+        {/* Background Layer */}
         <div
           className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
           style={{
             backgroundImage: "url('/gym_bg2.jpg')",
             backgroundColor: "rgba(70, 80, 100, 0.7)",
-            backgroundBlendMode: "multiply", 
+            backgroundBlendMode: "multiply",
             opacity: 0.9,
-            zIndex: -1
+            zIndex: -1,
           }}
         />
 
@@ -49,21 +57,22 @@ export default function AdminHome() {
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
-          minHeight="100vh"
           gap={6}
-          sx={{ position: "relative", zIndex: 1 }}
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            height: "100%", // Ensure full height usage
+            overflow: "hidden", // Prevent scrolling in dashboard
+          }}
         >
-          {/* กลุ่มปุ่มแยกเป็นหมวดหมู่ */}
-          {[
-            {
-              title: "Financial Management",
-              buttons: ["Confirm Payment", "Refund"],
-            },
-            {
-              title: "Management",
-              buttons: ["Officer Management", "Promotion Management", "Dashboard"],
-            },
-          ].map((category, categoryIndex) => (
+          {/* Category Buttons */}
+          {[{
+            title: "Financial Management",
+            buttons: ["Confirm Payment", "Refund"],
+          }, {
+            title: "Management",
+            buttons: ["Officer Management", "Promotion Management", "Dashboard"],
+          }].map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
               sx={{
@@ -92,7 +101,7 @@ export default function AdminHome() {
               >
                 {category.title}
               </Typography>
-              <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center"> 
+              <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
                 {category.buttons.map((text, index) => (
                   <Box
                     key={index}
@@ -115,7 +124,7 @@ export default function AdminHome() {
                       },
                     }}
                   >
-                    {text} {/* ✅ ลบ textTransform: "uppercase" ออกไปแล้ว */}
+                    {text}
                   </Box>
                 ))}
               </Box>
