@@ -15,18 +15,15 @@ export default function AdminHome() {
           position: "relative",
         }}
       >
-        {/* Background Layer */}
+        {/* พื้นหลังเลเยอร์ */}
         <div
+          className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
           style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
             backgroundImage: "url('/gym_bg2.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            zIndex: -1,
+            backgroundColor: "rgba(70, 80, 100, 0.7)",
+            backgroundBlendMode: "multiply", 
+            opacity: 0.9, // Adjusted opacity for better blending
+            zIndex: -1
           }}
         />
 
@@ -38,7 +35,7 @@ export default function AdminHome() {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(70, 80, 100, 0.7)",
+            backgroundColor: "rgba(70, 80, 100, 0.7)", // Keeping the same dark overlay
             zIndex: -1,
           }}
         />
@@ -57,16 +54,13 @@ export default function AdminHome() {
           sx={{ position: "relative", zIndex: 1 }}
         >
           {/* กลุ่มปุ่มแยกเป็นหมวดหมู่ */}
-          {[
-            {
-              title: "Financial Management",
-              buttons: ["Confirm Payment", "Refund"],
-            },
-            {
-              title: "Management",
-              buttons: ["Owner Management", "Dashboard"],
-            },
-          ].map((category, categoryIndex) => (
+          {[{
+            title: "Financial Management",
+            buttons: ["Confirm Payment", "Refund"],
+          }, {
+            title: "Management",
+            buttons: ["Owner Management", "Dashboard"],
+          }].map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
               sx={{
@@ -77,7 +71,7 @@ export default function AdminHome() {
                 flexDirection: "column",
                 alignItems: "center",
                 gap: 3,
-                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                backgroundColor: "rgba(0, 0, 0, 0.6)", // Keeping dark background
                 width: "90%",
                 maxWidth: "550px",
                 transition: "0.3s ease-in-out",
@@ -95,7 +89,7 @@ export default function AdminHome() {
               >
                 {category.title}
               </Typography>
-              <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center"> 
+              <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
                 {category.buttons.map((text, index) => (
                   <Box
                     key={index}

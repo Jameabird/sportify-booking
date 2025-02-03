@@ -15,18 +15,15 @@ export default function AdminHome() {
           position: "relative",
         }}
       >
-        {/* Background Layer */}
+        {/* พื้นหลังเลเยอร์ */}
         <div
+          className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
           style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
             backgroundImage: "url('/gym_bg2.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            zIndex: -1,
+            backgroundColor: "rgba(70, 80, 100, 0.7)",
+            backgroundBlendMode: "multiply", 
+            opacity: 0.9,
+            zIndex: -1
           }}
         />
 

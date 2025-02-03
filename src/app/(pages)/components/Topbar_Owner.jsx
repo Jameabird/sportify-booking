@@ -1,31 +1,25 @@
 "use client";
 import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Owner = (props) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [isLogin, setIsLogin] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // State สำหรับเปิด/ปิดเมนู
   const currentPath = usePathname();
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem("userToken");
-    setIsLogin(!!token); // Check if there is a token
-  }, []);
-
-  // Open menu when clicking Avatar
+  // เปิดเมนูเมื่อคลิก Avatar
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Close menu
+  // ปิดเมนู
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // Navigate to different pages
+  // ฟังก์ชันเปลี่ยนหน้า
   const navigateTo = (path) => {
     router.push(path);
     handleClose();
@@ -66,51 +60,29 @@ const TopBar_Owner = (props) => {
         </Link>
       </Box>
 
-      {/* Main Menu */}
+      {/* เมนูหลัก */}
       <Box display="flex" alignItems="center">
-        <Link href="/admin" style={getLinkStyle("/admin")}>
+        <Link href="/owner" style={getLinkStyle("/owner")}>
           Home
         </Link>
-        <Link href="/admin/promotion" style={getLinkStyle("/admin/promotion")}>
+        <Link href="/owner/promotion" style={getLinkStyle("/owner/promotion")}>
           Promotion
         </Link>
-        <Link href="/admin/history" style={getLinkStyle("/admin/history")}>
+        <Link href="/owner/history" style={getLinkStyle("/owner/history")}>
           History
         </Link>
 
         {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>
-          {isLogin ? (
-            <>
-              <Avatar
-                sx={{ cursor: "pointer", width: 35, height: 35 }}
-                onClick={handleAvatarClick}
-                alt="Admin Logo"
-              />
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-              >
-                <MenuItem onClick={() => navigateTo("/admin/setting")}>
-                  <Typography variant="body1">Settings</Typography>
-                </MenuItem>
-                <MenuItem onClick={() => navigateTo("/login")}>
-                  <Typography variant="body1">Sign Out</Typography>
-                </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Avatar
-              sx={{ cursor: "pointer", width: 35, height: 35 }}
-              onClick={handleAvatarClick}
-              alt="Admin Logo"
-            />
-          )}
+          <Avatar
+            sx={{ cursor: "pointer", width: 35, height: 35 }}
+            onClick={handleAvatarClick}
+            alt="User Logo"
+          />
         </Box>
       </Box>
+
+      {/* Dropdown Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -118,7 +90,7 @@ const TopBar_Owner = (props) => {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <MenuItem onClick={() => navigateTo("/admin/setting")}>
+        <MenuItem onClick={() => navigateTo("/setting")}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
         <MenuItem onClick={() => navigateTo("/login")}>
