@@ -82,8 +82,8 @@ const TopBar = (props) => {
         <Link href="/category" style={getLinkStyle("/category")}>
           Category
         </Link>
-        <Link href="/history" style={getLinkStyle("/history")}>
-          History
+        <Link href="/booking" style={getLinkStyle("/booking")}>
+          Booking
         </Link>
 
         {/* Avatar User or Sign In Button */}
