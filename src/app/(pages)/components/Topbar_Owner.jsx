@@ -90,7 +90,7 @@ const TopBar_Owner = (props) => {
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <MenuItem onClick={() => navigateTo("/setting")}>
+        <MenuItem onClick={() => navigateTo("/owner/setting")}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
         <MenuItem onClick={() => navigateTo("/login")}>
