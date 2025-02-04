@@ -4,50 +4,37 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const TopBar_User = props => {
-  const [anchorEl, setAnchorEl] = useState(null); // State for menu anchor element
-  const [isOpen, setIsOpen] = useState(false); // State for dropdown visibility
-  const currentPath = usePathname(); // Use to check the current path
-  const router = useRouter(); // Use for navigation
+const TopBar_User = (props) => {
+  const [anchorEl, setAnchorEl] = useState(null); // State สำหรับเปิด/ปิดเมนู
+  const currentPath = usePathname();
+  const router = useRouter();
 
-  // Open the menu when the avatar is clicked
-  const handleAvatarClick = event => {
+  // เปิดเมนูเมื่อคลิก Avatar
+  const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
-    setIsOpen(true);
   };
 
-  // Close the menu
+  // ปิดเมนู
   const handleClose = () => {
-    setIsOpen(false);
     setAnchorEl(null);
   };
 
-  // Handle Sign Out
-  const handleSignOut = () => {
-    localStorage.removeItem("userToken");
-    router.push("/login");
+  // ฟังก์ชันเปลี่ยนหน้า
+  const navigateTo = (path) => {
+    router.push(path);
+    handleClose();
   };
 
-  // Handle History Click
-  const handleHistoryClick = () => {
-    router.push("/history"); // Navigate to the History page
-  };
-
-  // Handle Settings Click (if needed)
-  const handleSettingsClick = () => {
-    router.push("/setting");
-  };
-
-  const getLinkStyle = path => ({
-    padding: "0 15px", // Consistent padding with TopBar.jsx
-    color: currentPath === path ? "orange" : props.textColor,
-    fontSize: "1.25rem", // Match font size
+  const getLinkStyle = (path) => ({
+    padding: "0 15px",
+    color: currentPath.startsWith(path) ? "orange" : props.textColor,
+    fontSize: "1.25rem",
     fontWeight: "bold",
     cursor: "pointer",
     textDecoration: "none",
     "&:hover": {
-      color: "#868dfb"
-    }
+      color: "#868dfb",
+    },
   });
 
   return (
@@ -57,12 +44,13 @@ const TopBar_User = props => {
       alignItems="center"
       p={2}
       sx={{
-        backgroundColor: "rgba(255, 255, 255, 0.1)", // สีโปร่งใส
-        backdropFilter: "blur(7px)", // เบลอพื้นหลัง
-        WebkitBackdropFilter: "blur(7px)", // สำหรับ Safari
-        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" // เพิ่มเงา
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        backdropFilter: "blur(7px)",
+        WebkitBackdropFilter: "blur(7px)",
+        boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)",
       }}
     >
+      {/* LOGO */}
       <Box display="flex" alignItems="center">
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
@@ -71,6 +59,8 @@ const TopBar_User = props => {
           </div>
         </Link>
       </Box>
+
+      {/* เมนูหลัก */}
       <Box display="flex" alignItems="center">
         <Link href="/home" style={getLinkStyle("/home")}>
           Home
@@ -81,6 +71,8 @@ const TopBar_User = props => {
         <Link href="/booking" style={getLinkStyle("/booking")}>
           Booking
         </Link>
+
+        {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>
           <Avatar
             sx={{ cursor: "pointer", width: 35, height: 35 }}
@@ -89,26 +81,22 @@ const TopBar_User = props => {
           />
         </Box>
       </Box>
+
+      {/* Dropdown Menu */}
       <Menu
         anchorEl={anchorEl}
-        open={isOpen}
+        open={Boolean(anchorEl)}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right"
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right"
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <MenuItem onClick={handleHistoryClick}> {/* Change to History */}
+        <MenuItem onClick={() => navigateTo("/history")}>
           <Typography variant="body1">History</Typography>
         </MenuItem>
-        <MenuItem onClick={handleSettingsClick}>
+        <MenuItem onClick={() => navigateTo("/setting")}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
-        <MenuItem onClick={handleSignOut}>
+        <MenuItem onClick={() => navigateTo("/login")}>
           <Typography variant="body1">Sign Out</Typography>
         </MenuItem>
       </Menu>
