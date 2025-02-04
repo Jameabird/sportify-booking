@@ -4,16 +4,16 @@ import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuIte
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import TopBar_Owner from "../../components/Topbar_Owner";
+import TopBar_Admin from "../../components/Topbar_Admin";
 
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [profileData, setProfileData] = useState({
-        name: "Owner1",
-        email: "Owner@gmail.com",
+        name: "Admin1",
+        email: "Admin1@gmail.com",
         phone: "0123456789",
-        role: "Owner",
+        role: "Admin",
     });
 
     const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
@@ -120,7 +120,7 @@ export default function Profile() {
                 zIndex: -1, // Keeps the background below the profile section
             }} />
 
-            <TopBar_Owner /> {/* Fixed top bar */}
+            <TopBar_Admin /> {/* Fixed top bar */}
 
             {/* Profile Section */}
             <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}

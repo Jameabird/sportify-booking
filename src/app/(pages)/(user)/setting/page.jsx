@@ -143,11 +143,42 @@ export default function Profile() {
 
       {/* Profile Section */}
       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
-        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" maxWidth="400px" sx={{ backgroundColor: "#fff", borderRadius: "8px", padding: "20px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          width="100%"
+          maxWidth="400px"
+          sx={{
+            backgroundColor: "#fff",
+            borderRadius: "8px",
+            padding: "20px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            animation: "fadeInUp 0.5s ease-in-out",
+            "@keyframes fadeInUp": {
+              "0%": { opacity: 0, transform: "translateY(20px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          }}
+        >
           {!isChangingPassword ? (
             <>
               <Box position="relative" textAlign="center" mb={2}>
-                <Avatar src={profileImage} alt="Profile Picture" sx={{ width: "100px", height: "100px", border: "2px solid #ddd", margin: "0 auto" }} />
+                <Avatar
+                  src={profileImage}
+                  alt="Profile Picture"
+                  sx={{
+                    width: "100px",
+                    height: "100px",
+                    border: "2px solid #ddd",
+                    margin: "0 auto",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": {
+                      transform: "scale(1.1)",
+                    },
+                  }}
+                />
                 {isEditing && (
                   <IconButton
                     color="primary"
@@ -177,6 +208,15 @@ export default function Profile() {
                   value={profileData.name}
                   disabled={!isEditing}
                   onChange={handleInputChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   label="Email"
@@ -184,6 +224,15 @@ export default function Profile() {
                   fullWidth
                   value={profileData.email}
                   disabled={true}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   label="Phone"
@@ -192,6 +241,15 @@ export default function Profile() {
                   value={profileData.phone}
                   disabled={!isEditing}
                   onChange={handleInputChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
 
                 {/* Bank Information Section */}
@@ -206,6 +264,15 @@ export default function Profile() {
                     value={profileData.firstName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        transition: "all 0.3s ease",
+                        "&.Mui-focused": {
+                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                          borderColor: "#0096ff",
+                        },
+                      },
+                    }}
                   />
                   <TextField
                     label="Last Name"
@@ -214,6 +281,15 @@ export default function Profile() {
                     value={profileData.lastName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        transition: "all 0.3s ease",
+                        "&.Mui-focused": {
+                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                          borderColor: "#0096ff",
+                        },
+                      },
+                    }}
                   />
                 </Box>
                 <TextField
@@ -223,6 +299,15 @@ export default function Profile() {
                   value={profileData.bankAccount}
                   disabled={!isEditing}
                   onChange={handleInputChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
                 <FormControl fullWidth variant="outlined" sx={{ fontSize: "14px", marginTop: "8px" }}>
                   <InputLabel sx={{ fontSize: "14px" }}>Bank Name</InputLabel>
@@ -232,6 +317,15 @@ export default function Profile() {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     label="Bank Name"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        transition: "all 0.3s ease",
+                        "&.Mui-focused": {
+                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                          borderColor: "#0096ff",
+                        },
+                      },
+                    }}
                   >
                     <MenuItem value="SCB">SCB</MenuItem>
                     <MenuItem value="KBANK">KBANK</MenuItem>
@@ -305,10 +399,36 @@ export default function Profile() {
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
                     <>
-                      <Button variant="contained" color="success" sx={{ width: "48%", fontSize: "13px" }} onClick={handleSaveClick}>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        sx={{
+                          width: "48%",
+                          fontSize: "13px",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+                            transform: "scale(1.05)",
+                          },
+                        }}
+                        onClick={handleSaveClick}
+                      >
                         Save
                       </Button>
-                      <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleCancelClick}>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        sx={{
+                          width: "48%",
+                          fontSize: "13px",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+                            transform: "scale(1.05)",
+                          },
+                        }}
+                        onClick={handleCancelClick}
+                      >
                         Cancel
                       </Button>
                     </>
@@ -447,7 +567,6 @@ export default function Profile() {
           </Button>
         </DialogActions>
       </Dialog>
-
     </Box>
   );
 }
