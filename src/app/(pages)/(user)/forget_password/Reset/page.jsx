@@ -3,59 +3,49 @@ import React, { useState } from "react";
 import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
+import { useRouter } from "next/navigation"; // ใช้ useRouter สำหรับนำทาง
+import "./resetPasswordPage.css";  // Importing the CSS
 
 const ResetPasswordPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  const router = useRouter(); // ใช้ router สำหรับนำทางไปยัง /login
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const handleToggleNewPasswordVisibility = () => {
+    setShowNewPassword(!showNewPassword);
+  };
+
+  const handleToggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const handleResetPassword = () => {
     if (newPassword === confirmPassword) {
       alert("Password reset successfully!");
+      router.push("/login"); // นำทางไปยังหน้า login หลังจากรีเซ็ตรหัสผ่านสำเร็จ
     } else {
       alert("Passwords do not match.");
     }
   };
 
   return (
-    <div className="app" style={{ display: "flex", height: "100vh" }}>
-      <main className="content" style={{ flex: 1, overflowY: "auto" }}>
-        <div
-          className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
-          style={{
-            backgroundImage: "url('/gym_bg2.jpg')",
-            backgroundColor: "rgba(70, 80, 100, 0.7)",
-            backgroundBlendMode: "multiply",
-            opacity: 0.9,
-            zIndex: -1,
-          }}
-        />
+    <div className="app">
+      <main className="content">
+        <div className="background-layer" />
         <div className="relative h-full w-full">
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12">
               <TopBar textColor={"white"} />
             </div>
             <div className="col-span-12 flex justify-center items-center">
-              <Box
-                sx={{
-                  width: "400px",
-                  padding: "24px",
-                  borderRadius: "10px",
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
-                  textAlign: "center",
-                }}
-              >
-                <h2 style={{ marginBottom: "16px", color: "rgba(70, 80, 100, 0.9)" }}>
-                  Reset Password
-                </h2>
+              <Box className="reset-password-container">
+                <h2 className="reset-password-title">Reset Password</h2>
                 <TextField
                   label="New Password"
-                  type={showPassword ? "text" : "password"}
+                  type={showNewPassword ? "text" : "password"}
                   variant="outlined"
                   fullWidth
                   value={newPassword}
@@ -65,11 +55,11 @@ const ResetPasswordPage = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={handleTogglePasswordVisibility}
+                          onClick={handleToggleNewPasswordVisibility}
                           edge="end"
-                          aria-label="toggle password visibility"
+                          aria-label="toggle new password visibility"
                         >
-                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                          {showNewPassword ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -77,7 +67,7 @@ const ResetPasswordPage = () => {
                 />
                 <TextField
                   label="Confirm Password"
-                  type={showPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   variant="outlined"
                   fullWidth
                   value={confirmPassword}
@@ -87,11 +77,11 @@ const ResetPasswordPage = () => {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={handleTogglePasswordVisibility}
+                          onClick={handleToggleConfirmPasswordVisibility}
                           edge="end"
-                          aria-label="toggle password visibility"
+                          aria-label="toggle confirm password visibility"
                         >
-                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                          {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -102,12 +92,7 @@ const ResetPasswordPage = () => {
                   color="primary"
                   fullWidth
                   onClick={handleResetPassword}
-                  sx={{
-                    backgroundColor: "#f57c00",
-                    "&:hover": {
-                      backgroundColor: "#ff9800",
-                    },
-                  }}
+                  className="reset-password-button"
                 >
                   Reset Password
                 </Button>

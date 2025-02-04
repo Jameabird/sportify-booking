@@ -1,7 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import TopBar_User from "../../components/Topbar_User";
 
 export default function Profile() {
@@ -17,29 +19,72 @@ export default function Profile() {
     bankName: "SCB",
     bankAccountImage: null,
   });
-  
-  const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });  
+
+  const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [profileImage, setProfileImage] = useState("/default-profile.png");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // เพิ่ม severity สำหรับแสดงใน Snackbar
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleChangePasswordClick = () => setIsChangingPassword(true);
+  const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
+  const [dialogSeverity, setDialogSeverity] = useState("success");  // เพิ่ม state สำหรับระดับของข้อความ (success หรือ error)
+
+  const handleSaveClick = () => {
+    if (!profileData.name || !profileData.phone || !profileData.firstName || !profileData.lastName || !profileData.bankAccount) {
+      setDialogMessage("Please fill out all required fields.");
+      setDialogSeverity("error");  // ใช้ "error" หากมีข้อผิดพลาด
+      setOpenDialog(true);
+      return;
+    }
+
+    setIsEditing(false);
+    setDialogMessage("Changes saved successfully!");
+    setDialogSeverity("success");  // ใช้ "success" เมื่อบันทึกสำเร็จ
+    setOpenDialog(true);
+  };
+
+  const handleChangePassword = () => {
+    if (newPassword !== confirmPassword) {
+      setDialogMessage("Passwords do not match.");
+      setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านไม่ตรงกัน
+      setOpenDialog(true);
+      return;
+    }
+
+    if (newPassword.length >= 6) {
+      setDialogMessage("Password changed successfully!");
+      setDialogSeverity("success");  // ใช้ "success" เมื่อเปลี่ยนรหัสผ่านสำเร็จ
+      setOpenDialog(true);
+    } else {
+      setDialogMessage("New password is too short.");
+      setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านสั้นเกินไป
+      setOpenDialog(true);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   const handleEditClick = () => {
     setOriginalProfileData(profileData); // เก็บค่าเดิมไว้
     setIsEditing(true);
   };
-  
-  const handleSaveClick = () => {
-    setIsEditing(false);
-    alert("Changes saved successfully!");
+
+  // Handle Dialog close
+  const handleDialogClose = () => {
+    setOpenDialog(false);
   };
-  
+
   const handleCancelClick = () => {
     setProfileData(originalProfileData);
     setIsEditing(false);
   };
-  
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -49,21 +94,9 @@ export default function Profile() {
     }));
   };
 
-  const handleChangePasswordClick = () => setIsChangingPassword(true);
-
-  const handleChangePassword = () => {
-    if (oldPassword !== "currentPassword") {
-      setError("Old password is incorrect!");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match!");
-      return;
-    }
-
-    alert("Password changed successfully!");
-    setIsChangingPassword(false);
+  // ฟังก์ชันสำหรับปิด Dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   // Function to handle the profile image change
@@ -105,16 +138,47 @@ export default function Profile() {
         backgroundColor: "#f4f4f4",
         zIndex: -1, // Keeps the background below the profile section
       }} />
-      
+
       <TopBar_User /> {/* Fixed top bar */}
 
       {/* Profile Section */}
       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
-        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" width="100%" maxWidth="400px" sx={{ backgroundColor: "#fff", borderRadius: "8px", padding: "20px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          width="100%"
+          maxWidth="400px"
+          sx={{
+            backgroundColor: "#fff",
+            borderRadius: "8px",
+            padding: "20px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            animation: "fadeInUp 0.5s ease-in-out",
+            "@keyframes fadeInUp": {
+              "0%": { opacity: 0, transform: "translateY(20px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          }}
+        >
           {!isChangingPassword ? (
             <>
               <Box position="relative" textAlign="center" mb={2}>
-                <Avatar src={profileImage} alt="Profile Picture" sx={{ width: "100px", height: "100px", border: "2px solid #ddd", margin: "0 auto" }} />
+                <Avatar
+                  src={profileImage}
+                  alt="Profile Picture"
+                  sx={{
+                    width: "100px",
+                    height: "100px",
+                    border: "2px solid #ddd",
+                    margin: "0 auto",
+                    transition: "transform 0.3s ease-in-out",
+                    "&:hover": {
+                      transform: "scale(1.1)",
+                    },
+                  }}
+                />
                 {isEditing && (
                   <IconButton
                     color="primary"
@@ -144,6 +208,15 @@ export default function Profile() {
                   value={profileData.name}
                   disabled={!isEditing}
                   onChange={handleInputChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   label="Email"
@@ -151,6 +224,15 @@ export default function Profile() {
                   fullWidth
                   value={profileData.email}
                   disabled={true}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
                 <TextField
                   label="Phone"
@@ -159,8 +241,17 @@ export default function Profile() {
                   value={profileData.phone}
                   disabled={!isEditing}
                   onChange={handleInputChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
-                
+
                 {/* Bank Information Section */}
                 <Typography variant="h8" sx={{ fontWeight: "bold", marginTop: "px" }}>
                   Bank Information
@@ -173,6 +264,15 @@ export default function Profile() {
                     value={profileData.firstName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        transition: "all 0.3s ease",
+                        "&.Mui-focused": {
+                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                          borderColor: "#0096ff",
+                        },
+                      },
+                    }}
                   />
                   <TextField
                     label="Last Name"
@@ -181,6 +281,15 @@ export default function Profile() {
                     value={profileData.lastName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        transition: "all 0.3s ease",
+                        "&.Mui-focused": {
+                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                          borderColor: "#0096ff",
+                        },
+                      },
+                    }}
                   />
                 </Box>
                 <TextField
@@ -190,6 +299,15 @@ export default function Profile() {
                   value={profileData.bankAccount}
                   disabled={!isEditing}
                   onChange={handleInputChange}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      transition: "all 0.3s ease",
+                      "&.Mui-focused": {
+                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                        borderColor: "#0096ff",
+                      },
+                    },
+                  }}
                 />
                 <FormControl fullWidth variant="outlined" sx={{ fontSize: "14px", marginTop: "8px" }}>
                   <InputLabel sx={{ fontSize: "14px" }}>Bank Name</InputLabel>
@@ -199,6 +317,15 @@ export default function Profile() {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     label="Bank Name"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        transition: "all 0.3s ease",
+                        "&.Mui-focused": {
+                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
+                          borderColor: "#0096ff",
+                        },
+                      },
+                    }}
                   >
                     <MenuItem value="SCB">SCB</MenuItem>
                     <MenuItem value="KBANK">KBANK</MenuItem>
@@ -217,13 +344,17 @@ export default function Profile() {
                       src={profileData.bankAccountImage}
                       alt="Bank Account"
                       sx={{
-                        width: "100px",
-                        height: "100px",
+                        width: "150px",
+                        height: "150px",
+                        borderRadius: "8px",
                         border: "2px solid #ddd",
-                        margin: "0 auto",
-                        objectFit: "cover",
+                        overflow: "hidden",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     />
+
                   ) : (
                     <Box
                       sx={{
@@ -268,10 +399,36 @@ export default function Profile() {
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
                     <>
-                      <Button variant="contained" color="success" sx={{ width: "48%", fontSize: "13px" }} onClick={handleSaveClick}>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        sx={{
+                          width: "48%",
+                          fontSize: "13px",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+                            transform: "scale(1.05)",
+                          },
+                        }}
+                        onClick={handleSaveClick}
+                      >
                         Save
                       </Button>
-                      <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleCancelClick}>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        sx={{
+                          width: "48%",
+                          fontSize: "13px",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
+                            transform: "scale(1.05)",
+                          },
+                        }}
+                        onClick={handleCancelClick}
+                      >
                         Cancel
                       </Button>
                     </>
@@ -319,17 +476,97 @@ export default function Profile() {
                   sx={{ marginBottom: "20px" }}
                 />
                 {error && <Typography color="error">{error}</Typography>}
-                <Button variant="contained" color="success" fullWidth sx={{ fontSize: "13px" }} onClick={handleChangePassword}>
+
+                {/* Change Password Button */}
+                <Button
+                  variant="contained"
+                  color="success"
+                  fullWidth
+                  sx={{ fontSize: "13px" }}
+                  onClick={handleChangePassword}
+                >
                   Change Password
                 </Button>
-                <Button variant="contained" color="error" fullWidth sx={{ marginTop: "10px", fontSize: "13px" }} onClick={() => setIsChangingPassword(false)}>
-                  Cancel
+
+                {/* Back to Setting Button */}
+                <Button
+                  variant="contained"
+                  color="error"
+                  fullWidth
+                  sx={{ marginTop: "10px", fontSize: "13px" }}
+                  onClick={() => setIsChangingPassword(false)}
+                >
+                  Back to setting
                 </Button>
               </Box>
             </>
+
           )}
         </Box>
       </Box>
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <MuiAlert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </MuiAlert>
+      </Snackbar>
+
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: '12px', // Add rounded corners
+            padding: '20px',
+            maxWidth: '400px',
+            backgroundColor: '#f9f9f9',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            textAlign: 'center',
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: dialogSeverity === "success" ? '#4caf50' : '#f44336',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+          }}
+        >
+          {dialogSeverity === "success" ? (
+            <span style={{ color: '#4caf50' }}>✔</span>
+          ) : (
+            <span style={{ color: '#f44336' }}>❌</span>
+          )}
+          {dialogSeverity === "success" ? "Success" : "Error"}
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: 'center', paddingBottom: '20px' }}>
+          <Typography variant="body1" sx={{ fontSize: '16px', color: '#333' }}>
+            {dialogMessage}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', paddingTop: '10px' }}>
+          <Button
+            onClick={handleCloseDialog}
+            color={dialogSeverity === "success" ? "success" : "error"}
+            variant="contained"
+            sx={{
+              fontSize: '14px',
+              fontWeight: 'bold',
+              padding: '8px 20px',
+              textTransform: 'none',
+              borderRadius: '8px',
+              '&:hover': {
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+              },
+            }}
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
