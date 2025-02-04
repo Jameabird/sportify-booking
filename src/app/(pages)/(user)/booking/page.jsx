@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Popup from 'reactjs-popup';
 import TopBar from "@components/Topbar";
 import {
   Box,
@@ -497,11 +498,28 @@ const Booking = () => {
             </Box>
           </div>
           <div className="col-span-1 col-start-6">
-            <Button
-              sx={{ backgroundColor: "green", color: "white", width: "100%" }}
-            >
+            {/* <Button sx={{ backgroundColor: "green", color: "white", width: "100%" }}>
               Booking
-            </Button>
+            </Button> */}
+            <Popup trigger={<Button className="trigger-button" sx={{ backgroundColor: "green", color: "white", width: "100%" }}>BOOKING</Button>} position="right center" modal nested >
+        {close => (
+          <div className="modal">
+            <button className="close" onClick={close}>
+              &times;
+            </button>
+            <div className="header"> รายละเอียดการจอง </div>
+            <div className="content">
+              QR CODE.
+            </div>
+            <div className="actions">
+              <button className="button" onClick={() => {
+                console.log('Button clicked');
+                close();
+              }}>Click here</button>
+            </div>
+          </div>
+        )}
+      </Popup>
           </div>
           <div className="col-span-1 col-start-7">
             <Button
