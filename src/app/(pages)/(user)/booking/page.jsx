@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 import TopBar from "@components/Topbar";
 import {
   Box,
@@ -508,15 +509,15 @@ const Booking = () => {
               &times;
             </button>
             <div className="header"> รายละเอียดการจอง </div>
-            <div className="content">
-              QR CODE.
-            </div>
-            <div className="actions">
-              <button className="button" onClick={() => {
-                console.log('Button clicked');
-                close();
-              }}>Click here</button>
-            </div>
+            <ul>
+            <li className="section"><h2>สถานที่</h2></li>
+            <li className="section"><h2>วันที่</h2></li>
+            <li className="section"><h2>เวลา</h2></li>
+            <li className="section"><h2>ราคารวม</h2></li>
+            <li className="section">QR CODE</li>
+            </ul>
+            <div><Button sx={{ backgroundColor: "green", color: "black", width: "25%" }}>Booking</Button>
+            <Button sx={{ backgroundColor: "red", color: "black", width: "25%" }}>ยกเลิก</Button></div>
           </div>
         )}
       </Popup>
