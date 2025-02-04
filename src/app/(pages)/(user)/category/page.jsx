@@ -9,15 +9,24 @@ const ChooseField = () => {
   const [selectedField, setSelectedField] = useState(null);
   const router = useRouter(); // ใช้ useRouter
   const fields = new Set([
+    "Archer",
     "Badminton",
-    "Football",
+    "Baseball",
     "Basketball",
+    "Bowling",
+    "Car racing",
+    "Football",
+    "Futsal",
     "Golf",
-    "Swimming pool",
+    "Hockey",
+    "Ice skating",
+    "Ice Hockey",
+    "Rugby",
+    "Table tennis",
+    "Tennis",
+    "Thai Boxing",
+    "Waterpool",
     "Volleyball",
-    "Table Tennis",
-    "Hiking",
-    "Ice Skate"
   ]);
 
   useEffect(() => {
