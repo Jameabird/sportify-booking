@@ -3,8 +3,16 @@ import React from "react";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
 import TopBar_Admin from "@components/Topbar_Admin";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 export default function AdminHome() {
+  const router = useRouter(); // Initialize useRouter hook
+
+  // Function to handle button click for navigation
+  const handleNavigation = (path) => {
+    router.push(path);
+  };
+
   return (
     <div
       className="app"
@@ -95,6 +103,7 @@ export default function AdminHome() {
                 {category.buttons.map((text, index) => (
                   <Box
                     key={index}
+                    onClick={() => text === "Owner Management" && handleNavigation("/admin/management")}
                     sx={{
                       backgroundColor: "rgba(0,123,255,0.9)",
                       padding: "16px 32px",
