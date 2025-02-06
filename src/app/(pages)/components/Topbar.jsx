@@ -79,13 +79,15 @@ const TopBar = (props) => {
         <Link href="/" style={getLinkStyle("/")}>
           Home
         </Link>
-        <Link href="/category" style={getLinkStyle("/category")}>
+        <Link href="/Spectator/category" style={getLinkStyle("/category")}>
           Category
         </Link>
-        <Link href="/booking" style={getLinkStyle("/booking")}>
+        <Link href="/Spectator/booking" style={getLinkStyle("/booking")}>
           Booking
         </Link>
-
+        <Link href="/Spectator/about" style={getLinkStyle("/booking")}>
+          About Us
+        </Link>
         {/* Avatar User or Sign In Button */}
         {isLogin ? (
           <Box sx={{ padding: "0 3px" }}>
