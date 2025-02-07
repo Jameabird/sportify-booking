@@ -1,17 +1,20 @@
 "use client";
 import React, { useState } from "react";
-import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/material";
+import { Box, TextField, Button, IconButton, InputAdornment, Snackbar, Alert } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation"; // ใช้ useRouter สำหรับนำทาง
-import "./resetPasswordPage.css";  // Importing the CSS
+import "./resetPasswordPage.css"; // Importing the CSS
 
 const ResetPasswordPage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+  const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะการแสดง Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความที่จะแสดงใน Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // สถานะของ Snackbar (success/error)
+
   const router = useRouter(); // ใช้ router สำหรับนำทางไปยัง /login
 
   const handleToggleNewPasswordVisibility = () => {
@@ -22,12 +25,31 @@ const ResetPasswordPage = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  const validatePassword = (password) => {
+    // ต้องมีตัวอักษรพิมพ์ใหญ่, ตัวเลข, และตัวอักษรพิเศษ
+    const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    return regex.test(password);
+  };
+
   const handleResetPassword = () => {
+    if (!validatePassword(newPassword)) {
+      setSnackbarMessage("รหัสผ่านต้องมีตัวพิมพ์ใหญ่, ตัวเลข, และอักขระพิเศษอย่างน้อย 1 ตัว");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
     if (newPassword === confirmPassword) {
-      alert("Password reset successfully!");
-      router.push("/login"); // นำทางไปยังหน้า login หลังจากรีเซ็ตรหัสผ่านสำเร็จ
+      setSnackbarMessage("Password reset successfully!");
+      setSnackbarSeverity("success"); // ถ้า reset สำเร็จ
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/login"); // นำทางไปยังหน้า login หลังจากรีเซ็ตรหัสผ่านสำเร็จ
+      }, 1500);
     } else {
-      alert("Passwords do not match.");
+      setSnackbarMessage("Passwords do not match.");
+      setSnackbarSeverity("error"); // ถ้ารหัสผ่านไม่ตรงกัน
+      setOpenSnackbar(true);
     }
   };
 
@@ -101,6 +123,20 @@ const ResetPasswordPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Snackbar แจ้งเตือน */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity} // ใช้ severity เป็น success หรือ error
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

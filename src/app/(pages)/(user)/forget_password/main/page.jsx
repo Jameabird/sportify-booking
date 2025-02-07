@@ -1,19 +1,28 @@
 "use client";
 import React, { useState } from "react";
-import { Box, TextField, Button } from "@mui/material";
+import { Box, TextField, Button, Snackbar, Alert } from "@mui/material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
 import "./forgetPasswordPage.css";  // Import the CSS file
 
 const ForgetPasswordPage = () => {
   const [email, setEmail] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะของ Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความใน Snackbar
   const router = useRouter();
 
   const handleSendLink = () => {
     if (email) {
-      router.push("/forget_password/OTP"); // ไปยังหน้า OTP
+      // ส่งอีเมลสำเร็จ
+      setSnackbarMessage("ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/forget_password/OTP"); // ไปยังหน้า OTP
+      }, 1500);
     } else {
-      alert("Please enter your email.");
+      // ถ้าไม่มีอีเมลกรอก
+      setSnackbarMessage("กรุณากรอกอีเมลของคุณ");
+      setOpenSnackbar(true);
     }
   };
 
@@ -50,6 +59,20 @@ const ForgetPasswordPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Snackbar แจ้งเตือน */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={email ? "success" : "error"} // ถ้ามีอีเมลใช้สีเขียว (success) ถ้าไม่มีใช้สีแดง (error)
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
