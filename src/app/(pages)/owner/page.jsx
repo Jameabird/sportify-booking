@@ -67,9 +67,6 @@ export default function AdminHome() {
         >
           {/* Category Buttons */}
           {[{
-            title: "Financial Management",
-            buttons: ["Confirm Payment", "Refund"],
-          }, {
             title: "Management",
             buttons: ["Officer Management", "Promotion Management", "Dashboard"],
           }].map((category, categoryIndex) => (

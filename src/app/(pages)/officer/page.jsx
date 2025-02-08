@@ -3,8 +3,16 @@ import React from "react";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
 import TopBar_Officer from "@components/Topbar_Officer";
+import { useRouter } from "next/navigation"; // เพิ่ม useRouter
 
-export default function AdminHome() {
+export default function Officer() {
+  const router = useRouter(); // สร้างอินสแตนซ์ของ useRouter
+
+  // ฟังก์ชันเปลี่ยนเส้นทาง
+  const handleNavigation = (path) => {
+    router.push(path);
+  };
+
   return (
     <div
       className="app"
@@ -65,7 +73,7 @@ export default function AdminHome() {
             overflow: "hidden",
           }}
         >
-          {/* Financial Management Section */}
+          {/* Management Section */}
           <Box
             sx={{
               boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.6)",
@@ -91,10 +99,13 @@ export default function AdminHome() {
                 marginBottom: "10px",
               }}
             >
-              Financial Management
+              Court Management
             </Typography>
             <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
-              {["Confirm Payment", "Refund"].map((text, index) => (
+              {[
+                { text: "Manage", path: "/officer/Manage" },
+                { text: "Inform to Owner", path: "/officer/Inform" },
+              ].map((item, index) => (
                 <Box
                   key={index}
                   sx={{
@@ -115,8 +126,9 @@ export default function AdminHome() {
                       transform: "scale(1.05)",
                     },
                   }}
+                  onClick={() => handleNavigation(item.path)} // เพิ่มการคลิกเพื่อนำทาง
                 >
-                  {text}
+                  {item.text}
                 </Box>
               ))}
             </Box>
