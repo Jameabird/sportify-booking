@@ -1,20 +1,35 @@
 "use client";
 import React, { useState } from "react";
-import { Box, TextField, Button } from "@mui/material";
+import { Box, TextField, Button, Snackbar, Alert } from "@mui/material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
 import './OtpPage.css'; // Import the CSS file
 
 const OtpPage = () => {
   const [otp, setOtp] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะของ Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความใน Snackbar
   const router = useRouter();
 
   const handleVerify = () => {
     if (otp.length === 6) {
-      router.push("/forget_password/Reset"); // เปลี่ยนเส้นทางไปหน้า reset password
+      // ถ้า OTP ถูกต้อง
+      setSnackbarMessage("OTP ถูกต้อง!");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/forget_password/Reset"); // ไปยังหน้า reset password
+      }, 1500);
     } else {
-      alert("Please enter a valid 6-digit OTP.");
+      // ถ้า OTP ไม่ถูกต้อง
+      setSnackbarMessage("กรุณากรอก OTP 6 หลักที่ถูกต้อง");
+      setOpenSnackbar(true);
     }
+  };
+
+  const handleOtpChange = (e) => {
+    // กรองให้กรอกแค่ตัวเลขและจำกัดให้ไม่เกิน 6 ตัว
+    const value = e.target.value.replace(/\D/g, "").slice(0, 6); // ลบตัวอักษรที่ไม่ใช่ตัวเลข และจำกัดที่ 6 ตัว
+    setOtp(value);
   };
 
   return (
@@ -34,7 +49,7 @@ const OtpPage = () => {
                   variant="outlined"
                   fullWidth
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={handleOtpChange}  // ใช้ฟังก์ชันนี้ในการจัดการการเปลี่ยนแปลง
                   inputProps={{ maxLength: 6 }}
                   sx={{ marginBottom: "16px" }}
                 />
@@ -52,6 +67,20 @@ const OtpPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Snackbar แจ้งเตือน */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={otp.length === 6 ? "success" : "error"} // ถ้า OTP ถูกต้องให้สีเขียว (success) ถ้าไม่ถูกต้องให้สีแดง (error)
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

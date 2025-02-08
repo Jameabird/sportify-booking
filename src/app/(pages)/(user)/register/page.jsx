@@ -1,6 +1,7 @@
-"use client"; // Marking this as a client component
+"use client"; 
 
 import React, { useState } from "react";
+import axios from "axios"; // นำเข้า axios
 import {
   Box,
   TextField,
@@ -11,6 +12,8 @@ import {
   InputLabel,
   IconButton,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
@@ -21,8 +24,14 @@ const RegisterPage = () => {
   const [bank, setBank] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [image, setImage] = useState(null); // State for holding image file
-  const router = useRouter(); // ใช้ useRouter จาก next/navigation
+  const [image, setImage] = useState(null);
+  const [username, setUsername] = useState(""); // เพิ่ม state สำหรับ username
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
+  const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะการแสดง Snackbar
+  const router = useRouter();
 
   const handleBankChange = (event) => {
     setBank(event.target.value);
@@ -43,11 +52,71 @@ const RegisterPage = () => {
     }
   };
 
+  // ฟังก์ชันตรวจสอบรหัสผ่าน
+  const validatePassword = (password) => {
+    const passwordPattern =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordPattern.test(password);
+  };
+
+  // ฟังก์ชันตรวจสอบว่ากรอกข้อมูลครบหรือไม่
+  const validateForm = () => {
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !bank ||
+      !image
+    ) {
+      setSnackbarMessage("กรุณากรอกข้อมูลให้ครบทุกฟิลด์");
+      setOpenSnackbar(true);
+      return false;
+    }
+    return true;
+  };
+
   // ฟังก์ชันเมื่อกด Register
-  const handleRegister = () => {
-    // ทำการลงทะเบียน (คุณสามารถทำการเรียก API ที่นี่ได้)
-    // หลังจากลงทะเบียนเสร็จ ให้เปลี่ยนไปหน้า login
-    router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login
+  const handleRegister = async () => {
+    // ตรวจสอบว่าแบบฟอร์มครบถ้วนหรือไม่
+    if (!validateForm()) return;
+
+    // ตรวจสอบรหัสผ่านและยืนยันรหัสผ่าน
+    if (!validatePassword(password)) {
+      setSnackbarMessage("รหัสผ่านต้องมีตัวอักษรใหญ่, ตัวเลข, และตัวอักษรพิเศษ");
+      setOpenSnackbar(true);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setSnackbarMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    // ทำการส่งข้อมูลไปยัง API ของ Backend
+    try {
+      const response = await axios.post("http://localhost:5000/api/register", {
+        username,
+        email,
+        password,
+        firstName: "First Name",  // ชื่อจริง
+        lastName: "Last Name",    // นามสกุล
+        bank,
+        accountNumber: "1234567890", // หมายเลขบัญชี
+        profileImage: image,  // รูปโปรไฟล์
+      });
+
+      if (response.status === 201) {
+        setSnackbarMessage("ลงทะเบียนสำเร็จ!");
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login
+        }, 1500);
+      }
+    } catch (error) {
+      setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+      setOpenSnackbar(true);
+    }
   };
 
   return (
@@ -62,17 +131,24 @@ const RegisterPage = () => {
             <div className="col-span-12 flex justify-center items-center">
               <Box className="register-container">
                 <h2 className="register-title">Create an Account</h2>
+
+                {/* เพิ่มกล่องข้อความ Username */}
                 <TextField
                   label="Username"
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
+
                 <TextField
                   label="Email Address"
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <TextField
                   label="Password"
@@ -80,6 +156,8 @@ const RegisterPage = () => {
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -100,6 +178,8 @@ const RegisterPage = () => {
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -117,7 +197,6 @@ const RegisterPage = () => {
 
                 {/* เพิ่มข้อความ Bank Details ตรงนี้ */}
                 <h2 className="register-title">Bank Details</h2>
-
                 <TextField
                   label="First Name"
                   variant="outlined"
@@ -194,6 +273,13 @@ const RegisterPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Snackbar แจ้งเตือน */}
+      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
+        <Alert onClose={() => setOpenSnackbar(false)} severity="warning">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
