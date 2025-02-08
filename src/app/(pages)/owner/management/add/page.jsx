@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import TopBar_Admin from "@components/Topbar_Admin";
+import TopBar_Owner from "@components/Topbar_Owner";
 import Box from '@mui/material/Box';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
@@ -18,13 +18,12 @@ export default function AddAccountPage() {
         name: "",
         email: "",
         password: "",
-        role: "Owner", // Fix Role to "Owner"
+        role: "Office", // Fix Role to "Owner"
     });
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogMessage, setDialogMessage] = useState("");
     const [dialogSeverity, setDialogSeverity] = useState("success");
@@ -52,7 +51,7 @@ export default function AddAccountPage() {
 
     const handleCloseDialog = () => {
         // Redirect to the /admin/management page when the dialog is closed
-        router.push("/admin/management");
+        router.push("/owner/management");
     };
 
     return (
@@ -68,7 +67,7 @@ export default function AddAccountPage() {
                     backgroundColor: "#f7fafc",
                     zIndex: -1, // Keeps the background below the profile section
                 }} />
-                <TopBar_Admin /> {/* ✅ Added TopBar_Admin */}
+                <TopBar_Owner /> {/* ✅ Added TopBar_Admin */}
 
                 <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
                     <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
@@ -132,7 +131,7 @@ export default function AddAccountPage() {
 
                             {/* Cancel button in red */}
                             <button
-                                onClick={() => router.push("/admin/management")}
+                                onClick={() => router.push("/owner/management")}
                                 className="bg-red-600 text-white px-5 py-3 rounded-lg w-1/2 hover:bg-red-700 transition ease-in-out"
                             >
                                 Cancel

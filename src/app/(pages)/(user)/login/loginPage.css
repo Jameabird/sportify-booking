@@ -69,7 +69,7 @@
 }
 
 .link {
-  color: #f57c00;
+  color: #1e40af;
   text-decoration: none;
   font-size: 0.875rem;
 }
@@ -84,14 +84,14 @@
   margin-bottom: 24px; /* เพิ่มระยะห่างระหว่างปุ่ม Login และ Google */
   padding: 12px;
   font-weight: bold;
-  background-color: #f57c00;
+  background-color: #1e40af;
   color: white;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .login-button:hover {
-  background-color: #ff9800;
+  background-color: #1e40af;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
