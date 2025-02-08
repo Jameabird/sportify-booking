@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import TopBar_Admin from '@components/Topbar_Admin';
+import { useRouter } from "next/navigation";
 
 const Card = ({ children, className }) => (
   <div className={`bg-white shadow rounded p-4 ${className}`}>{children}</div>
@@ -37,6 +38,8 @@ const Button = ({ children, ...props }) => (
     {children}
   </button>
 );
+
+
 
 const TrashIcon = ({ onClick }) => (
   <svg
@@ -110,14 +113,14 @@ const AdminPaidTable = () => {
   const handleCloseImagePopup = () => {
     setShowImagePopup(false);
   };
-
+const router = useRouter();
   return (
     <>
       <TopBar_Admin textColor={"black"} />
       <div className="p-6">
         <div className="flex items-center mb-4">
-          <Button className="p-2">
-            <ArrowIcon className="w-6 h-6 text-gray-500 mr-4" />
+          <Button className="p-2" onClick={() => router.push("/admin/management")}>
+            <ArrowIcon className="w-6 h-6 text-gray-500 mr-4"  />
           </Button>
           <h1 className="text-2xl font-semibold flex-grow">Better Club Pattaya</h1>
         </div>

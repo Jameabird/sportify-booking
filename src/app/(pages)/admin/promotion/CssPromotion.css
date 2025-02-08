@@ -39,6 +39,127 @@
   align-items: center; 
   flex-direction: column; 
 }
+/* ปรับแต่ง input ของ DatePicker */
+.datepicker-input {
+  width: 100px;
+  padding: 10px;
+  border: 2px solid #a4a4a4; /* สีกรอบ */
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: center;
+  background-color: #ffffff; /* สีพื้นหลัง */
+  color: #007bff; /* สีตัวอักษร */
+  outline: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.datepicker-input::placeholder {
+  color: #007bff; /* สี placeholder */
+}
+
+.datepicker-input:focus {
+  border-color: #ffffff; /* สีกรอบเมื่อ focus */
+  box-shadow: 0 0 5px #007bff;
+}
+
+/* ปรับแต่งตัวปฏิทิน */
+.custom-calendar {
+  font-family: "Arial", sans-serif;
+  background-color: #007bffe7; /* สีพื้นหลัง */
+  color: #007bff; /* สีตัวอักษร */
+  border-radius: 8px;
+  border: 1px solid #007bff;
+  overflow: hidden;
+}
+
+.react-datepicker__header {
+  background-color: #ffffff; /* สีหัวปฏิทิน */
+  border-bottom: 1px solid #444;
+  padding: 10px 0;
+  color: #007bff;
+}
+
+.react-datepicker__current-month {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.react-datepicker__day-names,
+.react-datepicker__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.react-datepicker__day {
+  font-size: 14px;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  text-align: center;
+  color: #fff;
+  cursor: pointer;
+}
+
+.react-datepicker__day:hover {
+  background-color: #555;
+}
+
+.react-datepicker__day--selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.react-datepicker__day--today {
+  border: 1px solid #fff; /* วงกลมรอบวันที่ปัจจุบัน */
+}
+
+.react-datepicker__navigation {
+  top: 10px;
+}
+
+.react-datepicker__navigation-icon {
+  font-size: 18px;
+  color: #fff;
+}
+/* ปรับแต่ง header ของปฏิทิน */
+.custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #ffffff;
+  color: #007bff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* ปุ่มนำทาง */
+.navigation-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.navigation-button:disabled {
+  color: #666; /* สีปุ่มที่ไม่สามารถกดได้ */
+  cursor: not-allowed;
+}
+
+.navigation-button:hover:not(:disabled) {
+  color: #007bff;
+}
+
+.react-datepicker__current-month {
+  display: none; /* ซ่อนข้อความเดือนและปี */
+}
+
+
+
 
 .modal-buttons button {
   margin-top: 10px;
