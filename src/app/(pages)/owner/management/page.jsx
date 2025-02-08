@@ -8,10 +8,10 @@ export default function AccountPage() {
   const router = useRouter(); // ✅ ใช้งาน useRouter
   const [search, setSearch] = useState("");
   const [accounts, setAccounts] = useState([
-    { name: "Office1", email: "Office_1@gmail.com", phone: "0123456789", role: "Office" },
-    { name: "Office2", email: "Office_2@gmail.com", phone: "0123456789", role: "Office" },
-    { name: "Office3", email: "Office_3@gmail.com", phone: "0123456789", role: "Office" },
-    { name: "Office4", email: "Office_4@gmail.com", phone: "0123456789", role: "Office" },
+    { name: "Officer1", email: "Officer_1@gmail.com", phone: "0123456789", role: "Officer" },
+    { name: "Officer2", email: "Officer_2@gmail.com", phone: "0123456789", role: "Officer" },
+    { name: "Officer3", email: "Officer_3@gmail.com", phone: "0123456789", role: "Officer" },
+    { name: "Officer4", email: "Officer_4@gmail.com", phone: "0123456789", role: "Officer" },
   ]);
 
   const handleDelete = (index) => {
