@@ -1,16 +1,26 @@
 "use client";
 import React, { useState } from "react";
-import { Box, TextField, Button, IconButton, InputAdornment } from "@mui/material";
+import { Box, TextField, Button, IconButton, InputAdornment, Snackbar, Alert } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import TopBar from "@components/Topbar";
-import { useRouter } from "next/navigation"; // Import useRouter
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"; // Import GoogleOAuthProvider
-import "./loginPage.css"; // Import CSS
+import "./loginPage.css";
+
+const users = [
+  { email: "user@example.com", password: "password123", role: "user" },
+  { email: "admin@example.com", password: "admin123", role: "admin" },
+  { email: "owner@example.com", password: "owner123", role: "owner" },
+  { email: "officer@example.com", password: "officer123", role: "officer" },
+];
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // สำหรับข้อความแสดงใน Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // สำหรับความรุนแรงของ Snackbar (success / error)
   const router = useRouter();
 
   const handleTogglePasswordVisibility = () => {
@@ -18,17 +28,33 @@ const LoginPage = () => {
   };
 
   const handleLogin = () => {
-    router.push("/home");
+    const user = users.find((user) => user.email === email && user.password === password);
+    if (user) {
+      setSnackbarMessage("เข้าสู่ระบบสำเร็จ!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/home");
+      }, 1500);
+    } else {
+      setSnackbarMessage("ข้อมูลรหัสผู้ใช้ไม่ถูกต้อง");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    }
   };
 
   const handleGoogleLogin = (response) => {
-    // Handle the response from Google login
-    console.log(response);
     if (response?.credential) {
-      // Handle successful Google login
-      router.push("/home");
+      setSnackbarMessage("เข้าสู่ระบบสำเร็จ!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+      setTimeout(() => {
+        router.push("/home");
+      }, 1500);
     } else {
-      console.log("Google login failed");
+      setSnackbarMessage("การเข้าสู่ระบบผ่าน Google ล้มเหลว");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
 
@@ -103,7 +129,7 @@ const LoginPage = () => {
                     size="large"
                     shape="pill"
                     theme="outline"
-                    className="google-login" // เพิ่ม class นี้
+                    className="google-login"
                   />
                 </GoogleOAuthProvider>
 
@@ -120,6 +146,13 @@ const LoginPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Snackbar แจ้งเตือน */}
+      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
+        <Alert onClose={() => setOpenSnackbar(false)} severity={snackbarSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
