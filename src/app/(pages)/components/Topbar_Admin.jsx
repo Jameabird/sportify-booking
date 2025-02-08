@@ -1,11 +1,14 @@
 "use client";
-import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Admin = (props) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null); // State สำหรับเปิด/ปิดเมนู
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null); // สำหรับเมนูแจ้งเตือน
+  const [unreadNotifications, setUnreadNotifications] = useState(3); // จำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน (ตัวอย่าง)
   const currentPath = usePathname();
   const router = useRouter();
 
@@ -17,6 +20,16 @@ const TopBar_Admin = (props) => {
   // ปิดเมนู
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  // ฟังก์ชันเปิดเมนูแจ้งเตือน
+  const handleNotificationClick = (event) => {
+    setNotificationAnchorEl(event.currentTarget);
+  };
+
+  // ปิดเมนูแจ้งเตือน
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null);
   };
 
   // ฟังก์ชันเปลี่ยนหน้า
@@ -36,7 +49,6 @@ const TopBar_Admin = (props) => {
       color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
     },
   });
-  
 
   return (
     <Box
@@ -72,6 +84,15 @@ const TopBar_Admin = (props) => {
         <Link href="/admin/history" style={getLinkStyle("/admin/history")}>
           History
         </Link>
+        
+        {/* ย้ายกระดิ่งแจ้งเตือนหลังโลโก้ */}
+        <Box sx={{ padding: "0 15px" }}>
+          <IconButton onClick={handleNotificationClick}>
+            <Badge badgeContent={unreadNotifications} color="error">
+              <NotificationsIcon sx={{ cursor: "pointer", fontSize: 30, color: 'white' }} />
+            </Badge>
+          </IconButton>
+        </Box>
 
         {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>
@@ -96,6 +117,25 @@ const TopBar_Admin = (props) => {
         </MenuItem>
         <MenuItem onClick={() => navigateTo("/login")}>
           <Typography variant="body1">Sign Out</Typography>
+        </MenuItem>
+      </Menu>
+
+      {/* เมนูแจ้งเตือน */}
+      <Menu
+        anchorEl={notificationAnchorEl}
+        open={Boolean(notificationAnchorEl)}
+        onClose={handleNotificationClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem onClick={handleNotificationClose}>
+          <Typography variant="body1">Notification 1</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleNotificationClose}>
+          <Typography variant="body1">Notification 2</Typography>
+        </MenuItem>
+        <MenuItem onClick={handleNotificationClose}>
+          <Typography variant="body1">Notification 3</Typography>
         </MenuItem>
       </Menu>
     </Box>
