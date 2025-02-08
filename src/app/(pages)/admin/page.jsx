@@ -2,7 +2,58 @@
 import React from "react";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
+import { useRouter } from "next/navigation"; // ✅ นำเข้า useRouter
 import TopBar_Admin from "@components/Topbar_Admin";
+
+// ** ข้อมูลหมวดหมู่และปุ่ม (รวม Promotion เข้า Management) **
+const adminCategories = [
+  {
+    title: "Financial Management",
+    buttons: ["Confirm Payment", "Refund"],
+  },
+  {
+    title: "Management",
+    buttons: ["Owner Management", "Dashboard", "Promotion"], // ✅ เพิ่ม "Promotion" เข้า Management
+  },
+];
+
+// ** ปุ่มในแต่ละหมวด **
+const AdminButton = ({ text }) => {
+  const router = useRouter(); // ✅ ใช้ useRouter() เพื่อเปลี่ยนหน้า
+
+  // ✅ ฟังก์ชันกำหนดเส้นทาง
+  const handleClick = () => {
+    if (text === "Owner Management") {
+      router.push("/admin/management"); // ✅ เปลี่ยนหน้าเมื่อกดปุ่ม "Owner Management"
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: "rgba(0,123,255,0.9)",
+        padding: "16px 32px",
+        borderRadius: "12px",
+        color: "white",
+        fontSize: "1.2rem",
+        fontWeight: "bold",
+        textAlign: "center",
+        cursor: "pointer",
+        transition: "0.3s",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
+        minWidth: "180px",
+        "&:hover": {
+          backgroundColor: "rgba(0,123,255,1)",
+          boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
+          transform: "scale(1.05)",
+        },
+      }}
+      onClick={handleClick} // ✅ กำหนด event onClick
+    >
+      {text}
+    </Box>
+  );
+};
 
 export default function AdminHome() {
   return (
@@ -14,7 +65,7 @@ export default function AdminHome() {
         className="content"
         style={{
           flex: 1,
-          overflow: "hidden", // Prevent vertical scrolling
+          overflow: "hidden",
           position: "relative",
         }}
       >
@@ -55,14 +106,7 @@ export default function AdminHome() {
           gap={6}
           sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
         >
-          {/* Category Buttons */}
-          {[{
-            title: "Financial Management",
-            buttons: ["Confirm Payment", "Refund"],
-          }, {
-            title: "Management",
-            buttons: ["Owner Management", "Dashboard"],
-          }].map((category, categoryIndex) => (
+          {adminCategories.map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
               sx={{
@@ -93,29 +137,7 @@ export default function AdminHome() {
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
                 {category.buttons.map((text, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      backgroundColor: "rgba(0,123,255,0.9)",
-                      padding: "16px 32px",
-                      borderRadius: "12px",
-                      color: "white",
-                      fontSize: "1.2rem",
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      cursor: "pointer",
-                      transition: "0.3s",
-                      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-                      minWidth: "180px",
-                      "&:hover": {
-                        backgroundColor: "rgba(0,123,255,1)",
-                        boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
-                        transform: "scale(1.05)",
-                      },
-                    }}
-                  >
-                    {text}
-                  </Box>
+                  <AdminButton key={index} text={text} />
                 ))}
               </Box>
             </Box>
