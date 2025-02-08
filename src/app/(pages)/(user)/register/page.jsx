@@ -1,6 +1,7 @@
 "use client"; 
 
 import React, { useState } from "react";
+import axios from "axios"; // นำเข้า axios
 import {
   Box,
   TextField,
@@ -76,7 +77,7 @@ const RegisterPage = () => {
   };
 
   // ฟังก์ชันเมื่อกด Register
-  const handleRegister = () => {
+  const handleRegister = async () => {
     // ตรวจสอบว่าแบบฟอร์มครบถ้วนหรือไม่
     if (!validateForm()) return;
 
@@ -92,13 +93,30 @@ const RegisterPage = () => {
       return;
     }
 
-    // ทำการลงทะเบียน (คุณสามารถทำการเรียก API ที่นี่ได้)
-    // หลังจากลงทะเบียนเสร็จ ให้เปลี่ยนไปหน้า login
-    setSnackbarMessage("ลงทะเบียนสำเร็จ!");
-    setOpenSnackbar(true);
-    setTimeout(() => {
-      router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login
-    }, 1500);
+    // ทำการส่งข้อมูลไปยัง API ของ Backend
+    try {
+      const response = await axios.post("http://localhost:5000/api/register", {
+        username,
+        email,
+        password,
+        firstName: "First Name",  // ชื่อจริง
+        lastName: "Last Name",    // นามสกุล
+        bank,
+        accountNumber: "1234567890", // หมายเลขบัญชี
+        profileImage: image,  // รูปโปรไฟล์
+      });
+
+      if (response.status === 201) {
+        setSnackbarMessage("ลงทะเบียนสำเร็จ!");
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login
+        }, 1500);
+      }
+    } catch (error) {
+      setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+      setOpenSnackbar(true);
+    }
   };
 
   return (
