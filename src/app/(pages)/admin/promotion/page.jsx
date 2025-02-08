@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { promotion } from "@app/(pages)/admin/promotion/Promotion";
+import { promotion } from "@/app/(pages)/admin/promotion/Promotion";
 import "@app/(pages)/admin/promotion/CssPromotion.css";
 import { Edit, Trash, Search } from "lucide-react";
+import DatePicker from "react-datepicker";
+
 const TopBar_Admin = dynamic(() => import("@components/Topbar_Admin"), {
   ssr: false,
 });
@@ -12,16 +14,16 @@ const TopBar_Admin = dynamic(() => import("@components/Topbar_Admin"), {
 const HistoryPageAdmin = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [promotionsData, setPromotionsData] = useState(promotion);
-  const [newPromotions, setNewPromotions] = useState({    
-    name:"",
-    description:"",
-    status:"",
-    startdate:"",
-    enddate:"",
-    amount:"",
-    usage:"", 
+  const [newPromotions, setNewPromotions] = useState({
+    name: "",
+    description: "",
+    status: "",
+    startdate: "",
+    enddate: "",
+    amount: "",
+    usage: "",
   });
-  const [showModal, setShowModal] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
@@ -49,68 +51,74 @@ const HistoryPageAdmin = () => {
   }, []);
 
   const handleCancel = () => {
-    setShowModal(false); 
+    setShowModal(false);
     setNewPromotions({
       id: "",
-      name:"",
-      description:"",
-      status:"",
-      startdate:"",
-      enddate:"",
-      amount:"",
-      usage:"",   
-    }); 
-    setIsEditMode(false); 
+      name: "",
+      description: "",
+      status: "",
+      startdate: "",
+      enddate: "",
+      amount: "",
+      usage: "",
+    });
+    setIsEditMode(false);
   };
 
   const handleAddUser = () => {
     const newId = promotionsData.length + 1;
     setPromotionsData([
       ...promotionsData,
-      { ...newPromotions, id: newId, number: newId } 
+      { ...newPromotions, id: newId, number: newId },
     ]);
     setNewPromotions({
       id: "",
-      name:"",
-      description:"",
-      status:"",
-      startdate:"",
-      enddate:"",
-      amount:"",
-      usage:"",   
+      name: "",
+      description: "",
+      status: "",
+      startdate: "",
+      enddate: "",
+      amount: "",
+      usage: "",
     });
     setShowModal(false);
   };
   const handleEdit = (id) => {
-    const promotionToEdit = promotionsData.find(promo => promo.id === id);
+    const promotionToEdit = promotionsData.find((promo) => promo.id === id);
     setNewPromotions(promotionToEdit);
-    setIsEditMode(true); 
+    setIsEditMode(true);
     setShowModal(true);
   };
-  
+
   const handleUpdate = () => {
-    const updatedPromotions = promotionsData.map(promotion => 
-      promotion.id === newPromotions.id ? { ...promotion, ...newPromotions } : promotion
+    const updatedPromotions = promotionsData.map((promotion) =>
+      promotion.id === newPromotions.id
+        ? { ...promotion, ...newPromotions }
+        : promotion
     );
-    setPromotionsData(updatedPromotions); 
-    setShowModal(false); 
-    setIsEditMode(false); 
+    setPromotionsData(updatedPromotions);
+    setShowModal(false);
+    setIsEditMode(false);
     setNewPromotions({
       id: "",
-      name:"",
-      description:"",
-      status:"",
-      startdate:"",
-      enddate:"",
-      amount:"",
-      usage:"",   
+      name: "",
+      description: "",
+      status: "",
+      startdate: "",
+      enddate: "",
+      amount: "",
+      usage: "",
     });
   };
 
   const handleDelete = (id) => {
-    const filteredData = promotionsData.filter(promotion => promotion.id !== id);
-    setPromotionsData(filteredData); 
+    const filteredData = promotionsData.filter(
+      (promotion) => promotion.id !== id
+    );
+    setPromotionsData(filteredData);
   };
+
+  const [selectedDate, setSelectedDate] = useState(null);
 
   return (
     <>
@@ -204,36 +212,90 @@ const HistoryPageAdmin = () => {
                 placeholder="Description"
                 value={newPromotions.description}
                 onChange={(e) =>
-                  setNewPromotions({ ...newPromotions, description: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Status"
-                value={newPromotions.status}
-                onChange={(e) =>
-                  setNewPromotions({ ...newPromotions, status: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Start date"
-                value={newPromotions.startdate}
-                onChange={(e) =>
-                  setNewPromotions({ ...newPromotions, startdate: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="End date"
-                value={newPromotions.enddate}
-                onChange={(e) =>
                   setNewPromotions({
                     ...newPromotions,
-                    location: e.target.value,
+                    description: e.target.value,
                   })
                 }
-              />              
+              />
+              {/* 📅 ปฏิทินเลือกวันเริ่มต้น */}
+              <label>Start Date:</label>
+              <div className="datepicker-container">
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  dateFormat="MM/dd/yyyy"
+                  className="datepicker-input"
+                  placeholderText="mm/dd/yyyy"
+                  calendarClassName="custom-calendar"
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                    prevMonthButtonDisabled,
+                    nextMonthButtonDisabled,
+                  }) => (
+                    <div className="custom-header">
+                      <button
+                        onClick={decreaseMonth}
+                        disabled={prevMonthButtonDisabled}
+                        className="navigation-button"
+                      >
+                        &#8249; {/* HTML Code for "<" */}
+                      </button>
+                      <span className="current-month">
+                        {date.toLocaleString("default", { month: "long" })}{" "}
+                        {date.getFullYear()}
+                      </span>
+                      <button
+                        onClick={increaseMonth}
+                        disabled={nextMonthButtonDisabled}
+                        className="navigation-button"
+                      >
+                        &#8250; {/* HTML Code for ">" */}
+                      </button>
+                    </div>
+                  )}
+                />
+                <label>End Date:</label>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  dateFormat="MM/dd/yyyy"
+                  className="datepicker-input"
+                  placeholderText="mm/dd/yyyy"
+                  calendarClassName="custom-calendar"
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                    prevMonthButtonDisabled,
+                    nextMonthButtonDisabled,
+                  }) => (
+                    <div className="custom-header">
+                      <button
+                        onClick={decreaseMonth}
+                        disabled={prevMonthButtonDisabled}
+                        className="navigation-button"
+                      >
+                        &#8249; {/* HTML Code for "<" */}
+                      </button>
+                      <span className="current-month">
+                        {date.toLocaleString("default", { month: "long" })}{" "}
+                        {date.getFullYear()}
+                      </span>
+                      <button
+                        onClick={increaseMonth}
+                        disabled={nextMonthButtonDisabled}
+                        className="navigation-button"
+                      >
+                        &#8250; {/* HTML Code for ">" */}
+                      </button>
+                    </div>
+                  )}
+                />
+              </div>
+
               <input
                 type="text"
                 placeholder="Discount Amount"
@@ -242,19 +304,20 @@ const HistoryPageAdmin = () => {
                   setNewPromotions({ ...newPromotions, amount: e.target.value })
                 }
               />
-               <input
+              <input
                 type="text"
                 placeholder="Usage Limit"
                 value={newPromotions.usage}
                 onChange={(e) =>
                   setNewPromotions({ ...newPromotions, usage: e.target.value })
                 }
-              />                
+              />
               <div className="modal-buttons">
-              <button onClick={isEditMode ? handleUpdate : handleAddUser}>
+                <button onClick={isEditMode ? handleUpdate : handleAddUser}>
                   {isEditMode ? "Update" : "Save"}
                 </button>
-                <button onClick={handleCancel}>Cancel</button></div>
+                <button onClick={handleCancel}>Cancel</button>
+              </div>
             </div>
           </div>
         )}

@@ -5,6 +5,9 @@ import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import TopBar_Owner from "../../components/Topbar_Owner";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import InputAdornment from "@mui/material/InputAdornment";
 
 export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +32,10 @@ export default function Profile() {
     const handleChangePasswordClick = () => setIsChangingPassword(true);
     const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
     const [dialogSeverity, setDialogSeverity] = useState("success");  // เพิ่ม state สำหรับระดับของข้อความ (success หรือ error)
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
     const handleSaveClick = () => {
         if (!profileData.name || !profileData.phone || !profileData.role) {
@@ -300,34 +307,84 @@ export default function Profile() {
                         </>
                     ) : (
                         <>
-                            <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
-                                Change Password
-                            </Typography>
-                            <Box width="100%" display="flex" flexDirection="column" gap={2}>
+                            <Box
+                                width="100%"
+                                display="flex"
+                                flexDirection="column"
+                                gap={2}
+                                sx={{
+                                    backgroundColor: "#fff",
+                                    padding: "20px",
+                                    borderRadius: "8px",
+                                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                                }}
+                            >
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: "bold",
+                                        textAlign: "center",
+                                        color: "#333",
+                                        marginBottom: "10px",
+                                    }}
+                                >
+                                    Change Password
+                                </Typography>
+
                                 <TextField
                                     label="Old Password"
-                                    type="password"
+                                    type={showOldPassword ? "text" : "password"}
                                     fullWidth
                                     value={oldPassword}
                                     onChange={(e) => setOldPassword(e.target.value)}
                                     sx={{ marginBottom: "20px" }}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                                                    {showOldPassword ? <Visibility /> : <VisibilityOff />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
+
                                 <TextField
                                     label="New Password"
-                                    type="password"
+                                    type={showNewPassword ? "text" : "password"}
                                     fullWidth
                                     value={newPassword}
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     sx={{ marginBottom: "20px" }}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                                                    {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
+
                                 <TextField
                                     label="Confirm Password"
-                                    type="password"
+                                    type={showConfirmPassword ? "text" : "password"}
                                     fullWidth
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     sx={{ marginBottom: "20px" }}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                                                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
+
                                 {error && <Typography color="error">{error}</Typography>}
 
                                 {/* Change Password Button */}
@@ -353,7 +410,6 @@ export default function Profile() {
                                 </Button>
                             </Box>
                         </>
-
                     )}
                 </Box>
             </Box>
