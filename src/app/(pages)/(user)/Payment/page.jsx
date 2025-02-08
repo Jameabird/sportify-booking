@@ -56,7 +56,7 @@ export default function PopupBooking() {
     return (
         <div className="popup-container">
             <Popup
-                trigger={<button className="trigger-button">จอง</button>}
+                trigger={<button className="trigger-button">Booking</button>}
                 modal
                 nested
             >
