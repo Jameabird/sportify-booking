@@ -27,13 +27,13 @@ const TopBar_Owner = (props) => {
 
   const getLinkStyle = (path) => ({
     padding: "0 15px",
-    color: currentPath.startsWith(path) ? "orange" : props.textColor,
+    color: currentPath === path ? "#1e40af" : props.textColor, // เปลี่ยนเป็นสีน้ำเงินถ้า path ตรงกับ currentPath
     fontSize: "1.25rem",
     fontWeight: "bold",
     cursor: "pointer",
     textDecoration: "none",
     "&:hover": {
-      color: "#868dfb",
+      color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
     },
   });
 
@@ -55,7 +55,7 @@ const TopBar_Owner = (props) => {
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
             <div style={{ color: props.textColor }}>SPORTIFY</div>
-            <div className="pl-2 text-orange-500">BOOKING</div>
+            <div className="pl-2" style={{ color: "#1e40af" }}>BOOKING</div>
           </div>
         </Link>
       </Box>
