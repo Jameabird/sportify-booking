@@ -57,9 +57,6 @@ export default function OwnerHome() {
         >
           {/* Category Buttons */}
           {[{
-            title: "Financial Management",
-            buttons: ["Confirm Payment", "Refund"],
-          }, {
             title: "Management",
             buttons: ["Office Management", "Dashboard"],
           }].map((category, categoryIndex) => (
