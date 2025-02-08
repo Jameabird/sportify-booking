@@ -2,24 +2,19 @@
 import React from "react";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
-import TopBar_Admin from "@components/Topbar_Owner";
+import TopBar_Owner from "@components/Topbar_Owner";
 
-export default function AdminHome() {
+export default function OwnerHome() {
   return (
     <div
       className="app"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        overflow: "hidden", // Prevent vertical scrolling
-      }}
+      style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}
     >
       <main
         className="content"
         style={{
           flex: 1,
-          overflow: "hidden", // Prevent overflow inside content
+          overflow: "hidden", // Prevent vertical scrolling
           position: "relative",
         }}
       >
@@ -49,29 +44,21 @@ export default function AdminHome() {
         />
 
         {/* Top Navigation Bar */}
-        <TopBar_Admin textColor="white" />
+        <TopBar_Owner textColor="white" />
 
-        {/* Admin Dashboard Container */}
+        {/* Owner Dashboard Container */}
         <Box
           display="flex"
           flexDirection="column"
           alignItems="center"
           justifyContent="center"
           gap={6}
-          sx={{
-            position: "relative",
-            zIndex: 1,
-            height: "100%", // Ensure full height usage
-            overflow: "hidden", // Prevent scrolling in dashboard
-          }}
+          sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
         >
           {/* Category Buttons */}
           {[{
-            title: "Financial Management",
-            buttons: ["Confirm Payment", "Refund"],
-          }, {
             title: "Management",
-            buttons: ["Officer Management", "Promotion Management", "Dashboard"],
+            buttons: ["Office Management", "Dashboard"],
           }].map((category, categoryIndex) => (
             <Box
               key={categoryIndex}

@@ -7,7 +7,7 @@ export const users = [
       email: "tony.reichert@example.com",      
       location: "aaaaaaaaaaaaaaaaaa",
       status: "cancel",
-      price:"1000",   
+      price:"1000",
     },
     {
       id: 2,
@@ -17,7 +17,8 @@ export const users = [
       email: "zoey.lang@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "refund",
-      price:"2000",  
+      price:"2000", 
+ 
     },
     {
       id: 3,
@@ -27,7 +28,7 @@ export const users = [
       email: "jane.fisher@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "refund",
-      price:"4000",       
+      price:"4000",
     },
     {
       id: 4,
@@ -37,7 +38,7 @@ export const users = [
       email: "william.howard@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "cancel",
-      price:"1000",  
+      price:"1000",
     },
     {
       id: 5,
@@ -48,6 +49,7 @@ export const users = [
       location: "aaaaaaaaaaaaaaaaaa",
       status: "cancel",
       price:"1000", 
+
     },
     {
       id: 6,
@@ -57,7 +59,8 @@ export const users = [
       email: "brian.kim@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
-      price:"1000", 
+      price:"1000",
+ 
     },
     {
       id: 7,
@@ -68,6 +71,7 @@ export const users = [
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
       price:"1500", 
+
     },
     {
       id: 8,
@@ -77,7 +81,8 @@ export const users = [
       email: "samantha.brooks@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
-      price:"1600", 
+      price:"1600",
+       
     },
     {
       id: 9,
@@ -88,6 +93,7 @@ export const users = [
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
       price:"1050", 
+      
     },
     {
       id: 10,
@@ -97,7 +103,8 @@ export const users = [
       email: "emma.adams@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
-      price:"1100", 
+      price:"1100",
+       
     },
     {
       id: 11,
@@ -108,6 +115,7 @@ export const users = [
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
       price:"1000", 
+      
     },
     {
       id: 12,
@@ -118,6 +126,7 @@ export const users = [
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
       price:"1000", 
+      
     },
     {
       id: 13,
@@ -137,7 +146,7 @@ export const users = [
       email: "grace.allen@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
-      price:"1000", 
+      price:"1000",
     },
     {
       id: 15,
@@ -147,7 +156,7 @@ export const users = [
       email: "noah.carter@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
-      price:"1000", 
+      price:"1000",
     },
     {
       id: 16,
@@ -197,6 +206,6 @@ export const users = [
       email: "mia.robinson@example.com",
       location: "aaaaaaaaaaaaaaaaaa",
       status: "reserve",
-      price:"1000", 
+      price:"1000",
     },
   ];

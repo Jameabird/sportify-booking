@@ -11,7 +11,7 @@ const TopBar_Owner = dynamic(() => import("@components/Topbar_Owner"), {
 });
 
 const HistoryPageOwner = () => {
-  const [statusFilter, setStatusFilter] = useState("refund");
+  const [statusFilter, setStatusFilter] = useState("reserve");
   const [searchQuery, setSearchQuery] = useState("");
   const [usersData, setUsersData] = useState([]);
 
@@ -21,8 +21,8 @@ const HistoryPageOwner = () => {
 
   const filteredByStatus =
     statusFilter === "all"
-      ? usersData
-      : usersData.filter((user) => user.status === statusFilter);
+      ? usersData.filter((user) => user.status !== "refund")
+      : usersData.filter((user) => user.status === statusFilter && user.status !== "refund");
 
   const filteredUsers = filteredByStatus.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,14 +56,14 @@ const HistoryPageOwner = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="flex-row-button"
             >
-              <option value="all">All</option>
-              <option value="refund">Refund</option>
+              <option value="all">All</option>              
               <option value="reserve">Reserve</option>
               <option value="cancel">Cancel</option>
             </select>
           </div>
           <div className="SearchBox flex items-center gap-2">
             <label htmlFor="search">Search name: </label>
+            
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
               <input
@@ -77,7 +77,7 @@ const HistoryPageOwner = () => {
             </div>
           </div>
         </div>
-        <section>
+        <section>      
           <div className="tbl-header">
             <table cellPadding="0" cellSpacing="0" border="0">
               <thead>
