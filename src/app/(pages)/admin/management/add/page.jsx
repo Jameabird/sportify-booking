@@ -122,10 +122,10 @@ export default function AddAccountPage() {
                         </div>
 
                         <div className="flex justify-between mt-8">
-                            {/* Save button in green */}
+                            {/* Save button in blue */}
                             <button
                                 onClick={handleSave}
-                                className="bg-green-600 text-white px-5 py-3 rounded-lg w-1/2 mr-2 hover:bg-green-700 transition ease-in-out"
+                                className="bg-blue-600 text-white px-5 py-3 rounded-lg w-1/2 mr-2 hover:bg-blue-700 transition ease-in-out"
                             >
                                 Save
                             </button>
