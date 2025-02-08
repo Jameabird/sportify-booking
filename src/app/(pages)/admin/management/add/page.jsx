@@ -29,7 +29,6 @@ export default function AddAccountPage() {
     const [dialogMessage, setDialogMessage] = useState("");
     const [dialogSeverity, setDialogSeverity] = useState("success");
 
-
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -58,7 +57,7 @@ export default function AddAccountPage() {
 
     return (
         <>
-            <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
+            <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f7fafc", position: "relative", overflow: "hidden" }}>
                 {/* Background Box */}
                 <Box sx={{
                     position: "fixed",
@@ -66,68 +65,67 @@ export default function AddAccountPage() {
                     left: 0,
                     width: "100%",
                     height: "100%",
-                    backgroundColor: "#f4f4f4",
+                    backgroundColor: "#f7fafc",
                     zIndex: -1, // Keeps the background below the profile section
                 }} />
                 <TopBar_Admin /> {/* ✅ Added TopBar_Admin */}
-                
-                <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-                    <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-                        {/* Change title color to black */}
-                        <h2 className="text-2xl font-bold text-center text-black mb-4">Add Account</h2>
 
-                        <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+                    <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                        {/* Change title color to black */}
+                        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">Add New Account</h2>
+
+                        <div className="space-y-5">
                             <div>
-                                <label className="block font-semibold">Name</label>
+                                <label className="block text-lg font-medium text-gray-600">Name</label>
                                 <input
                                     type="text"
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="w-full border px-3 py-2 rounded-lg"
+                                    className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div>
-                                <label className="block font-semibold">Email</label>
+                                <label className="block text-lg font-medium text-gray-600">Email</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="w-full border px-3 py-2 rounded-lg"
+                                    className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div>
-                                <label className="block font-semibold">Password</label>
+                                <label className="block text-lg font-medium text-gray-600">Password</label>
                                 <input
                                     type="password"
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="w-full border px-3 py-2 rounded-lg text-gray-400"
-                                    // Removed the 'disabled' attribute to allow editing
+                                    className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div>
-                                <label className="block font-semibold">Role</label>
+                                <label className="block text-lg font-medium text-gray-600">Role</label>
                                 <input
                                     type="text"
                                     name="role"
                                     value={formData.role}
                                     readOnly
-                                    className="w-full border px-3 py-2 rounded-lg bg-gray-200 text-gray-600"
+                                    className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 focus:outline-none"
                                 />
                             </div>
                         </div>
 
-                        <div className="flex justify-between mt-6">
+                        <div className="flex justify-between mt-8">
                             {/* Save button in green */}
                             <button
                                 onClick={handleSave}
-                                className="bg-green-600 text-white px-4 py-2 rounded-lg w-1/2 mr-2 hover:bg-green-700"
+                                className="bg-green-600 text-white px-5 py-3 rounded-lg w-1/2 mr-2 hover:bg-green-700 transition ease-in-out"
                             >
                                 Save
                             </button>
@@ -135,7 +133,7 @@ export default function AddAccountPage() {
                             {/* Cancel button in red */}
                             <button
                                 onClick={() => router.push("/admin/management")}
-                                className="bg-red-600 text-white px-4 py-2 rounded-lg w-1/2 hover:bg-red-700"
+                                className="bg-red-600 text-white px-5 py-3 rounded-lg w-1/2 hover:bg-red-700 transition ease-in-out"
                             >
                                 Cancel
                             </button>
