@@ -65,9 +65,6 @@ const TopBar_Owner = (props) => {
         <Link href="/owner" style={getLinkStyle("/owner")}>
           Home
         </Link>
-        <Link href="/owner/promotion" style={getLinkStyle("/owner/promotion")}>
-          Promotion
-        </Link>
         <Link href="/owner/history" style={getLinkStyle("/owner/history")}>
           History
         </Link>

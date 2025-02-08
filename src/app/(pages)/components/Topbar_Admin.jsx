@@ -65,6 +65,9 @@ const TopBar_Admin = (props) => {
         <Link href="/admin" style={getLinkStyle("/admin")}>
           Home
         </Link>
+        <Link href="/admin/promotion" style={getLinkStyle("/admin/promotion")}>
+          Promotion
+        </Link>
         <Link href="/admin/history" style={getLinkStyle("/admin/history")}>
           History
         </Link>
