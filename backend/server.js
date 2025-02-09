@@ -6,6 +6,7 @@ const User = require("./models/user");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(
@@ -15,12 +16,6 @@ app.use(
 );
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
-
-bcrypt.compare(password, hashedPassword)
-  .then(isMatch => {
-    console.log(isMatch ? "✅ Password matches!" : "❌ Password mismatch!");
-  })
-  .catch(error => console.error("Error:", error));
 
 // ตั้งค่าการจัดเก็บไฟล์ภาพ
 const storage = multer.diskStorage({
@@ -33,6 +28,15 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+
+// ตั้งค่าการเชื่อมต่อกับ nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,  // อีเมลผู้ส่ง
+    pass: process.env.EMAIL_PASS,  // รหัสผ่านอีเมลผู้ส่ง
+  },
+});
 
 // เชื่อมต่อ MongoDB
 mongoose
@@ -129,6 +133,7 @@ app.post("/api/login", async (req, res) => {
     console.log("Password received:", password);
     console.log("Hashed password from database:", user.password);
 
+    // เปรียบเทียบรหัสผ่านที่ผู้ใช้ป้อนกับรหัสผ่านที่เก็บไว้ในฐานข้อมูล
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       console.log("Password mismatch");
@@ -151,6 +156,46 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Route สำหรับรีเซ็ตรหัสผ่าน
+app.post('/api/forget-password', async (req, res) => {
+  const { email } = req.body;
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();  // สร้างรหัสรีเซ็ต
+  const expiryTime = new Date(Date.now() + 5 * 60 * 1000);  // รหัสรีเซ็ตหมดอายุใน 5 นาที
+
+  try {
+    // ตรวจสอบอีเมลในฐานข้อมูล
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).send('Email not found');
+    }
+
+    // อัปเดตรหัสรีเซ็ตและเวลาหมดอายุในฐานข้อมูล
+    user.resetCode = resetCode;
+    user.resetCodeExpires = expiryTime;
+    await user.save();
+
+    // ส่งอีเมล
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset Code',
+      text: `Your reset code is: ${resetCode}. It will expire in 5 minutes.`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).send('Error sending email');
+      } else {
+        console.log('Email sent: ' + info.response);
+        res.send('Reset code sent to email');
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+});
 
 // Route สำหรับดึงข้อมูลผู้ใช้ทั้งหมด
 app.get("/api/users", async (req, res) => {

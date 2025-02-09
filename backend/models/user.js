@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,  // ต้องเป็น unique
+    unique: true,
     trim: true,
     minlength: 3,
     maxlength: 50,
@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,  // ต้องเป็น unique
+    unique: true,
     match: [/\S+@\S+\.\S+/, 'Please use a valid email address'],
   },
   password: {
@@ -43,11 +43,18 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     type: String,
   },
+  resetCode: {
+    type: String,  // รหัสรีเซ็ต
+  },
+  resetCodeExpires: {
+    type: Date,  // เวลาหมดอายุของรหัสรีเซ็ต
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
