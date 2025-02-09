@@ -54,7 +54,7 @@ export default function Home() {
           </Typography>
 
           <Typography variant="body1" className="text-lg text-gray-700 leading-relaxed">
-            ไม่ว่าคุณจะเป็นนักกีฬามืออาชีพ หรือเพียงแค่ต้องการสถานที่ออกกำลังกายกับเพื่อน ๆ  
+            ไม่ว่าคุณจะเป็นนักกีฬามืออาชีพ หรือเพียงแค่ต้องการสถานที่ออกกำลังกายกับเพื่อน ๆ
             <b> Sportify Booking </b> พร้อมช่วยให้การจองสนามเป็นเรื่องง่าย รวดเร็ว และน่าเชื่อถือ!
           </Typography>
 
@@ -64,7 +64,8 @@ export default function Home() {
               <Button
                 variant="contained"
                 color="primary"
-                className="w-full sm:w-auto py-3 px-8 text-xl font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-orange-600"
+                className="py-4 px-10 text-2xl font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 hover:bg-orange-700"
+                style={{ minWidth: "200px" }}
               >
                 เริ่มจองเลย!
               </Button>
@@ -74,7 +75,8 @@ export default function Home() {
               <Button
                 variant="contained"
                 color="secondary"
-                className="w-full sm:w-auto py-3 px-8 text-xl font-semibold rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-indigo-600"
+                className="py-4 px-10 text-2xl font-bold rounded-xl shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 hover:bg-indigo-700"
+                style={{ minWidth: "200px" }}
               >
                 เกี่ยวกับเรา
               </Button>
