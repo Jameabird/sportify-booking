@@ -39,15 +39,20 @@ const TopBar = (props) => {
     router.push("/login");
   };
 
+  // Normalize the current path to avoid issues with trailing slashes
+  const normalizePath = (path) => {
+    return path.endsWith("/") ? path.slice(0, -1) : path;
+  };
+
   const getLinkStyle = (path) => ({
     padding: "0 15px",
-    color: currentPath === path ? "#1e40af" : props.textColor, // เปลี่ยนเป็นสีน้ำเงินถ้า path ตรงกับ currentPath
+    color: normalizePath(currentPath) === normalizePath(path) ? "#1e40af" : props.textColor, // Active link color set to blue
     fontSize: "1.25rem",
     fontWeight: "bold",
     cursor: "pointer",
     textDecoration: "none",
     "&:hover": {
-      color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
+      color: "#1e40af", // Blue on hover
     },
   });
 
@@ -76,17 +81,17 @@ const TopBar = (props) => {
 
       {/* เมนูหลัก */}
       <Box display="flex" alignItems="center">
-        <Link href="/" style={getLinkStyle("/")}>
+        <Link href="/Spectator/home" style={getLinkStyle("/Spectator/home")}>
           Home
         </Link>
-        <Link href="/Spectator/category" style={getLinkStyle("/category")}>
+        <Link href="/Spectator/category" style={getLinkStyle("/Spectator/category")}>
           Category
         </Link>
-        <Link href="/Spectator/booking" style={getLinkStyle("/booking")}>
+        <Link href="/Spectator/booking" style={getLinkStyle("/Spectator/booking")}>
           Booking
         </Link>
-        <Link href="/Spectator/about" style={getLinkStyle("/booking")}>
-          About Us
+        <Link href="/Spectator/about" style={getLinkStyle("/Spectator/about")}>
+          About Contact Us
         </Link>
         {/* Avatar User or Sign In Button */}
         {isLogin ? (
