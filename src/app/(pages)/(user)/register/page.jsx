@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import React, { useState } from "react";
 import axios from "axios"; // นำเข้า axios
@@ -28,6 +28,9 @@ const RegisterPage = () => {
   const [username, setUsername] = useState(""); // เพิ่ม state สำหรับ username
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
   const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะการแสดง Snackbar
@@ -48,7 +51,7 @@ const RegisterPage = () => {
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file)); // Show the selected image as preview
+      setImage(file); // Show the selected image as preview
     }
   };
 
@@ -78,39 +81,45 @@ const RegisterPage = () => {
 
   // ฟังก์ชันเมื่อกด Register
   const handleRegister = async () => {
-    // ตรวจสอบว่าแบบฟอร์มครบถ้วนหรือไม่
     if (!validateForm()) return;
 
-    // ตรวจสอบรหัสผ่านและยืนยันรหัสผ่าน
     if (!validatePassword(password)) {
       setSnackbarMessage("รหัสผ่านต้องมีตัวอักษรใหญ่, ตัวเลข, และตัวอักษรพิเศษ");
       setOpenSnackbar(true);
       return;
     }
+
     if (password !== confirmPassword) {
       setSnackbarMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
       setOpenSnackbar(true);
       return;
     }
 
-    // ทำการส่งข้อมูลไปยัง API ของ Backend
     try {
-      const response = await axios.post("http://localhost:5000/api/register", {
-        username,
-        email,
-        password,
-        firstName: "First Name",  // ชื่อจริง
-        lastName: "Last Name",    // นามสกุล
-        bank,
-        accountNumber: "1234567890", // หมายเลขบัญชี
-        profileImage: image,  // รูปโปรไฟล์
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("bank", bank);
+      formData.append("accountNumber", accountNumber);
+
+      if (image) {
+        formData.append("profileImage", image); // ✅ ใส่ไฟล์จริง ไม่ใช่ URL preview
+      }
+
+      const response = await axios.post("http://localhost:5000/api/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       if (response.status === 201) {
         setSnackbarMessage("ลงทะเบียนสำเร็จ!");
         setOpenSnackbar(true);
         setTimeout(() => {
-          router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login
+          router.push("/login");
         }, 1500);
       }
     } catch (error) {
@@ -118,6 +127,7 @@ const RegisterPage = () => {
       setOpenSnackbar(true);
     }
   };
+
 
   return (
     <div className="app">
@@ -194,7 +204,17 @@ const RegisterPage = () => {
                     ),
                   }}
                 />
-
+                <h3 style={{
+                  color: "#d32f2f",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  marginBottom: "10px",
+                  backgroundColor: "#ffebee",
+                  padding: "8px",
+                  borderRadius: "5px"
+                }}>
+                  รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร ประกอบด้วย ตัวอักษรพิมพ์ใหญ่ (A-Z), ตัวเลข (0-9) และอักขระพิเศษ (@$!%*?&)
+                </h3>
                 {/* เพิ่มข้อความ Bank Details ตรงนี้ */}
                 <h2 className="register-title">Bank Details</h2>
                 <TextField
@@ -202,12 +222,16 @@ const RegisterPage = () => {
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
                 <TextField
                   label="Last Name"
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                 />
 
                 <FormControl fullWidth sx={{ marginBottom: "16px" }}>
@@ -234,6 +258,8 @@ const RegisterPage = () => {
                     maxLength: 10,
                   }}
                   sx={{ marginBottom: "16px" }}
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
                 />
                 <Box sx={{ marginBottom: "16px" }}>
                   <h3 className="register-title">Bank Image</h3>
@@ -243,13 +269,19 @@ const RegisterPage = () => {
                     onChange={handleImageChange}
                     style={{ width: "100%" }}
                   />
-                  {image && (
+                  {image && typeof image === "string" ? (
                     <img
-                      src={image}
-                      alt="Preview"
-                      style={{ marginTop: "16px", maxWidth: "100%" }}
+                      src={`http://localhost:5000/${image}`} // โหลดจากเซิร์ฟเวอร์
+                      alt="Profile"
+                      style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
                     />
-                  )}
+                  ) : image ? (
+                    <img
+                      src={URL.createObjectURL(image)}
+                      alt="Preview"
+                      style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
+                    />
+                  ) : null}
                 </Box>
                 <Button
                   variant="contained"

@@ -9,6 +9,7 @@ const multer = require("multer"); // เพิ่มการใช้งาน 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // ตั้งค่าการจัดเก็บไฟล์ภาพ
 const storage = multer.diskStorage({
@@ -28,11 +29,14 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'SE' })
   .catch(err => console.log("MongoDB Connection Error:", err));
 
 // Route สำหรับการลงทะเบียน
-app.post("/api/register", upload.single('profileImage'), async (req, res) => {
-  const { username, email, password, firstName, lastName, bank, accountNumber } = req.body;
-  const profileImage = req.file ? req.file.path : null; // กรณีมีการอัปโหลดไฟล์
-
+app.post("/api/register", upload.single("profileImage"), async (req, res) => {
   try {
+    console.log("Received form data:", req.body);  // Debug ดูค่าที่ Frontend ส่งมา
+    console.log("Uploaded file:", req.file); // Debug ดูไฟล์ที่อัปโหลด
+
+    // ดึงค่าจาก req.body
+    const { username, email, password, firstName, lastName, bank, accountNumber } = req.body;
+
     // ตรวจสอบว่าอีเมลหรือชื่อผู้ใช้มีการใช้แล้วหรือไม่
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
@@ -42,6 +46,14 @@ app.post("/api/register", upload.single('profileImage'), async (req, res) => {
 
     // เข้ารหัสรหัสผ่านก่อนบันทึก
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ตรวจสอบว่าอัปโหลดรูปภาพหรือไม่
+    const profileImage = req.file ? req.file.path : null;
+
+    // ตรวจสอบว่ามีค่าทั้งหมดหรือไม่
+    if (!username || !email || !password || !firstName || !lastName || !bank || !accountNumber) {
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
+    }
 
     // สร้างผู้ใช้ใหม่
     const newUser = new User({
@@ -57,14 +69,15 @@ app.post("/api/register", upload.single('profileImage'), async (req, res) => {
 
     // บันทึกผู้ใช้ใหม่ลงใน MongoDB
     await newUser.save();
-    console.log(`New user registered: ${username} / ${email}`);  // แจ้งเตือนที่ cmd
+    console.log(`✅ New user registered: ${username} / ${email}`);
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error("Server error: ", error);  // แจ้งเตือนเมื่อเกิดข้อผิดพลาด
+    console.error("❌ Server error:", error);
     res.status(500).json({ message: "Server error", error });
   }
 });
+
 
 // Route สำหรับดึงข้อมูลผู้ใช้ทั้งหมด
 app.get("/api/users", async (req, res) => {
