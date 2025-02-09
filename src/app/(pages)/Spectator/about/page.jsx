@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import "@app/globals.css";
-import { Box } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material"; // Import Typography and Button
 import TopBar from "@components/Topbar"; // Import TopBar
 
 export default function About() {
@@ -23,9 +23,7 @@ export default function About() {
 
       {/* กล่องเนื้อหา (พื้นหลังสีขาว) */}
       <main className="flex-1 flex justify-center items-center px-6 py-12">
-        <div
-          className="max-w-4xl w-full bg-white p-10 rounded-2xl shadow-lg"
-        >
+        <div className="max-w-4xl w-full bg-white p-10 rounded-2xl shadow-lg">
           {/* ส่วนหัว */}
           <div className="text-center">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">เกี่ยวกับเรา</h1>
@@ -62,7 +60,7 @@ export default function About() {
                 🚀
               </div>
               <p>
-                ไม่ว่าคุณจะเป็นนักกีฬามืออาชีพ หรือแค่อยากออกกำลังกายกับเพื่อน ๆ  
+                ไม่ว่าคุณจะเป็นนักกีฬามืออาชีพ หรือแค่อยากออกกำลังกายกับเพื่อน ๆ
                 <b> Sportify Booking </b> พร้อมช่วยให้คุณจองสนามได้สะดวก รวดเร็ว และน่าเชื่อถือ!
               </p>
             </div>
@@ -74,7 +72,7 @@ export default function About() {
               สมาชิกผู้จัดทำ
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
+              {[ 
                 { id: "6330300160", name: "ชญานิน ตลับเงิน" },
                 { id: "6330300071", name: "กิตติญาภรณ์ ดวงไกร" },
                 { id: "6530300465", name: "รินรดา คัตตพันธ์" },
@@ -93,6 +91,40 @@ export default function About() {
                   <p className="text-lg text-gray-800">{member.name}</p>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Contact Us Section (Moved Inside White Box) */}
+          <div className="mt-12">
+            <Typography variant="h5" fontWeight="bold" className="text-center">
+              ติดต่อเรา
+            </Typography>
+            <Typography variant="body1" className="mt-4 text-lg text-gray-700 text-center">
+              หากคุณมีคำถามหรือข้อสงสัยเกี่ยวกับการใช้บริการหรือการจองสนามกีฬา
+              <br />
+              สามารถติดต่อเราผ่านช่องทางด้านล่างนี้
+            </Typography>
+
+            <div className="mt-8 flex justify-center gap-6">
+              {/* ส่งอีเมล */}
+              <Button
+                variant="outlined"
+                color="primary"
+                className="px-6 py-2 text-xl font-bold rounded-xl border-white hover:bg-white hover:text-gray-800 transition-all duration-300"
+                onClick={() => window.location.href = 'mailto:support@sportify.com?subject=Inquiry&body=Hello, I have a question about booking a sports facility.'}
+              >
+                ส่งอีเมล
+              </Button>
+
+              {/* โทรติดต่อ */}
+              <Button
+                variant="outlined"
+                color="secondary"
+                className="px-6 py-2 text-xl font-bold rounded-xl border-white hover:bg-white hover:text-gray-800 transition-all duration-300"
+                onClick={() => window.location.href = 'tel:+1234567890'} // Replace with your contact number
+              >
+                โทรติดต่อ
+              </Button>
             </div>
           </div>
         </div>
