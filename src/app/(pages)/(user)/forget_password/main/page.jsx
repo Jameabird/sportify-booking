@@ -14,35 +14,32 @@ const ForgetPasswordPage = () => {
 
   const handleSendLink = async () => {
     if (email) {
+      console.log("Sending reset link to email:", email);  // ดูค่าของ email ที่จะส่ง
       try {
         // ส่งคำขอไปยัง backend เพื่อเช็คอีเมล
         await axios.post('http://localhost:5000/api/forget-password', { email });
         
-        // หากส่งสำเร็จ, แสดงข้อความและไปยังหน้าถัดไป
         setSnackbarMessage("ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
         setOpenSnackbar(true);
-
-        // ไปยังหน้า OTP
+  
         setTimeout(() => {
           router.push(`/forget_password/OTP?email=${email}`);
         }, 1500);
         
       } catch (error) {
-        // หากมีข้อผิดพลาดจาก backend (เช่น อีเมลไม่พบในระบบ)
         if (error.response) {
-          setSnackbarMessage(error.response.data); // ข้อความผิดพลาดจากเซิร์ฟเวอร์
+          setSnackbarMessage(error.response.data); // ข้อความจากเซิร์ฟเวอร์
         } else {
           setSnackbarMessage('ไม่สามารถส่งลิงค์รีเซ็ตรหัสผ่านได้');
         }
         setOpenSnackbar(true);
       }
     } else {
-      // ถ้าไม่มีอีเมลกรอก
       setSnackbarMessage("กรุณากรอกอีเมลของคุณ");
       setOpenSnackbar(true);
     }
   };
-
+  
   return (
     <div className="app">
       <main className="content">

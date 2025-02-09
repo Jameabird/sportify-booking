@@ -166,7 +166,7 @@ app.post('/api/forget-password', async (req, res) => {
     // ตรวจสอบอีเมลในฐานข้อมูล
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).send('Email not found');
+      return res.status(404).send('ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง');
     }
 
     // อัปเดตรหัสรีเซ็ตและเวลาหมดอายุในฐานข้อมูล
@@ -193,7 +193,37 @@ app.post('/api/forget-password', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Server error');
+    res.status(500).send('เกิดข้อผิดพลาดบนเซิร์ฟเวอร์');
+  }
+});
+
+// Route สำหรับตรวจสอบ OTP
+app.post('/api/verify-otp', async (req, res) => {
+  const { otp } = req.body;
+  
+  if (!otp || otp.length !== 6) {
+    return res.status(400).send('กรุณากรอก OTP 6 หลักที่ถูกต้อง');
+  }
+
+  try {
+    // ค้นหาผู้ใช้ที่มีรหัสรีเซ็ตรหัสผ่าน
+    const user = await User.findOne({ resetCode: otp });
+    
+    if (!user) {
+      return res.status(404).send('OTP ไม่ถูกต้อง');
+    }
+
+    // ตรวจสอบว่า OTP หมดอายุหรือไม่
+    const currentTime = new Date();
+    if (user.resetCodeExpires < currentTime) {
+      return res.status(400).send('OTP หมดอายุแล้ว');
+    }
+
+    // ถ้า OTP ถูกต้องและยังไม่หมดอายุ
+    res.status(200).send('OTP ถูกต้อง');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('เกิดข้อผิดพลาดในการตรวจสอบ OTP');
   }
 });
 

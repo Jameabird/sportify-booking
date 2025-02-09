@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Box, TextField, Button, Snackbar, Alert } from "@mui/material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
+import axios from 'axios';  // เพิ่มการใช้งาน Axios
 import './OtpPage.css'; // Import the CSS file
 
 const OtpPage = () => {
@@ -11,16 +12,24 @@ const OtpPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความใน Snackbar
   const router = useRouter();
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (otp.length === 6) {
-      // ถ้า OTP ถูกต้อง
-      setSnackbarMessage("OTP ถูกต้อง!");
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        router.push("/forget_password/Reset"); // ไปยังหน้า reset password
-      }, 1500);
+      try {
+        // ส่ง OTP ไปยัง Backend เพื่อตรวจสอบ
+        const response = await axios.post('http://localhost:5000/api/verify-otp', { otp });
+
+        // ถ้า OTP ถูกต้อง
+        setSnackbarMessage("OTP ถูกต้อง!");
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          router.push("/forget_password/Reset"); // ไปยังหน้า reset password
+        }, 1500);
+      } catch (error) {
+        // หาก OTP ไม่ถูกต้อง
+        setSnackbarMessage(error.response ? error.response.data : 'เกิดข้อผิดพลาด');
+        setOpenSnackbar(true);
+      }
     } else {
-      // ถ้า OTP ไม่ถูกต้อง
       setSnackbarMessage("กรุณากรอก OTP 6 หลักที่ถูกต้อง");
       setOpenSnackbar(true);
     }
