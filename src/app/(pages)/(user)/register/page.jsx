@@ -82,19 +82,19 @@ const RegisterPage = () => {
   // ฟังก์ชันเมื่อกด Register
   const handleRegister = async () => {
     if (!validateForm()) return;
-
+  
     if (!validatePassword(password)) {
       setSnackbarMessage("รหัสผ่านต้องมีตัวอักษรใหญ่, ตัวเลข, และตัวอักษรพิเศษ");
       setOpenSnackbar(true);
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setSnackbarMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
       setOpenSnackbar(true);
       return;
     }
-
+  
     try {
       const formData = new FormData();
       formData.append("username", username);
@@ -104,17 +104,15 @@ const RegisterPage = () => {
       formData.append("lastName", lastName);
       formData.append("bank", bank);
       formData.append("accountNumber", accountNumber);
-
+  
       if (image) {
-        formData.append("profileImage", image); // ✅ ใส่ไฟล์จริง ไม่ใช่ URL preview
+        formData.append("profileImage", image);
       }
-
+  
       const response = await axios.post("http://localhost:5000/api/register", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-
+  
       if (response.status === 201) {
         setSnackbarMessage("ลงทะเบียนสำเร็จ!");
         setOpenSnackbar(true);
@@ -123,12 +121,21 @@ const RegisterPage = () => {
         }, 1500);
       }
     } catch (error) {
-      setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+      console.error("Registration Error:", error);
+  
+      if (error.response) {
+        if (error.response.status === 400 && error.response.data.message === "Email already exists") {
+          setSnackbarMessage("อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น");
+        } else {
+          setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+        }
+      } else {
+        setSnackbarMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      }
       setOpenSnackbar(true);
     }
   };
-
-
+  
   return (
     <div className="app">
       <main className="content">

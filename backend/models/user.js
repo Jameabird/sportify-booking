@@ -49,18 +49,32 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// เพิ่มการเข้ารหัสรหัสผ่านก่อนบันทึก
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();  // ถ้ารหัสผ่านไม่ได้ถูกแก้ไข ไม่ต้องทำการเข้ารหัสใหม่
-  
+  if (!this.isModified("password")) return next();
+
   try {
-    const salt = await bcrypt.genSalt(10); // สร้าง salt
-    this.password = await bcrypt.hash(this.password, salt); // เข้ารหัสรหัสผ่าน
-    next(); // เรียก next() เพื่อให้กระบวนการ save ต่อไป
+    // ป้องกันการเข้ารหัสซ้ำซ้อน
+    if (!this.password.startsWith("$2a$")) { 
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+    next();
   } catch (error) {
-    next(error); // ถ้ามีข้อผิดพลาดในการเข้ารหัส ให้ส่งข้อผิดพลาด
+    next(error);
   }
 });
+
+userSchema.pre("findOneAndUpdate", async function (next) {
+  if (!this._update.password) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this._update.password = await bcrypt.hash(this._update.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 const User = mongoose.model("User", userSchema);
 

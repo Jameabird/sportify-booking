@@ -1,79 +1,152 @@
-const express = require("express"); 
+const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const User = require("./models/user");
 const bcrypt = require("bcryptjs");
-const multer = require("multer"); // เพิ่มการใช้งาน multer สำหรับอัปโหลดไฟล์
+const multer = require("multer");
+const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // ตั้งค่า frontend ที่จะเข้าใช้งาน backend
+  })
+);
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
+
+bcrypt.compare(password, hashedPassword)
+  .then(isMatch => {
+    console.log(isMatch ? "✅ Password matches!" : "❌ Password mismatch!");
+  })
+  .catch(error => console.error("Error:", error));
 
 // ตั้งค่าการจัดเก็บไฟล์ภาพ
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // กำหนดให้เก็บไฟล์ในโฟลเดอร์ uploads
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // ตั้งชื่อไฟล์ที่ไม่ซ้ำกัน
-  }
+    cb(null, Date.now() + "-" + file.originalname);
+  },
 });
 
 const upload = multer({ storage: storage });
 
-// เชื่อมต่อ MongoDB และกำหนดฐานข้อมูลเป็น SE
-mongoose.connect(process.env.MONGO_URI, { dbName: 'SE' })
+// เชื่อมต่อ MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, { dbName: "SE" })
   .then(() => console.log("MongoDB Connected to SE database"))
-  .catch(err => console.log("MongoDB Connection Error:", err));
+  .catch((err) => console.log("MongoDB Connection Error:", err));
 
 // Route สำหรับการลงทะเบียน
 app.post("/api/register", upload.single("profileImage"), async (req, res) => {
   try {
-    console.log("Received form data:", req.body);  // Debug ดูค่าที่ Frontend ส่งมา
-    console.log("Uploaded file:", req.file); // Debug ดูไฟล์ที่อัปโหลด
+    console.log("Received form data:", req.body);
+    console.log("Uploaded file:", req.file);
 
-    // ดึงค่าจาก req.body
-    const { username, email, password, firstName, lastName, bank, accountNumber } = req.body;
-
-    // ตรวจสอบว่าอีเมลหรือชื่อผู้ใช้มีการใช้แล้วหรือไม่
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      console.log(`Username or email already exists: ${username} / ${email}`);
-      return res.status(400).json({ message: "Username or email already exists" });
-    }
-
-    // เข้ารหัสรหัสผ่านก่อนบันทึก
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // ตรวจสอบว่าอัปโหลดรูปภาพหรือไม่
-    const profileImage = req.file ? req.file.path : null;
-
-    // ตรวจสอบว่ามีค่าทั้งหมดหรือไม่
-    if (!username || !email || !password || !firstName || !lastName || !bank || !accountNumber) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
-    }
-
-    // สร้างผู้ใช้ใหม่
-    const newUser = new User({
+    const {
       username,
       email,
-      password: hashedPassword, // ใช้รหัสผ่านที่ถูกเข้ารหัส
+      password,
       firstName,
       lastName,
       bank,
       accountNumber,
-      profileImage, // เพิ่มไฟล์โปรไฟล์ภาพ
+    } = req.body;
+
+    // ตรวจสอบรูปแบบอีเมล
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "อีเมลไม่ถูกต้อง" });
+    }
+
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Username หรือ email นี้ถูกใช้งานไปแล้ว" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const profileImage = req.file ? req.file.path : null;
+
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !firstName ||
+      !lastName ||
+      !bank ||
+      !accountNumber
+    ) {
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
+    }
+
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      bank,
+      accountNumber,
+      profileImage,
     });
 
-    // บันทึกผู้ใช้ใหม่ลงใน MongoDB
     await newUser.save();
-    console.log(`✅ New user registered: ${username} / ${email}`);
-
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error("❌ Server error:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+app.post("/api/login", async (req, res) => {
+  try {
+    let { email, password } = req.body;
+    console.log("Received email:", email); // พิมพ์ email ที่รับมา
+    console.log("Received password:", password); // พิมพ์ password ที่รับมา
+
+    // ลบช่องว่างออกจากอีเมลและรหัสผ่าน (เพื่อหลีกเลี่ยงการป้อนค่าที่มีช่องว่าง)
+    email = email.trim();
+    password = password.trim();
+
+    // ตรวจสอบว่าอีเมลและรหัสผ่านไม่ว่าง
+    if (!email || !password) {
+      return res.status(400).json({ message: "กรุณากรอกอีเมลและรหัสผ่าน" });
+    }
+
+    // ค้นหาผู้ใช้ในฐานข้อมูล
+    const user = await User.findOne({ email: email }); // ค้นหาตามอีเมลที่ได้รับ
+    console.log("Found user:", user);
+    if (!user) {
+      return res.status(400).json({ message: "ข้อมูลรหัสผู้ใช้ไม่ถูกต้อง" });
+    }
+
+    // ตรวจสอบรหัสผ่าน
+    console.log("Password received:", password);
+    console.log("Hashed password from database:", user.password);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log("Password mismatch");
+      return res.status(400).json({ message: "ข้อมูลรหัสผู้ใช้ไม่ถูกต้อง" });
+    }
+
+    console.log("Password matches successfully!");
+
+    // สร้าง JWT token
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ!", token });
+  } catch (error) {
+    console.error("Error during login:", error);
     res.status(500).json({ message: "Server error", error });
   }
 });
@@ -82,8 +155,8 @@ app.post("/api/register", upload.single("profileImage"), async (req, res) => {
 // Route สำหรับดึงข้อมูลผู้ใช้ทั้งหมด
 app.get("/api/users", async (req, res) => {
   try {
-    const users = await User.find();  // ดึงข้อมูลผู้ใช้ทั้งหมดจากฐานข้อมูล
-    res.status(200).json(users);  // ส่งข้อมูลผู้ใช้ทั้งหมดกลับไปยัง client
+    const users = await User.find();
+    res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Server error", error });
@@ -91,11 +164,11 @@ app.get("/api/users", async (req, res) => {
 });
 
 // สร้างโฟลเดอร์ uploads ถ้ายังไม่มี
-const fs = require('fs');
-const uploadsDir = './uploads';
+const fs = require("fs");
+const uploadsDir = "./uploads";
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  // แจ้งเตือนเมื่อเซิร์ฟเวอร์เริ่มทำงาน
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); // แจ้งเตือนเมื่อเซิร์ฟเวอร์เริ่มทำงาน

@@ -3,16 +3,9 @@ import React, { useState } from "react";
 import { Box, TextField, Button, IconButton, InputAdornment, Snackbar, Alert } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import TopBar from "@components/Topbar";
+import axios from "axios";
 import "./loginPage.css";
-
-const users = [
-  { email: "user@example.com", password: "password123", role: "user" },
-  { email: "admin@example.com", password: "admin123", role: "admin" },
-  { email: "owner@example.com", password: "owner123", role: "owner" },
-  { email: "officer@example.com", password: "officer123", role: "officer" },
-];
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,35 +20,33 @@ const LoginPage = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleLogin = () => {
-    const user = users.find((user) => user.email === email && user.password === password);
-    if (user) {
-      setSnackbarMessage("เข้าสู่ระบบสำเร็จ!");
-      setSnackbarSeverity("success");
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        router.push("/home");
-      }, 1500);
-    } else {
-      setSnackbarMessage("ข้อมูลรหัสผู้ใช้ไม่ถูกต้อง");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-    }
-  };
+  const handleLogin = async () => {
+    console.log("Email:", email); // ดูว่า email ถูกส่งไปหรือไม่
+    console.log("Password:", password); // ดูว่า password ถูกส่งไปหรือไม่
 
-  const handleGoogleLogin = (response) => {
-    if (response?.credential) {
-      setSnackbarMessage("เข้าสู่ระบบสำเร็จ!");
+    if (!email || !password) {
+      setSnackbarMessage("กรุณากรอกข้อมูลให้ครบ");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/login", { email, password });
+      console.log("Login response:", response);
+      setSnackbarMessage(response.data.message || "เข้าสู่ระบบสำเร็จ!");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
       setTimeout(() => {
         router.push("/home");
       }, 1500);
-    } else {
-      setSnackbarMessage("การเข้าสู่ระบบผ่าน Google ล้มเหลว");
+    } catch (error) {
+      console.error("Login error:", error);
+      console.error("Error response data:", error.response?.data);
+      setSnackbarMessage(error.response?.data?.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
-    }
+    }    
   };
 
   return (
@@ -120,18 +111,6 @@ const LoginPage = () => {
                 >
                   Login
                 </Button>
-
-                <GoogleOAuthProvider clientId="160660169940-jovtts08pu9olgt12494uc3sc5oo7u1c.apps.googleusercontent.com">
-                  <GoogleLogin
-                    onSuccess={handleGoogleLogin}
-                    onError={handleGoogleLogin}
-                    useOneTap
-                    size="large"
-                    shape="pill"
-                    theme="outline"
-                    className="google-login"
-                  />
-                </GoogleOAuthProvider>
 
                 <Box className="sign-up">
                   <p>
