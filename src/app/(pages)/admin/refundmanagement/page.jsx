@@ -153,6 +153,7 @@ const AdminPaidTable = () => {
                   <p><strong>Bank number:</strong> {paymentDetails.bankNumber}</p>
                 </div>
               ) : null}
+              
               <div className="flex justify-center mt-4">
                 <button 
                   className="bg-red-600 text-white px-4 py-1 rounded-lg hover:bg-red-700" 
