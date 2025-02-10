@@ -244,8 +244,7 @@ export default function Profile() {
                                     name="role"
                                     fullWidth
                                     value={profileData.role}
-                                    disabled={!isEditing}
-                                    onChange={handleInputChange}
+                                    disabled={true}
                                     sx={{
                                         "& .MuiOutlinedInput-root": {
                                             transition: "all 0.3s ease",
