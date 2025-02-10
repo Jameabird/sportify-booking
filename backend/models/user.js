@@ -18,8 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
-    minlength: 8,
+    minlength: 8, // Google Login อาจไม่มี password
   },
   firstName: {
     type: String,
@@ -37,7 +36,6 @@ const userSchema = new mongoose.Schema({
   },
   accountNumber: {
     type: String,
-    required: true,
     maxlength: 10,
   },
   profileImage: {
@@ -45,7 +43,6 @@ const userSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    required: true,
     match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'],
     minlength: 10,
     maxlength: 10,
@@ -64,7 +61,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'officer', 'owner', 'admin'],
     default: 'user',
-  }
+  },
+  authProvider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local',
+  },
 });
 
 

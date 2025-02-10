@@ -7,7 +7,10 @@ const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
 const nodemailer = require('nodemailer');
+const { OAuth2Client } = require('google-auth-library');
 
+console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const app = express();
 app.use(
   cors({
@@ -155,6 +158,81 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Server error", error });
+  }
+});
+
+app.post("/api/google-login", async (req, res) => { 
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: "Token is required" });
+  }
+
+  try {
+    console.log("🔹 Received Token:", token);
+
+    // ตรวจสอบว่า GOOGLE_CLIENT_ID ถูกต้องหรือไม่
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      throw new Error("Missing GOOGLE_CLIENT_ID in environment variables");
+    }
+
+    // ตรวจสอบ Token ที่ได้รับจาก Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    console.log("🔹 Google Payload:", payload);
+
+    if (!payload || !payload.email) {
+      throw new Error("Invalid Google token payload");
+    }
+
+    // ตรวจสอบว่า user มีในระบบหรือไม่
+    let user = await User.findOne({ email: payload.email });
+    
+    if (!user) {
+      // ถ้าไม่มีผู้ใช้ในระบบ ให้ลงทะเบียนใหม่
+      user = new User({
+        username: payload.name || payload.email.split("@")[0],
+        email: payload.email,
+        firstName: payload.given_name || "",
+        lastName: payload.family_name || "Unknown", // กำหนดค่าเริ่มต้น
+        profileImage: payload.picture || "",
+        role: "user",
+        phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
+        accountNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
+        password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
+        authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
+      });
+      await user.save();
+      console.log("✅ New user created:", user);
+    } else {
+      console.log("✅ User found:", user);
+    }
+
+    // สร้าง JWT token สำหรับผู้ใช้
+    const jwtToken = jwt.sign(
+      { userId: user._id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    console.log("✅ JWT Token Created:", jwtToken);
+
+    // ส่ง JWT token กลับไปยัง frontend
+    res.status(200).json({
+      message: "เข้าสู่ระบบสำเร็จ!",
+      token: jwtToken,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("🚨 Google Login Error:", error.message);
+    res.status(500).json({
+      message: "ไม่สามารถเข้าสู่ระบบผ่าน Google ได้",
+      error: error.message,
+    });
   }
 });
 
