@@ -151,7 +151,7 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ!", token });
+    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ!", token, role: user.role });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Server error", error });

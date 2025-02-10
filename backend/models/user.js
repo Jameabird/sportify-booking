@@ -43,6 +43,13 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     type: String,
   },
+  phoneNumber: {
+    type: String,
+    required: true,
+    match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'],
+    minlength: 10,
+    maxlength: 10,
+  },
   resetCode: {
     type: String,  // รหัสรีเซ็ต
   },
@@ -53,6 +60,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  role: {
+    type: String,
+    enum: ['user', 'officer', 'owner', 'admin'],
+    default: 'user',
+  }
 });
 
 
@@ -81,7 +93,6 @@ userSchema.pre("findOneAndUpdate", async function (next) {
     next(error);
   }
 });
-
 
 const User = mongoose.model("User", userSchema);
 

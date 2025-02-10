@@ -21,33 +21,54 @@ const LoginPage = () => {
   };
 
   const handleLogin = async () => {
-    console.log("Email:", email); // ดูว่า email ถูกส่งไปหรือไม่
-    console.log("Password:", password); // ดูว่า password ถูกส่งไปหรือไม่
+  console.log("Email:", email); // ดูว่า email ถูกส่งไปหรือไม่
+  console.log("Password:", password); // ดูว่า password ถูกส่งไปหรือไม่
 
-    if (!email || !password) {
-      setSnackbarMessage("กรุณากรอกข้อมูลให้ครบ");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-      return;
-    }
+  if (!email || !password) {
+    setSnackbarMessage("กรุณากรอกข้อมูลให้ครบ");
+    setSnackbarSeverity("error");
+    setOpenSnackbar(true);
+    return;
+  }
 
-    try {
-      const response = await axios.post("http://localhost:5000/api/login", { email, password });
-      console.log("Login response:", response);
-      setSnackbarMessage(response.data.message || "เข้าสู่ระบบสำเร็จ!");
-      setSnackbarSeverity("success");
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        router.push("/home");
-      }, 1500);
-    } catch (error) {
-      console.error("Login error:", error);
-      console.error("Error response data:", error.response?.data);
-      setSnackbarMessage(error.response?.data?.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
-      setSnackbarSeverity("error");
-      setOpenSnackbar(true);
-    }    
-  };
+  try {
+    const response = await axios.post("http://localhost:5000/api/login", { email, password });
+    console.log("Login response:", response);
+    setSnackbarMessage(response.data.message || "เข้าสู่ระบบสำเร็จ!");
+    setSnackbarSeverity("success");
+    setOpenSnackbar(true);
+
+    // Get the user role from the response and redirect accordingly
+    const userRole = response.data.role;
+    console.log("Role from response:", userRole); // พิมพ์ role ที่ได้รับจาก response
+
+    // ให้เวลาแสดง snackbar ก่อน
+    setTimeout(() => {
+      switch (userRole) {
+        case 'user':
+          router.push("/home");
+          break;
+        case 'officer':
+          router.push("/officer");
+          break;
+        case 'owner':
+          router.push("/owner");
+          break;
+        case 'admin':
+          router.push("/admin");
+          break;
+        default:
+          router.push("/home"); // Default path in case of unknown role
+      }
+    }, 3000); // เพิ่มเวลาช้าหน่อย เพื่อให้ snackbar แสดงก่อน
+  } catch (error) {
+    console.error("Login error:", error);
+    console.error("Error response data:", error.response?.data);
+    setSnackbarMessage(error.response?.data?.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
+    setSnackbarSeverity("error");
+    setOpenSnackbar(true);
+  }    
+};
 
   return (
     <div className="app">
