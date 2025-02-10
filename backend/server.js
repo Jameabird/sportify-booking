@@ -11,9 +11,11 @@ const nodemailer = require('nodemailer');
 const app = express();
 app.use(
   cors({
-    origin: "*", // ตั้งค่า frontend ที่จะเข้าใช้งาน backend
+    origin: "http://localhost:3000", // กำหนด origin เฉพาะ
+    credentials: true, // อนุญาตให้ cookies หรือ headers ที่จำเป็นถูกส่งไปกับคำขอ
   })
 );
+
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
@@ -224,6 +226,62 @@ app.post('/api/verify-otp', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('เกิดข้อผิดพลาดในการตรวจสอบ OTP');
+  }
+});
+
+// Route สำหรับรีเซ็ตรหัสผ่าน
+app.post('/api/reset-password', async (req, res) => {
+  const { otp, newPassword, confirmPassword } = req.body;
+  
+  // ตรวจสอบ OTP
+  if (!otp || otp.length !== 6) {
+    return res.status(400).send('กรุณากรอก OTP 6 หลักที่ถูกต้อง');
+  }
+
+  // ตรวจสอบรหัสผ่านใหม่และยืนยันรหัสผ่าน
+  if (!newPassword || !confirmPassword) {
+    return res.status(400).send('กรุณากรอกรหัสผ่านใหม่และยืนยันรหัสผ่าน');
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).send('รหัสผ่านไม่ตรงกัน');
+  }
+
+  // ตรวจสอบความแข็งแกร่งของรหัสผ่าน (ตัวพิมพ์ใหญ่, ตัวเลข, อักขระพิเศษ)
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+  if (!passwordRegex.test(newPassword)) {
+    return res.status(400).send('รหัสผ่านต้องมีตัวพิมพ์ใหญ่, ตัวเลข, และอักขระพิเศษอย่างน้อย 1 ตัว');
+  }
+
+  try {
+    // ค้นหาผู้ใช้ที่มีรหัสรีเซ็ตรหัสผ่าน
+    const user = await User.findOne({ resetCode: otp });
+
+    if (!user) {
+      return res.status(404).send('OTP ไม่ถูกต้อง');
+    }
+
+    // ตรวจสอบว่า OTP หมดอายุหรือไม่
+    const currentTime = new Date();
+    if (user.resetCodeExpires < currentTime) {
+      return res.status(400).send('OTP หมดอายุแล้ว');
+    }
+
+    // รีเซ็ตรหัสผ่านใหม่โดยการแฮชรหัสผ่าน
+    const hashedPassword = await bcrypt.hash(newPassword, 10); // 10 คือจำนวนรอบในการแฮช
+
+    // บันทึกรหัสผ่านใหม่และลบ OTP
+    user.password = hashedPassword;
+    user.resetCode = null; // ลบรหัส OTP
+    user.resetCodeExpires = null; // ลบเวลา OTP หมดอายุ
+
+    // บันทึกรหัสผ่านใหม่ลงในฐานข้อมูล
+    await user.save();
+
+    res.status(200).send('รีเซ็ตรหัสผ่านสำเร็จ');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
   }
 });
 

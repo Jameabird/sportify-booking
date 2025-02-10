@@ -23,7 +23,7 @@ const ForgetPasswordPage = () => {
         setOpenSnackbar(true);
   
         setTimeout(() => {
-          router.push(`/forget_password/OTP?email=${email}`);
+          router.push(`/forget_password/Combined?email=${email}`);
         }, 1500);
         
       } catch (error) {
