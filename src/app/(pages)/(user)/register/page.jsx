@@ -290,6 +290,17 @@ const RegisterPage = () => {
                     />
                   ) : null}
                 </Box>
+                <h3 style={{
+                  color: "#d32f2f",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  marginBottom: "10px",
+                  backgroundColor: "#ffebee",
+                  padding: "8px",
+                  borderRadius: "5px"
+                }}>
+                  เพื่อยืนยันเเละใช้ในการคืนเงินเพื่อยกเลิกการจอง
+                </h3>
                 <Button
                   variant="contained"
                   color="primary"
