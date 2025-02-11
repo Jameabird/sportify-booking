@@ -87,9 +87,6 @@ const TopBar = (props) => {
         <Link href="/Spectator/category" style={getLinkStyle("/Spectator/category")}>
           Category
         </Link>
-        <Link href="/Spectator/booking" style={getLinkStyle("/Spectator/booking")}>
-          Booking
-        </Link>
         <Link href="/Spectator/about" style={getLinkStyle("/Spectator/about")}>
           About Contact Us
         </Link>
