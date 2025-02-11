@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
-import TopBar from "@components/Topbar";
+import TopBar_Owner from "@components/Topbar_Owner";
 import "@app/globals.css";
 
 export default function AddNewPlace() {
@@ -46,7 +46,7 @@ export default function AddNewPlace() {
           {/* TopBar */}
           <div className="grid grid-cols-12">
             <div className="col-span-12">
-              <TopBar textColor={"black"} />
+              <TopBar_Owner textColor={"black"} />
             </div>
           </div>
 
