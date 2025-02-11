@@ -59,13 +59,16 @@ export default function OwnerHome() {
           sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
         >
           {/* Category Buttons */}
-          {[{
-            title: "Management",
-            buttons: [
-              { text: "Office Management", path: "/owner/management" }, // ✅ เพิ่ม path
-              { text: "Report", path: "/owner/report" } // ตัวอย่าง path อื่น
-            ],
-          }].map((category, categoryIndex) => (
+          {[
+            {
+              title: "Management",
+              buttons: [
+                { text: "Office Management", path: "/owner/management" },
+                { text: "Report", path: "/owner/report" },
+                { text: "New Field", path: "/owner/new-field" } // ✅ เพิ่มปุ่มใหม่ที่นี่
+              ],
+            }
+          ].map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
               sx={{
@@ -98,7 +101,7 @@ export default function OwnerHome() {
                 {category.buttons.map((button, index) => (
                   <Box
                     key={index}
-                    onClick={() => router.push(button.path)} // ✅ นำทางไปที่ path ของปุ่ม
+                    onClick={() => router.push(button.path)}
                     sx={{
                       backgroundColor: "rgba(0,123,255,0.9)",
                       padding: "16px 32px",
