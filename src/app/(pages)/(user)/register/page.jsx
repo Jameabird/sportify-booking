@@ -25,6 +25,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [image, setImage] = useState(null);
+  const [bankImage, setBankImage] = useState(null); // State for the bank image
   const [username, setUsername] = useState(""); // เพิ่ม state สำหรับ username
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,10 +49,10 @@ const RegisterPage = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleImageChange = (event) => {
+  const handleBankImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setImage(file); // Show the selected image as preview
+      setBankImage(file); // Set the selected bank image
     }
   };
 
@@ -100,6 +101,10 @@ const RegisterPage = () => {
 
       if (image) {
         formData.append("profileImage", image);
+      }
+
+      if (bankImage) {
+        formData.append("bankImage", bankImage);
       }
 
       const response = await axios.post("http://localhost:5000/api/register", formData, {
@@ -271,19 +276,19 @@ const RegisterPage = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
+                    onChange={handleBankImageChange} // Handle file change for bank image
                     style={{ width: "100%" }}
                   />
-                  {image && typeof image === "string" ? (
+                  {bankImage && typeof bankImage === "string" ? (
                     <img
-                      src={`http://localhost:5000/${image}`} // โหลดจากเซิร์ฟเวอร์
-                      alt="Profile"
+                      src={`http://localhost:5000/${bankImage}`} // Load from the server
+                      alt="Bank Image"
                       style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
                     />
-                  ) : image ? (
+                  ) : bankImage ? (
                     <img
-                      src={URL.createObjectURL(image)}
-                      alt="Preview"
+                      src={URL.createObjectURL(bankImage)} // Preview image locally
+                      alt="Bank Image Preview"
                       style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
                     />
                   ) : null}

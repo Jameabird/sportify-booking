@@ -22,17 +22,28 @@ app.use(
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// ตั้งค่าการจัดเก็บไฟล์ภาพ
-const storage = multer.diskStorage({
+// ตั้งค่าการจัดเก็บไฟล์ profileImage ที่ path uploads/profile
+const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, "uploads/profile");
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
-const upload = multer({ storage: storage });
+// ตั้งค่าการจัดเก็บไฟล์ bankImage ที่ path uploads/bank
+const bankStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/bank");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const uploadProfile = multer({ storage: profileStorage });
+const uploadBank = multer({ storage: bankStorage });
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
 const transporter = nodemailer.createTransport({
@@ -50,10 +61,11 @@ mongoose
   .catch((err) => console.log("MongoDB Connection Error:", err));
 
 // Route สำหรับการลงทะเบียน
-app.post("/api/register", upload.single("profileImage"), async (req, res) => {
+app.post("/api/register", uploadProfile.single("profileImage"), uploadBank.single("bankImage"), async (req, res) => {
   try {
     console.log("Received form data:", req.body);
     console.log("Uploaded file:", req.file);
+    console.log("Uploaded files:", req.files);
 
     const {
       username,
@@ -89,6 +101,7 @@ app.post("/api/register", upload.single("profileImage"), async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const profileImage = req.file ? req.file.path : null;
+    const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : "";
 
     // สร้าง object สำหรับบันทึกข้อมูล
     const newUser = new User({
@@ -100,6 +113,7 @@ app.post("/api/register", upload.single("profileImage"), async (req, res) => {
       bank: bank || undefined,
       accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
       profileImage,
+      bankImage,
     });
 
     await newUser.save();
