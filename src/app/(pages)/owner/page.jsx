@@ -63,7 +63,7 @@ export default function OwnerHome() {
             title: "Management",
             buttons: [
               { text: "Office Management", path: "/owner/management" }, // ✅ เพิ่ม path
-              { text: "Dashboard", path: "/owner/dashboard" } // ตัวอย่าง path อื่น
+              { text: "Report", path: "/owner/report" } // ตัวอย่าง path อื่น
             ],
           }].map((category, categoryIndex) => (
             <Box
