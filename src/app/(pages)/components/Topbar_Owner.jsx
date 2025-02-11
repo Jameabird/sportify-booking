@@ -1,5 +1,6 @@
 "use client";
-import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";

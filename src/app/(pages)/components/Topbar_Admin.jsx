@@ -1,11 +1,12 @@
 "use client";
-import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Admin = (props) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null); // State สำหรับเปิด/ปิดเมนู
   const currentPath = usePathname();
   const router = useRouter();
 
@@ -36,7 +37,6 @@ const TopBar_Admin = (props) => {
       color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
     },
   });
-  
 
   return (
     <Box

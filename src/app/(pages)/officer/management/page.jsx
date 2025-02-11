@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import "./managePage.css"; // นำเข้าไฟล์ CSS
 
-export default function Manage() {
+export default function management() {
   const buildings = ["ตึก 1", "ตึก 2", "ตึก 3"];
   const sports = ["บาสเกตบอล", "แบดมินตัน", "ฟุตบอล"];
 

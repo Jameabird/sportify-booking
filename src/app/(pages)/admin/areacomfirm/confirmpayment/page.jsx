@@ -113,14 +113,21 @@ const AdminPaidTable = () => {
   const handleCloseImagePopup = () => {
     setShowImagePopup(false);
   };
-const router = useRouter();
+
+  const router = useRouter();
+
+  // Function to handle the click on the arrow icon
+  const handleArrowClick = () => {
+    router.push("/admin/areacomfirm"); // Route to /admin/area
+  };
+
   return (
     <>
       <TopBar_Admin textColor={"black"} />
       <div className="p-6">
         <div className="flex items-center mb-4">
-          <Button className="p-2" onClick={() => router.push("/admin/management")}>
-            <ArrowIcon className="w-6 h-6 text-gray-500 mr-4"  />
+          <Button className="p-2" onClick={handleArrowClick}> {/* Call handleArrowClick on click */}
+            <ArrowIcon className="w-6 h-6 text-gray-500 mr-4" />
           </Button>
           <h1 className="text-2xl font-semibold flex-grow">Better Club Pattaya</h1>
         </div>
@@ -205,3 +212,4 @@ const router = useRouter();
 };
 
 export default AdminPaidTable;
+
