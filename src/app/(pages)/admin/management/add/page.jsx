@@ -142,13 +142,6 @@ export default function AddAccountPage() {
                 </div>
             </Box>
 
-            {/* Snackbar for notifications */}
-            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                <MuiAlert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-                    {snackbarMessage}
-                </MuiAlert>
-            </Snackbar>
-
             {/* Dialog for success/error */}
             <Dialog
                 open={openDialog}
@@ -163,12 +156,13 @@ export default function AddAccountPage() {
                     }
                 }}
             >
+                {/* Dialog Title */}
                 <DialogTitle
                     sx={{
                         textAlign: 'center',
                         fontSize: '20px',
                         fontWeight: 'bold',
-                        color: dialogSeverity === "success" ? '#4caf50' : '#f44336',
+                        color: dialogSeverity === "success" ? '#1e40af' : '#f44336',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -176,7 +170,7 @@ export default function AddAccountPage() {
                     }}
                 >
                     {dialogSeverity === "success" ? (
-                        <span style={{ color: '#4caf50' }}>✔</span>
+                        <span style={{ color: '#1e40af' }}>✔</span>
                     ) : (
                         <span style={{ color: '#f44336' }}>❌</span>
                     )}
@@ -188,19 +182,22 @@ export default function AddAccountPage() {
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: 'center', paddingTop: '10px' }}>
+                    {/* Dialog Button */}
                     <Button
-                        onClick={handleCloseDialog} // This will trigger the redirect
-                        color={dialogSeverity === "success" ? "success" : "error"}
+                        onClick={handleCloseDialog}
+                        color={dialogSeverity === "success" ? "primary" : "error"} // ใช้ primary หรือกำหนดเองด้านล่าง
                         variant="contained"
                         sx={{
+                            backgroundColor: dialogSeverity === "success" ? '#1e40af' : '#d32f2f',
+                            '&:hover': {
+                                backgroundColor: dialogSeverity === "success" ? '#162d68' : '#b71c1c',
+                                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+                            },
                             fontSize: '14px',
                             fontWeight: 'bold',
                             padding: '8px 20px',
                             textTransform: 'none',
                             borderRadius: '8px',
-                            '&:hover': {
-                                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
-                            },
                         }}
                     >
                         OK

@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import "./informPage.css"; // นำเข้าไฟล์ CSS
 
-export default function Inform() {
+export default function inform() {
   const [issueType, setIssueType] = useState("");
   const [title, setTitle] = useState("");
   const [details, setDetails] = useState("");

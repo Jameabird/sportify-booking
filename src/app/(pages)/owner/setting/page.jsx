@@ -244,8 +244,7 @@ export default function Profile() {
                                     name="role"
                                     fullWidth
                                     value={profileData.role}
-                                    disabled={!isEditing}
-                                    onChange={handleInputChange}
+                                    disabled={true}
                                     sx={{
                                         "& .MuiOutlinedInput-root": {
                                             transition: "all 0.3s ease",
@@ -261,17 +260,19 @@ export default function Profile() {
                                         <>
                                             <Button
                                                 variant="contained"
-                                                color="success"
+                                                onClick={handleSaveClick}
                                                 sx={{
+                                                    backgroundColor: "#1e40af", // เปลี่ยนสีพื้นหลังเป็นน้ำเงินเข้ม
+                                                    color: "white", // เปลี่ยนสีตัวอักษรให้เป็นสีขาว
                                                     width: "48%",
                                                     fontSize: "13px",
                                                     transition: "all 0.3s ease",
                                                     "&:hover": {
+                                                        backgroundColor: "#162d68", // สีเข้มขึ้นเมื่อโฮเวอร์
                                                         boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
                                                         transform: "scale(1.05)",
                                                     },
                                                 }}
-                                                onClick={handleSaveClick}
                                             >
                                                 Save
                                             </Button>
@@ -294,7 +295,19 @@ export default function Profile() {
                                         </>
                                     ) : (
                                         <>
-                                            <Button variant="contained" color="success" sx={{ width: "48%", fontSize: "13px" }} onClick={handleChangePasswordClick}>
+                                            <Button
+                                                variant="contained"
+                                                onClick={handleChangePasswordClick}
+                                                sx={{
+                                                    backgroundColor: "#1e40af", // กำหนดสีพื้นหลังเป็นน้ำเงินเข้ม
+                                                    "&:hover": {
+                                                        backgroundColor: "#162d68", // เปลี่ยนเป็นน้ำเงินเข้มขึ้นเมื่อโฮเวอร์
+                                                    },
+                                                    width: "48%",
+                                                    fontSize: "13px",
+                                                    color: "white", // ทำให้ข้อความอ่านง่ายขึ้น
+                                                }}
+                                            >
                                                 Change Password
                                             </Button>
                                             <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleEditClick}>
@@ -390,10 +403,15 @@ export default function Profile() {
                                 {/* Change Password Button */}
                                 <Button
                                     variant="contained"
-                                    color="success"
                                     fullWidth
-                                    sx={{ fontSize: "13px" }}
                                     onClick={handleChangePassword}
+                                    sx={{
+                                        backgroundColor: "#1e40af", // สีพื้นหลังเป็นน้ำเงินเข้ม
+                                        "&:hover": {
+                                            backgroundColor: "#162d68", // เปลี่ยนสีเข้มขึ้นเมื่อโฮเวอร์
+                                        },
+                                        fontSize: "13px",
+                                    }}
                                 >
                                     Change Password
                                 </Button>
@@ -413,12 +431,7 @@ export default function Profile() {
                     )}
                 </Box>
             </Box>
-            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                <MuiAlert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-                    {snackbarMessage}
-                </MuiAlert>
-            </Snackbar>
-
+            {/* Dialog for success/error */}
             <Dialog
                 open={openDialog}
                 onClose={handleCloseDialog}
@@ -432,12 +445,13 @@ export default function Profile() {
                     }
                 }}
             >
+                {/* Dialog Title */}
                 <DialogTitle
                     sx={{
                         textAlign: 'center',
                         fontSize: '20px',
                         fontWeight: 'bold',
-                        color: dialogSeverity === "success" ? '#4caf50' : '#f44336',
+                        color: dialogSeverity === "success" ? '#1e40af' : '#f44336',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -445,7 +459,7 @@ export default function Profile() {
                     }}
                 >
                     {dialogSeverity === "success" ? (
-                        <span style={{ color: '#4caf50' }}>✔</span>
+                        <span style={{ color: '#1e40af' }}>✔</span>
                     ) : (
                         <span style={{ color: '#f44336' }}>❌</span>
                     )}
@@ -457,19 +471,22 @@ export default function Profile() {
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: 'center', paddingTop: '10px' }}>
+                    {/* Dialog Button */}
                     <Button
                         onClick={handleCloseDialog}
-                        color={dialogSeverity === "success" ? "success" : "error"}
+                        color={dialogSeverity === "success" ? "primary" : "error"} // ใช้ primary หรือกำหนดเองด้านล่าง
                         variant="contained"
                         sx={{
+                            backgroundColor: dialogSeverity === "success" ? '#1e40af' : '#d32f2f',
+                            '&:hover': {
+                                backgroundColor: dialogSeverity === "success" ? '#162d68' : '#b71c1c',
+                                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
+                            },
                             fontSize: '14px',
                             fontWeight: 'bold',
                             padding: '8px 20px',
                             textTransform: 'none',
                             borderRadius: '8px',
-                            '&:hover': {
-                                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
-                            },
                         }}
                     >
                         OK
