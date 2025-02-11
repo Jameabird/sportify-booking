@@ -39,6 +39,77 @@
   align-items: center; 
   flex-direction: column; 
 }
+
+.flex-container {
+ 
+  gap: 4px; /* ระยะห่างระหว่าง elements */
+}
+
+.flex-container label {
+  min-width: 30px; /* กำหนดความกว้างขั้นต่ำของ label */
+  text-align: right;
+}
+
+.flex-container input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1; /* ขยาย input ให้เต็มพื้นที่ที่เหลือ */
+}
+
+p {
+  color:#666;
+  margin: 0;
+  white-space: nowrap; /* ป้องกันข้อความขึ้นบรรทัดใหม่ */
+}
+
+.inputnumber {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px;
+  border-radius: 4px;
+}
+.container {
+  display: flex;
+  align-items: center;  /* จัดให้อยู่ตรงกลางแนวแกนตั้ง */
+}
+
+.container label {
+  min-width: 80px; /* กำหนดความกว้างขั้นต่ำของ label */
+  text-align: left; /* จัดให้ข้อความอยู่ชิดซ้าย */
+}
+
+.counter-button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.counter-button:hover {
+  background-color: #0056b3;
+}
+
+h3{
+  margin-bottom: 10px;
+}
+
+
+input {
+  min-width: 40px;
+  flex: 1; /* ให้ input กว้างเต็มที่ */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
 /* ปรับแต่ง input ของ DatePicker */
 .datepicker-input {
   width: 100px;
@@ -53,6 +124,7 @@
   transition: all 0.3s ease;
   cursor: pointer;
 }
+
 
 .datepicker-input::placeholder {
   color: #007bff; /* สี placeholder */
@@ -139,7 +211,7 @@
 .navigation-button {
   background: none;
   border: none;
-  color: white;
+  color: #007bff;
   font-size: 18px;
   cursor: pointer;
   transition: color 0.3s ease;
@@ -156,6 +228,28 @@
 
 .react-datepicker__current-month {
   display: none; /* ซ่อนข้อความเดือนและปี */
+}
+
+.checkbox-container {
+
+  gap: 8px;
+  cursor: pointer; /* ✅ ทำให้คลิกง่ายขึ้น */
+}
+
+.checkbox-container input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.checkbox-container label {
+  cursor: pointer;
+}
+
+.checkbox-container.disabled {
+  color: gray;
+  opacity: 0.5;
 }
 
 

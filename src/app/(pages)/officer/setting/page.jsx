@@ -4,7 +4,7 @@ import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuIte
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import TopBar_Owner from "../../components/Topbar_Owner";
+import TopBar_Officer from "../../components/Topbar_Officer";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -13,10 +13,10 @@ export default function Profile() {
     const [isEditing, setIsEditing] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [profileData, setProfileData] = useState({
-        name: "Owner1",
-        email: "Owner@gmail.com",
+        name: "Officer1",
+        email: "Officer1@gmail.com",
         phone: "0123456789",
-        role: "Owner",
+        role: "Officer",
     });
 
     const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
@@ -32,10 +32,11 @@ export default function Profile() {
     const handleChangePasswordClick = () => setIsChangingPassword(true);
     const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
     const [dialogSeverity, setDialogSeverity] = useState("success");  // เพิ่ม state สำหรับระดับของข้อความ (success หรือ error)
+
+    // เพิ่ม state สำหรับควบคุมการแสดงผลรหัสผ่าน
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
 
     const handleSaveClick = () => {
         if (!profileData.name || !profileData.phone || !profileData.role) {
@@ -127,7 +128,7 @@ export default function Profile() {
                 zIndex: -1, // Keeps the background below the profile section
             }} />
 
-            <TopBar_Owner /> {/* Fixed top bar */}
+            <TopBar_Officer /> {/* Fixed top bar */}
 
             {/* Profile Section */}
             <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
@@ -428,6 +429,7 @@ export default function Profile() {
                                 </Button>
                             </Box>
                         </>
+
                     )}
                 </Box>
             </Box>

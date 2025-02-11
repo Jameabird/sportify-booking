@@ -4,6 +4,7 @@ import { Box, TextField, Button, Snackbar, Alert } from "@mui/material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
 import "./forgetPasswordPage.css";  // Import the CSS file
+import axios from 'axios';
 
 const ForgetPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -11,21 +12,35 @@ const ForgetPasswordPage = () => {
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความใน Snackbar
   const router = useRouter();
 
-  const handleSendLink = () => {
+  const handleSendLink = async () => {
     if (email) {
-      // ส่งอีเมลสำเร็จ
-      setSnackbarMessage("ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
-      setOpenSnackbar(true);
-      setTimeout(() => {
-        router.push("/forget_password/OTP"); // ไปยังหน้า OTP
-      }, 1500);
+      const normalizedEmail = email.toLowerCase();
+      console.log("Sending reset link to email:", normalizedEmail);  // ดูค่าของ email ที่จะส่ง
+      try {
+        // ส่งคำขอไปยัง backend เพื่อเช็คอีเมล
+        await axios.post('http://localhost:5000/api/forget-password', {email: normalizedEmail });
+        
+        setSnackbarMessage("ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
+        setOpenSnackbar(true);
+  
+        setTimeout(() => {
+          router.push(`/forget_password/Combined?email=${email}`);
+        }, 1500);
+        
+      } catch (error) {
+        if (error.response) {
+          setSnackbarMessage(error.response.data); // ข้อความจากเซิร์ฟเวอร์
+        } else {
+          setSnackbarMessage('ไม่สามารถส่งลิงค์รีเซ็ตรหัสผ่านได้');
+        }
+        setOpenSnackbar(true);
+      }
     } else {
-      // ถ้าไม่มีอีเมลกรอก
       setSnackbarMessage("กรุณากรอกอีเมลของคุณ");
       setOpenSnackbar(true);
     }
   };
-
+  
   return (
     <div className="app">
       <main className="content">

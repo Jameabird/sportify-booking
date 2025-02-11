@@ -21,7 +21,7 @@ import {
 import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
 import Header from "@components/Header";
 import Image from "next/image";
-import badminton_img from "@assets/badminton.png";
+//import badminton_img from "@assets/badminton/badminton.png";
 import { data } from "autoprefixer";
 import { Dropdown, DatePicker, Space } from "antd";
 import { Dayjs } from "dayjs";
@@ -29,7 +29,7 @@ import dayjs from "dayjs";
 import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
-import { Tab } from "bootstrap";
+//import { Tab } from "bootstrap";
 
 const Booking = () => {
   const [buildingNames, setBuildingNames] = useState([]);
