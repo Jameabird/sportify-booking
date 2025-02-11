@@ -104,7 +104,7 @@ export default function Officer() {
             <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
               {[
                 { text: "Manage", path: "/officer/management" },
-                { text: "Inform to Owner", path: "/officer/inform" },
+                { text: "Inform to Owner", path: "/officer/Inform" },
               ].map((item, index) => (
                 <Box
                   key={index}
