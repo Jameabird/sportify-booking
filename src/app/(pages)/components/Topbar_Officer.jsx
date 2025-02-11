@@ -1,11 +1,12 @@
 "use client";
-import { Box, Avatar, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Officer = (props) => {
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null); // สำหรับเปิด/ปิดเมนู Avatar
   const currentPath = usePathname();
   const router = useRouter();
 
@@ -36,7 +37,6 @@ const TopBar_Officer = (props) => {
       color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
     },
   });
-  
 
   return (
     <Box
@@ -56,7 +56,7 @@ const TopBar_Officer = (props) => {
         <Link href="/">
           <div className="text-3xl font-bold flex pl-10">
             <div style={{ color: props.textColor }}>SPORTIFY</div>
-            <div className="pl-2" style={{ color: "#1e40af" }}>BOOKING</div>
+            <div className="pl-2" style={{ color: "#1e40af" }}>BOOKING</div> {/* เปลี่ยนสีเป็นน้ำเงิน */}
           </div>
         </Link>
       </Box>
