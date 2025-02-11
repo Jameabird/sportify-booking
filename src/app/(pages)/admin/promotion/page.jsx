@@ -120,6 +120,38 @@ const HistoryPageAdmin = () => {
 
   const [selectedDate, setSelectedDate] = useState(null);
 
+  const [isChecked, setIsChecked] = useState(false);
+
+  const toggleCheckbox = () => {
+    setIsChecked(!isChecked);
+  };
+
+  const [usage, setUsage] = useState(1); // state สำหรับจำนวน
+  const [discount, setDiscount] = useState(1); // state สำหรับส่วนลด
+
+  // ฟังก์ชันเพิ่ม-ลดจำนวน
+  const increaseUsage = () => setUsage((prev) => prev + 1);
+  const decreaseUsage = () => setUsage((prev) => (prev > 0 ? prev - 1 : 0));
+
+  // ฟังก์ชันเพิ่ม-ลดส่วนลด
+  const increaseDiscount = () => setDiscount((prev) => prev + 1);
+  const decreaseDiscount = () =>
+    setDiscount((prev) => (prev > 0 ? prev - 1 : 0));
+
+  const [isCheckedAmount, setIsCheckedAmount] = useState(false);
+  const [isCheckedPercentage, setIsCheckedPercentage] = useState(false);
+  const [selectedPercentage, setSelectedPercentage] = useState(10); // ค่าเริ่มต้น 10%
+
+  // ฟังก์ชันสลับการเลือก
+  const toggleAmountCheckbox = () => {
+    setIsCheckedAmount(!isCheckedAmount);
+    if (!isCheckedAmount) setIsCheckedPercentage(false); // ปิดอีกอัน
+  };
+
+  const togglePercentageCheckbox = () => {
+    setIsCheckedPercentage(!isCheckedPercentage);
+    if (!isCheckedPercentage) setIsCheckedAmount(false); // ปิดอีกอัน
+  };
   return (
     <>
       <TopBar_Admin textColor={"black"} />
@@ -199,65 +231,34 @@ const HistoryPageAdmin = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <h3>{isEditMode ? "Edit Promotion" : "Add Promotion"}</h3>
-              <input
-                type="text"
-                placeholder="Name"
-                value={newPromotions.name}
-                onChange={(e) =>
-                  setNewPromotions({ ...newPromotions, name: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                value={newPromotions.description}
-                onChange={(e) =>
-                  setNewPromotions({
-                    ...newPromotions,
-                    description: e.target.value,
-                  })
-                }
-              />
-              {/* 📅 ปฏิทินเลือกวันเริ่มต้น */}
-              <label>Start Date:</label>
-              <div className="datepicker-container">
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  dateFormat="MM/dd/yyyy"
-                  className="datepicker-input"
-                  placeholderText="mm/dd/yyyy"
-                  calendarClassName="custom-calendar"
-                  renderCustomHeader={({
-                    date,
-                    decreaseMonth,
-                    increaseMonth,
-                    prevMonthButtonDisabled,
-                    nextMonthButtonDisabled,
-                  }) => (
-                    <div className="custom-header">
-                      <button
-                        onClick={decreaseMonth}
-                        disabled={prevMonthButtonDisabled}
-                        className="navigation-button"
-                      >
-                        &#8249; {/* HTML Code for "<" */}
-                      </button>
-                      <span className="current-month">
-                        {date.toLocaleString("default", { month: "long" })}{" "}
-                        {date.getFullYear()}
-                      </span>
-                      <button
-                        onClick={increaseMonth}
-                        disabled={nextMonthButtonDisabled}
-                        className="navigation-button"
-                      >
-                        &#8250; {/* HTML Code for ">" */}
-                      </button>
-                    </div>
-                  )}
+              <div className="container">
+                <label>ชื่อ:</label>
+                <input
+                  type="text"
+                  placeholder="Name......"
+                  value={newPromotions.name}
+                  onChange={(e) =>
+                    setNewPromotions({ ...newPromotions, name: e.target.value })
+                  }
                 />
-                <label>End Date:</label>
+              </div>
+              <div className="container">
+                <label>รายละเอียด: </label>
+                <input
+                  type="text"
+                  placeholder="Description......"
+                  value={newPromotions.description}
+                  onChange={(e) =>
+                    setNewPromotions({
+                      ...newPromotions,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <label className="container">วันเริ่มต้น: </label>
+              <div className="datepicker-container ">
                 <DatePicker
                   selected={selectedDate}
                   onChange={(date) => setSelectedDate(date)}
@@ -296,22 +297,138 @@ const HistoryPageAdmin = () => {
                 />
               </div>
 
-              <input
-                type="text"
-                placeholder="Discount Amount"
-                value={newPromotions.amount}
-                onChange={(e) =>
-                  setNewPromotions({ ...newPromotions, amount: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Usage Limit"
-                value={newPromotions.usage}
-                onChange={(e) =>
-                  setNewPromotions({ ...newPromotions, usage: e.target.value })
-                }
-              />
+              <label className="container">วันสิ้นสุด: </label>
+              <div>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  dateFormat="MM/dd/yyyy"
+                  className="datepicker-input"
+                  placeholderText="mm/dd/yyyy"
+                  calendarClassName="custom-calendar"
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                    prevMonthButtonDisabled,
+                    nextMonthButtonDisabled,
+                  }) => (
+                    <div className="custom-header">
+                      <button
+                        onClick={decreaseMonth}
+                        disabled={prevMonthButtonDisabled}
+                        className="navigation-button"
+                      >
+                        &#8249; {/* HTML Code for "<" */}
+                      </button>
+                      <span className="current-month">
+                        {date.toLocaleString("default", { month: "long" })}{" "}
+                        {date.getFullYear()}
+                      </span>
+                      <button
+                        onClick={increaseMonth}
+                        disabled={nextMonthButtonDisabled}
+                        className="navigation-button"
+                      >
+                        &#8250; {/* HTML Code for ">" */}
+                      </button>
+                    </div>
+                  )}
+                />
+              </div>
+              <label className="container">จำนวนครั้งที่จองสนาม</label>
+              <div>             
+                <div className="container">
+                  <label>จำนวน: </label>
+                  <button className="counter-button" onClick={decreaseUsage}>
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={usage}
+                    readOnly
+                    className="inputnumber"
+                  />
+                  <button className="counter-button" onClick={increaseUsage}>
+                    +
+                  </button>
+                  <p> /ครั้ง</p>
+                </div>
+                </div>
+                <label className="container">ประเภทส่วนลด</label>
+
+                <div
+                  className={`checkbox-container ${
+                    isCheckedAmount ? "" : "disabled"
+                  }`}
+                  onClick={toggleCheckbox}
+                >
+                  <input
+                    type="checkbox"
+                    id="promo-amount-checkbox"
+                    checked={isCheckedAmount}
+                    onChange={toggleAmountCheckbox}
+                  />
+                  <label htmlFor="promo-amount-checkbox">
+                    โปรโมชั่นแบบเลือกจำนวน
+                  </label>
+                </div>
+              
+
+              {isCheckedAmount && (
+                <div className="flex-container">
+                  <label>ส่วนลด: </label>
+                  <button className="counter-button" onClick={decreaseDiscount}>
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={discount}
+                    readOnly
+                    className="inputnumber"
+                  />
+                  <button className="counter-button" onClick={increaseDiscount}>
+                    +
+                  </button>
+                </div>
+              )}
+
+              {/* ✅ โปรโมชั่นแบบเลือกเปอร์เซ็นต์ */}
+              <div
+                className={`checkbox-container ${
+                  isCheckedPercentage ? "" : "disabled"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  id="promo-percentage-checkbox"
+                  checked={isCheckedPercentage}
+                  onChange={togglePercentageCheckbox}
+                />
+                <label htmlFor="promo-percentage-checkbox">
+                  โปรโมชั่นแบบเลือกเปอร์เซ็นต์
+                </label>
+              </div>
+
+              {isCheckedPercentage && (
+                <div className="percentage-selector">
+                  <label>เลือกเปอร์เซ็นต์: </label>
+                  <select
+                    value={selectedPercentage}
+                    onChange={(e) =>
+                      setSelectedPercentage(Number(e.target.value))
+                    }
+                    className="select-box"
+                  >
+                    {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => (
+                      <option key={percent} value={percent}>
+                        {percent}%
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="modal-buttons">
                 <button onClick={isEditMode ? handleUpdate : handleAddUser}>
                   {isEditMode ? "Update" : "Save"}
