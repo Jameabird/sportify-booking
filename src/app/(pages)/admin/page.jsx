@@ -13,7 +13,7 @@ const adminCategories = [
   },
   {
     title: "Management",
-    buttons: ["Owner Management", "Dashboard", "Promotion"], // ✅ เพิ่ม "Promotion" เข้า Management
+    buttons: ["Owner Management", "Report", "Promotion"], // ✅ เพิ่ม "Promotion" เข้า Management
   },
 ];
 
