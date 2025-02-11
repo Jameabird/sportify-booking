@@ -64,15 +64,8 @@ const RegisterPage = () => {
 
   // ฟังก์ชันตรวจสอบว่ากรอกข้อมูลครบหรือไม่
   const validateForm = () => {
-    if (
-      !username ||
-      !email ||
-      !password ||
-      !confirmPassword ||
-      !bank ||
-      !image
-    ) {
-      setSnackbarMessage("กรุณากรอกข้อมูลให้ครบทุกฟิลด์");
+    if (!username || !email || !password || !confirmPassword) {
+      setSnackbarMessage("กรุณากรอก Username, Email, Password และ Confirm Password ให้ครบ");
       setOpenSnackbar(true);
       return false;
     }
@@ -82,19 +75,19 @@ const RegisterPage = () => {
   // ฟังก์ชันเมื่อกด Register
   const handleRegister = async () => {
     if (!validateForm()) return;
-  
+
     if (!validatePassword(password)) {
       setSnackbarMessage("รหัสผ่านต้องมีตัวอักษรใหญ่, ตัวเลข, และตัวอักษรพิเศษ");
       setOpenSnackbar(true);
       return;
     }
-  
+
     if (password !== confirmPassword) {
       setSnackbarMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
       setOpenSnackbar(true);
       return;
     }
-  
+
     try {
       const formData = new FormData();
       formData.append("username", username);
@@ -104,15 +97,15 @@ const RegisterPage = () => {
       formData.append("lastName", lastName);
       formData.append("bank", bank);
       formData.append("accountNumber", accountNumber);
-  
+
       if (image) {
         formData.append("profileImage", image);
       }
-  
+
       const response = await axios.post("http://localhost:5000/api/register", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       if (response.status === 201) {
         setSnackbarMessage("ลงทะเบียนสำเร็จ!");
         setOpenSnackbar(true);
@@ -122,7 +115,7 @@ const RegisterPage = () => {
       }
     } catch (error) {
       console.error("Registration Error:", error);
-  
+
       if (error.response) {
         if (error.response.status === 400 && error.response.data.message === "Email already exists") {
           setSnackbarMessage("อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น");
@@ -135,7 +128,7 @@ const RegisterPage = () => {
       setOpenSnackbar(true);
     }
   };
-  
+
   return (
     <div className="app">
       <main className="content">
@@ -249,11 +242,16 @@ const RegisterPage = () => {
                     onChange={handleBankChange}
                     label="Bank"
                   >
-                    <MenuItem value="BAAC">BAAC</MenuItem>
-                    <MenuItem value="SCB">SCB</MenuItem>
-                    <MenuItem value="K-Bank">K-Bank</MenuItem>
-                    <MenuItem value="Krungthai">Krungthai</MenuItem>
-                    <MenuItem value="TTB">TTB</MenuItem>
+                    <MenuItem value="PromptPay"> PromptPay </MenuItem>
+                    <MenuItem value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</MenuItem>
+                    <MenuItem value="SCB">ไทยพาณิชย์ (SCB)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
+                    <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
+                    <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
+                    <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
                   </Select>
                 </FormControl>
                 <TextField
@@ -299,7 +297,8 @@ const RegisterPage = () => {
                   padding: "8px",
                   borderRadius: "5px"
                 }}>
-                  เพื่อยืนยันเเละใช้ในการคืนเงินเพื่อยกเลิกการจอง
+                  เพื่อยืนยันเเละใช้ในการคืนเงินเพื่อยกเลิกการจอง สามารถใส่ข้อมูลในภายหลังได้ที่ settings
+                  ถ้าไม่ใส่การคืนเงินให้ทางผู้ใช้งานจะถือเป็นโมฆะ
                 </h3>
                 <Button
                   variant="contained"

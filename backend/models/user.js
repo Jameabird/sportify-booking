@@ -18,21 +18,31 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    minlength: 8, // Google Login อาจไม่มี password
+    minlength: 8,
+    required: true,
   },
   firstName: {
     type: String,
-    required: true,
     trim: true,
   },
   lastName: {
     type: String,
-    required: true,
     trim: true,
   },
   bank: {
     type: String,
-    enum: ['BAAC', 'SCB', 'K-Bank', 'Krungthai', 'TTB'],
+    enum: [
+      'PromptPay', // พร้อมเพย์
+      'BAAC', // เพื่อการเกษตรและสหกรณ์การเกษตร
+      'SCB', // ไทยพาณิชย์
+      'KBank', // กสิกรไทย
+      'Krungthai', // กรุงไทย
+      'TTB', // TTB
+      'BBL', // กรุงเทพ
+      'Krungsri', // กรุงศรีอยุธยา
+      'Thanachart' // ธนชาต
+    ],
+    required: false,
   },
   accountNumber: {
     type: String,
@@ -46,6 +56,7 @@ const userSchema = new mongoose.Schema({
     match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'],
     minlength: 10,
     maxlength: 10,
+    required: false,
   },
   resetCode: {
     type: String,  // รหัสรีเซ็ต
@@ -71,6 +82,10 @@ const userSchema = new mongoose.Schema({
 
 
 userSchema.pre("save", async function (next) {
+  if (this.email) {
+    this.email = this.email.toLowerCase(); // ทำให้ email เป็นตัวพิมพ์เล็กทั้งหมด
+  }
+
   if (!this.isModified("password")) return next();
 
   try {

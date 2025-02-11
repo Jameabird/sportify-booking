@@ -6,8 +6,8 @@ const User = require("./models/user");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
-const nodemailer = require('nodemailer');
-const { OAuth2Client } = require('google-auth-library');
+const nodemailer = require("nodemailer");
+const { OAuth2Client } = require("google-auth-library");
 
 console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -36,10 +36,10 @@ const upload = multer({ storage: storage });
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,  // อีเมลผู้ส่ง
-    pass: process.env.EMAIL_PASS,  // รหัสผ่านอีเมลผู้ส่ง
+    user: process.env.EMAIL_USER, // อีเมลผู้ส่ง
+    pass: process.env.EMAIL_PASS, // รหัสผ่านอีเมลผู้ส่ง
   },
 });
 
@@ -65,6 +65,15 @@ app.post("/api/register", upload.single("profileImage"), async (req, res) => {
       accountNumber,
     } = req.body;
 
+    if (!username || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "กรุณากรอก Username, Email และ Password ให้ครบ" });
+    }
+
+    // บังคับให้ email เป็นตัวพิมพ์เล็กทั้งหมด
+    const normalizedEmail = email.toLowerCase();
+
     // ตรวจสอบรูปแบบอีเมล
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -81,26 +90,15 @@ app.post("/api/register", upload.single("profileImage"), async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const profileImage = req.file ? req.file.path : null;
 
-    if (
-      !username ||
-      !email ||
-      !password ||
-      !firstName ||
-      !lastName ||
-      !bank ||
-      !accountNumber
-    ) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
-    }
-
+    // สร้าง object สำหรับบันทึกข้อมูล
     const newUser = new User({
       username,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
-      firstName,
-      lastName,
-      bank,
-      accountNumber,
+      firstName: firstName || undefined, // ป้องกันการบันทึกค่าว่าง
+      lastName: lastName || undefined, // ป้องกันการบันทึกค่าว่าง
+      bank: bank || undefined,
+      accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
       profileImage,
     });
 
@@ -119,7 +117,7 @@ app.post("/api/login", async (req, res) => {
     console.log("Received password:", password); // พิมพ์ password ที่รับมา
 
     // ลบช่องว่างออกจากอีเมลและรหัสผ่าน (เพื่อหลีกเลี่ยงการป้อนค่าที่มีช่องว่าง)
-    email = email.trim();
+    email = email.trim().toLowerCase();
     password = password.trim();
 
     // ตรวจสอบว่าอีเมลและรหัสผ่านไม่ว่าง
@@ -154,14 +152,16 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ!", token, role: user.role });
+    res
+      .status(200)
+      .json({ message: "เข้าสู่ระบบสำเร็จ!", token, role: user.role });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Server error", error });
   }
 });
 
-app.post("/api/google-login", async (req, res) => { 
+app.post("/api/google-login", async (req, res) => {
   const { token } = req.body;
 
   if (!token) {
@@ -191,7 +191,7 @@ app.post("/api/google-login", async (req, res) => {
 
     // ตรวจสอบว่า user มีในระบบหรือไม่
     let user = await User.findOne({ email: payload.email });
-    
+
     if (!user) {
       // ถ้าไม่มีผู้ใช้ในระบบ ให้ลงทะเบียนใหม่
       user = new User({
@@ -202,7 +202,7 @@ app.post("/api/google-login", async (req, res) => {
         profileImage: payload.picture || "",
         role: "user",
         phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
-        accountNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
+        accountNumber: "Unknown", // ใส่ค่าเริ่มต้นชั่วคราว
         password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
         authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
       });
@@ -237,16 +237,18 @@ app.post("/api/google-login", async (req, res) => {
 });
 
 // Route สำหรับรีเซ็ตรหัสผ่าน
-app.post('/api/forget-password', async (req, res) => {
-  const { email } = req.body;
-  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();  // สร้างรหัสรีเซ็ต
-  const expiryTime = new Date(Date.now() + 5 * 60 * 1000);  // รหัสรีเซ็ตหมดอายุใน 5 นาที
+app.post("/api/forget-password", async (req, res) => {
+  let { email } = req.body;
+  email = email.toLowerCase();
+
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString(); // สร้างรหัสรีเซ็ต
+  const expiryTime = new Date(Date.now() + 5 * 60 * 1000); // รหัสรีเซ็ตหมดอายุใน 5 นาที
 
   try {
     // ตรวจสอบอีเมลในฐานข้อมูล
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).send('ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง');
+      return res.status(404).send("ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
     }
 
     // อัปเดตรหัสรีเซ็ตและเวลาหมดอายุในฐานข้อมูล
@@ -258,77 +260,82 @@ app.post('/api/forget-password', async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Password Reset Code',
+      subject: "Password Reset Code",
       text: `Your reset code is: ${resetCode}. It will expire in 5 minutes.`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
-        return res.status(500).send('Error sending email');
+        return res.status(500).send("Error sending email");
       } else {
-        console.log('Email sent: ' + info.response);
-        res.send('Reset code sent to email');
+        console.log("Email sent: " + info.response);
+        res.send("Reset code sent to email");
       }
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('เกิดข้อผิดพลาดบนเซิร์ฟเวอร์');
+    res.status(500).send("เกิดข้อผิดพลาดบนเซิร์ฟเวอร์");
   }
 });
 
 // Route สำหรับตรวจสอบ OTP
-app.post('/api/verify-otp', async (req, res) => {
+app.post("/api/verify-otp", async (req, res) => {
   const { otp } = req.body;
-  
+
   if (!otp || otp.length !== 6) {
-    return res.status(400).send('กรุณากรอก OTP 6 หลักที่ถูกต้อง');
+    return res.status(400).send("กรุณากรอก OTP 6 หลักที่ถูกต้อง");
   }
 
   try {
     // ค้นหาผู้ใช้ที่มีรหัสรีเซ็ตรหัสผ่าน
     const user = await User.findOne({ resetCode: otp });
-    
+
     if (!user) {
-      return res.status(404).send('OTP ไม่ถูกต้อง');
+      return res.status(404).send("OTP ไม่ถูกต้อง");
     }
 
     // ตรวจสอบว่า OTP หมดอายุหรือไม่
     const currentTime = new Date();
     if (user.resetCodeExpires < currentTime) {
-      return res.status(400).send('OTP หมดอายุแล้ว');
+      return res.status(400).send("OTP หมดอายุแล้ว");
     }
 
     // ถ้า OTP ถูกต้องและยังไม่หมดอายุ
-    res.status(200).send('OTP ถูกต้อง');
+    res.status(200).send("OTP ถูกต้อง");
   } catch (error) {
     console.error(error);
-    res.status(500).send('เกิดข้อผิดพลาดในการตรวจสอบ OTP');
+    res.status(500).send("เกิดข้อผิดพลาดในการตรวจสอบ OTP");
   }
 });
 
 // Route สำหรับรีเซ็ตรหัสผ่าน
-app.post('/api/reset-password', async (req, res) => {
+app.post("/api/reset-password", async (req, res) => {
   const { otp, newPassword, confirmPassword } = req.body;
-  
+
   // ตรวจสอบ OTP
   if (!otp || otp.length !== 6) {
-    return res.status(400).send('กรุณากรอก OTP 6 หลักที่ถูกต้อง');
+    return res.status(400).send("กรุณากรอก OTP 6 หลักที่ถูกต้อง");
   }
 
   // ตรวจสอบรหัสผ่านใหม่และยืนยันรหัสผ่าน
   if (!newPassword || !confirmPassword) {
-    return res.status(400).send('กรุณากรอกรหัสผ่านใหม่และยืนยันรหัสผ่าน');
+    return res.status(400).send("กรุณากรอกรหัสผ่านใหม่และยืนยันรหัสผ่าน");
   }
 
   if (newPassword !== confirmPassword) {
-    return res.status(400).send('รหัสผ่านไม่ตรงกัน');
+    return res.status(400).send("รหัสผ่านไม่ตรงกัน");
   }
 
   // ตรวจสอบความแข็งแกร่งของรหัสผ่าน (ตัวพิมพ์ใหญ่, ตัวเลข, อักขระพิเศษ)
-  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
   if (!passwordRegex.test(newPassword)) {
-    return res.status(400).send('รหัสผ่านต้องมีตัวพิมพ์ใหญ่, ตัวเลข, และอักขระพิเศษอย่างน้อย 1 ตัว');
+    return res
+      .status(400)
+      .send(
+        "รหัสผ่านต้องมีตัวพิมพ์ใหญ่, ตัวเลข, และอักขระพิเศษอย่างน้อย 1 ตัว"
+      );
   }
 
   try {
@@ -336,13 +343,13 @@ app.post('/api/reset-password', async (req, res) => {
     const user = await User.findOne({ resetCode: otp });
 
     if (!user) {
-      return res.status(404).send('OTP ไม่ถูกต้อง');
+      return res.status(404).send("OTP ไม่ถูกต้อง");
     }
 
     // ตรวจสอบว่า OTP หมดอายุหรือไม่
     const currentTime = new Date();
     if (user.resetCodeExpires < currentTime) {
-      return res.status(400).send('OTP หมดอายุแล้ว');
+      return res.status(400).send("OTP หมดอายุแล้ว");
     }
 
     // รีเซ็ตรหัสผ่านใหม่โดยการแฮชรหัสผ่าน
@@ -356,10 +363,10 @@ app.post('/api/reset-password', async (req, res) => {
     // บันทึกรหัสผ่านใหม่ลงในฐานข้อมูล
     await user.save();
 
-    res.status(200).send('รีเซ็ตรหัสผ่านสำเร็จ');
+    res.status(200).send("รีเซ็ตรหัสผ่านสำเร็จ");
   } catch (error) {
     console.error(error);
-    res.status(500).send('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
+    res.status(500).send("เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน");
   }
 });
 

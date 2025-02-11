@@ -14,10 +14,11 @@ const ForgetPasswordPage = () => {
 
   const handleSendLink = async () => {
     if (email) {
-      console.log("Sending reset link to email:", email);  // ดูค่าของ email ที่จะส่ง
+      const normalizedEmail = email.toLowerCase();
+      console.log("Sending reset link to email:", normalizedEmail);  // ดูค่าของ email ที่จะส่ง
       try {
         // ส่งคำขอไปยัง backend เพื่อเช็คอีเมล
-        await axios.post('http://localhost:5000/api/forget-password', { email });
+        await axios.post('http://localhost:5000/api/forget-password', {email: normalizedEmail });
         
         setSnackbarMessage("ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
         setOpenSnackbar(true);
