@@ -21,7 +21,7 @@ import {
 import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
 import Header from "@components/Header";
 import Image from "next/image";
-import badminton_img from "@assets/badminton.png";
+import badminton_img from "@assets/badminton/badminton.png";
 import { data } from "autoprefixer";
 import { Dropdown, DatePicker, Space } from "antd";
 import { Dayjs } from "dayjs";
