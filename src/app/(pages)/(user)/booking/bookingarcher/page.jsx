@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-import { useRouter } from "next/navigation";
-import Topbar_User from "@components/Topbar_User";
+import TopBar_User from "@components/Topbar_User";
 import {
   Box,
   Button,
@@ -22,7 +22,7 @@ import {
 import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
 import Header from "@components/Header";
 import Image from "next/image";
-//import badminton_img from "@assets/badminton/badminton.png";
+import badminton_img from "@assets/badminton/badminton.png";
 import { data } from "autoprefixer";
 import { Dropdown, DatePicker, Space } from "antd";
 import { Dayjs } from "dayjs";
@@ -30,12 +30,12 @@ import dayjs from "dayjs";
 import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
-//import { Tab } from "bootstrap";
+import { Tab } from "bootstrap";
 
 const Booking = () => {
   const [buildingNames, setBuildingNames] = useState([]);
   const [currentBuilding, setCurrentBuilding] = useState("Building1");
-  const [currentCourt, setCurrentCourt] = useState("Court1");
+  const [currentCourt, setCurrentCourt] = useState("Field1");
   const [courtNames, setCourtNames] = useState([]);
   const [CourtData, setCourtData] = useState([]);
   const placeName = sessionStorage.getItem("booking_place");
@@ -194,7 +194,7 @@ const Booking = () => {
 
   return (
     <div className="absolute top-0 left-0 h-full w-full bg-cover bg-center">
-      <Topbar_User textColor={"black"} />
+      <TopBar_User textColor={"black"} />
       <Box
         sx={{
           height: "550px"
@@ -204,7 +204,7 @@ const Booking = () => {
           className="absolute w-full bg-cover bg-center"
           style={{
             // backgroundColor: "#a2d8f5",
-            backgroundImage: "url('/assets/badminton.png')",
+            backgroundImage: "url('/assets/Archer/Archer1.png')",
             backgroundColor: "rgba(70, 80, 100, 0.3)",
             backgroundBlendMode: "multiply",
             opacity: 0.9,
