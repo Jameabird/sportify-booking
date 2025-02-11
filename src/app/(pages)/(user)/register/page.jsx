@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import React, { useState } from "react";
 import axios from "axios"; // นำเข้า axios
@@ -25,9 +25,13 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [image, setImage] = useState(null);
+  const [bankImage, setBankImage] = useState(null); // State for the bank image
   const [username, setUsername] = useState(""); // เพิ่ม state สำหรับ username
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
   const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะการแสดง Snackbar
@@ -45,10 +49,10 @@ const RegisterPage = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleImageChange = (event) => {
+  const handleBankImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file)); // Show the selected image as preview
+      setBankImage(file); // Set the selected bank image
     }
   };
 
@@ -61,15 +65,8 @@ const RegisterPage = () => {
 
   // ฟังก์ชันตรวจสอบว่ากรอกข้อมูลครบหรือไม่
   const validateForm = () => {
-    if (
-      !username ||
-      !email ||
-      !password ||
-      !confirmPassword ||
-      !bank ||
-      !image
-    ) {
-      setSnackbarMessage("กรุณากรอกข้อมูลให้ครบทุกฟิลด์");
+    if (!username || !email || !password || !confirmPassword) {
+      setSnackbarMessage("กรุณากรอก Username, Email, Password และ Confirm Password ให้ครบ");
       setOpenSnackbar(true);
       return false;
     }
@@ -78,43 +75,61 @@ const RegisterPage = () => {
 
   // ฟังก์ชันเมื่อกด Register
   const handleRegister = async () => {
-    // ตรวจสอบว่าแบบฟอร์มครบถ้วนหรือไม่
     if (!validateForm()) return;
 
-    // ตรวจสอบรหัสผ่านและยืนยันรหัสผ่าน
     if (!validatePassword(password)) {
       setSnackbarMessage("รหัสผ่านต้องมีตัวอักษรใหญ่, ตัวเลข, และตัวอักษรพิเศษ");
       setOpenSnackbar(true);
       return;
     }
+
     if (password !== confirmPassword) {
       setSnackbarMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
       setOpenSnackbar(true);
       return;
     }
 
-    // ทำการส่งข้อมูลไปยัง API ของ Backend
     try {
-      const response = await axios.post("http://localhost:5000/api/register", {
-        username,
-        email,
-        password,
-        firstName: "First Name",  // ชื่อจริง
-        lastName: "Last Name",    // นามสกุล
-        bank,
-        accountNumber: "1234567890", // หมายเลขบัญชี
-        profileImage: image,  // รูปโปรไฟล์
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("bank", bank);
+      formData.append("accountNumber", accountNumber);
+
+      if (image) {
+        formData.append("profileImage", image);
+      }
+
+      if (bankImage) {
+        formData.append("bankImage", bankImage);
+      }
+
+      const response = await axios.post("http://localhost:5000/api/register", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       if (response.status === 201) {
         setSnackbarMessage("ลงทะเบียนสำเร็จ!");
         setOpenSnackbar(true);
         setTimeout(() => {
-          router.push("/login"); // เปลี่ยนเส้นทางไปหน้า login
+          router.push("/login");
         }, 1500);
       }
     } catch (error) {
-      setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+      console.error("Registration Error:", error);
+
+      if (error.response) {
+        if (error.response.status === 400 && error.response.data.message === "Email already exists") {
+          setSnackbarMessage("อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น");
+        } else {
+          setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+        }
+      } else {
+        setSnackbarMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      }
       setOpenSnackbar(true);
     }
   };
@@ -194,7 +209,17 @@ const RegisterPage = () => {
                     ),
                   }}
                 />
-
+                <h3 style={{
+                  color: "#d32f2f",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  marginBottom: "10px",
+                  backgroundColor: "#ffebee",
+                  padding: "8px",
+                  borderRadius: "5px"
+                }}>
+                  รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร ประกอบด้วย ตัวอักษรพิมพ์ใหญ่ (A-Z), ตัวเลข (0-9) และอักขระพิเศษ (@$!%*?&)
+                </h3>
                 {/* เพิ่มข้อความ Bank Details ตรงนี้ */}
                 <h2 className="register-title">Bank Details</h2>
                 <TextField
@@ -202,12 +227,16 @@ const RegisterPage = () => {
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
                 <TextField
                   label="Last Name"
                   variant="outlined"
                   fullWidth
                   sx={{ marginBottom: "16px" }}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                 />
 
                 <FormControl fullWidth sx={{ marginBottom: "16px" }}>
@@ -218,11 +247,16 @@ const RegisterPage = () => {
                     onChange={handleBankChange}
                     label="Bank"
                   >
-                    <MenuItem value="BAAC">BAAC</MenuItem>
-                    <MenuItem value="SCB">SCB</MenuItem>
-                    <MenuItem value="K-Bank">K-Bank</MenuItem>
-                    <MenuItem value="Krungthai">Krungthai</MenuItem>
-                    <MenuItem value="TTB">TTB</MenuItem>
+                    <MenuItem value="PromptPay"> PromptPay </MenuItem>
+                    <MenuItem value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</MenuItem>
+                    <MenuItem value="SCB">ไทยพาณิชย์ (SCB)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
+                    <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
+                    <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
+                    <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
                   </Select>
                 </FormControl>
                 <TextField
@@ -234,23 +268,43 @@ const RegisterPage = () => {
                     maxLength: 10,
                   }}
                   sx={{ marginBottom: "16px" }}
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
                 />
                 <Box sx={{ marginBottom: "16px" }}>
                   <h3 className="register-title">Bank Image</h3>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange}
+                    onChange={handleBankImageChange} // Handle file change for bank image
                     style={{ width: "100%" }}
                   />
-                  {image && (
+                  {bankImage && typeof bankImage === "string" ? (
                     <img
-                      src={image}
-                      alt="Preview"
-                      style={{ marginTop: "16px", maxWidth: "100%" }}
+                      src={`http://localhost:5000/${bankImage}`} // Load from the server
+                      alt="Bank Image"
+                      style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
                     />
-                  )}
+                  ) : bankImage ? (
+                    <img
+                      src={URL.createObjectURL(bankImage)} // Preview image locally
+                      alt="Bank Image Preview"
+                      style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
+                    />
+                  ) : null}
                 </Box>
+                <h3 style={{
+                  color: "#d32f2f",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  marginBottom: "10px",
+                  backgroundColor: "#ffebee",
+                  padding: "8px",
+                  borderRadius: "5px"
+                }}>
+                  เพื่อยืนยันเเละใช้ในการคืนเงินเพื่อยกเลิกการจอง สามารถใส่ข้อมูลในภายหลังได้ที่ settings
+                  ถ้าไม่ใส่การคืนเงินให้ทางผู้ใช้งานจะถือเป็นโมฆะ
+                </h3>
                 <Button
                   variant="contained"
                   color="primary"
