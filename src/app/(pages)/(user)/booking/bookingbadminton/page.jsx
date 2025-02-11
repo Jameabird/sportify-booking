@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-import TopBar from "@components/Topbar";
+import TopBar_User from "@components/Topbar_User";
 import {
   Box,
   Button,
@@ -185,9 +186,15 @@ const Booking = () => {
 
   const columns = ["Select", "Court", "Price", "Time"];
 
+  const router = useRouter();
+
+  const handleBookingClick = () => {
+    router.push("/Payment"); // เปลี่ยนเส้นทางไปที่ http://localhost:3000/Payment
+  };
+
   return (
     <div className="absolute top-0 left-0 h-full w-full bg-cover bg-center">
-      <TopBar textColor={"black"} />
+      <TopBar_User textColor={"black"} />
       <Box
         sx={{
           height: "550px"
@@ -383,47 +390,65 @@ const Booking = () => {
                               (column, colIndex) =>
                                 column === "Select"
                                   ? <TableCell
+                                    key={colIndex}
+                                    align="center"
+                                    // colSpan={2}
+                                    sx={{
+                                      ...Table_Styles.styletablebody,
+                                      "&.MuiTableCell-root": {
+                                        padding: 0.65,
+                                        margin: 0
+                                      }
+                                      // borderLeft: "1px solid #000",
+                                      // borderBottom:
+                                      //   rowIndex === lastIndex &&
+                                      //   "1px solid #000"
+                                    }}
+                                  >
+                                    <div className="text-base font-bold">
+                                      <Checkbox
+                                        disabled={!row.booking}
+                                      // checked={selectedDataBaking.includes(
+                                      //   rowIndex
+                                      // )}
+                                      // onChange={() =>
+                                      //   handleRowSelectBaking(
+                                      //     rowIndex,
+                                      //     row
+                                      //   )} // Handle row selection
+                                      // sx={{
+                                      //   color: selectedDataBaking.includes(
+                                      //     rowIndex
+                                      //   )
+                                      //     ? "#1FAB89"
+                                      //     : "grey",
+                                      //   "&.Mui-checked": {
+                                      //     color: "#1FAB89"
+                                      //   }
+                                      // }}
+                                      />
+                                    </div>
+                                  </TableCell>
+                                  : column === "Court"
+                                    ? <TableCell
                                       key={colIndex}
                                       align="center"
-                                      // colSpan={2}
+                                      colSpan={2}
                                       sx={{
                                         ...Table_Styles.styletablebody,
                                         "&.MuiTableCell-root": {
                                           padding: 0.65,
                                           margin: 0
                                         }
-                                        // borderLeft: "1px solid #000",
                                         // borderBottom:
                                         //   rowIndex === lastIndex &&
                                         //   "1px solid #000"
                                       }}
                                     >
-                                      <div className="text-base font-bold">
-                                        <Checkbox
-                                          disabled={!row.booking}
-                                          // checked={selectedDataBaking.includes(
-                                          //   rowIndex
-                                          // )}
-                                          // onChange={() =>
-                                          //   handleRowSelectBaking(
-                                          //     rowIndex,
-                                          //     row
-                                          //   )} // Handle row selection
-                                          // sx={{
-                                          //   color: selectedDataBaking.includes(
-                                          //     rowIndex
-                                          //   )
-                                          //     ? "#1FAB89"
-                                          //     : "grey",
-                                          //   "&.Mui-checked": {
-                                          //     color: "#1FAB89"
-                                          //   }
-                                          // }}
-                                        />
-                                      </div>
+                                      {row.name}
                                     </TableCell>
-                                  : column === "Court"
-                                    ? <TableCell
+                                    : column === "Price"
+                                      ? <TableCell
                                         key={colIndex}
                                         align="center"
                                         colSpan={2}
@@ -438,44 +463,26 @@ const Booking = () => {
                                           //   "1px solid #000"
                                         }}
                                       >
-                                        {row.name}
+                                        {row.price}
                                       </TableCell>
-                                    : column === "Price"
-                                      ? <TableCell
-                                          key={colIndex}
-                                          align="center"
-                                          colSpan={2}
-                                          sx={{
-                                            ...Table_Styles.styletablebody,
-                                            "&.MuiTableCell-root": {
-                                              padding: 0.65,
-                                              margin: 0
-                                            }
-                                            // borderBottom:
-                                            //   rowIndex === lastIndex &&
-                                            //   "1px solid #000"
-                                          }}
-                                        >
-                                          {row.price}
-                                        </TableCell>
                                       : <TableCell
-                                          key={colIndex}
-                                          align="center"
-                                          colSpan={2}
-                                          sx={{
-                                            ...Table_Styles.styletablebody,
-                                            "&.MuiTableCell-root": {
-                                              padding: 0.65,
-                                              margin: 0
-                                            }
-                                            // borderRight: "1px solid #000",
-                                            // borderBottom:
-                                            //   rowIndex === lastIndex &&
-                                            //   "1px solid #000"
-                                          }}
-                                        >
-                                          {row.time}
-                                        </TableCell>
+                                        key={colIndex}
+                                        align="center"
+                                        colSpan={2}
+                                        sx={{
+                                          ...Table_Styles.styletablebody,
+                                          "&.MuiTableCell-root": {
+                                            padding: 0.65,
+                                            margin: 0
+                                          }
+                                          // borderRight: "1px solid #000",
+                                          // borderBottom:
+                                          //   rowIndex === lastIndex &&
+                                          //   "1px solid #000"
+                                        }}
+                                      >
+                                        {row.time}
+                                      </TableCell>
                             )}
                           </TableRow>
                         );
@@ -502,25 +509,57 @@ const Booking = () => {
             {/* <Button sx={{ backgroundColor: "green", color: "white", width: "100%" }}>
               Booking
             </Button> */}
-            <Popup trigger={<Button className="trigger-button" sx={{ backgroundColor: "green", color: "white", width: "100%" }}>BOOKING</Button>} position="right center" modal nested >
-        {close => (
-          <div className="modal">
-            <button className="close" onClick={close}>
-              &times;
-            </button>
-            <div className="header"> รายละเอียดการจอง </div>
-            <ul>
-            <li className="section"><h2>สถานที่</h2></li>
-            <li className="section"><h2>วันที่</h2></li>
-            <li className="section"><h2>เวลา</h2></li>
-            <li className="section"><h2>ราคารวม</h2></li>
-            <li className="section">QR CODE</li>
-            </ul>
-            <div><Button sx={{ backgroundColor: "green", color: "black", width: "25%" }}>Booking</Button>
-            <Button sx={{ backgroundColor: "red", color: "black", width: "25%" }}>ยกเลิก</Button></div>
-          </div>
-        )}
-      </Popup>
+            <Popup
+              trigger={
+                <Button
+                  className="trigger-button"
+                  sx={{ backgroundColor: "green", color: "white", width: "100%" }}
+                >
+                  BOOKING
+                </Button>
+              }
+              position="right center"
+              modal
+              nested
+            >
+              {(close) => (
+                <div className="modal">
+                  <button className="close" onClick={close}>
+                    &times;
+                  </button>
+                  <div className="header"> รายละเอียดการจอง </div>
+                  <ul>
+                    <li className="section">
+                      <h2>สถานที่</h2>
+                    </li>
+                    <li className="section">
+                      <h2>วันที่</h2>
+                    </li>
+                    <li className="section">
+                      <h2>เวลา</h2>
+                    </li>
+                    <li className="section">
+                      <h2>ราคารวม</h2>
+                    </li>
+                    <li className="section">QR CODE</li>
+                  </ul>
+                  <div>
+                    <Button
+                      sx={{ backgroundColor: "green", color: "black", width: "25%" }}
+                      onClick={handleBookingClick} // เพิ่มฟังก์ชันเปลี่ยนเส้นทางที่นี่
+                    >
+                      Booking
+                    </Button>
+                    <Button
+                      sx={{ backgroundColor: "red", color: "black", width: "25%" }}
+                      onClick={close}
+                    >
+                      ยกเลิก
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Popup>
           </div>
           <div className="col-span-1 col-start-7">
             <Button
