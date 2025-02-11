@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./ChooseField.css";
-import TopBar from "@components/Topbar";
+import TopBar_User from "@components/Topbar_User";
 
 const ChooseField = () => {
   const [selectedField, setSelectedField] = useState(null);
@@ -46,7 +46,7 @@ const ChooseField = () => {
         zIndex: -1,
       }}
     >
-      <TopBar textColor={"white"} />
+      <TopBar_User textColor={"white"} />
       <div className="choose-field-container">
         <h1 className="title">CHOOSE FIELD</h1>
         <div className="fields">

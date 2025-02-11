@@ -75,7 +75,7 @@ export default function Home() {
                 {[
                   "ค้นหาและเลือกสนามที่ต้องการ",
                   "ตรวจสอบและยืนยันการจอง",
-                  "เช็คอินด้วย QR Code",
+                  "เช็คเอาท์ด้วย QR Code",
                   "เสร็จสิ้น ขอให้สนุกกับการออกกำลังกาย"
                 ].map((step, index) => (
                   <div key={index} className="flex items-start space-x-4">
