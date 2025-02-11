@@ -32,8 +32,8 @@ const AdminButton = ({ text }) => {
     if(text === "Refund"){
       router.push("/admin/arearefund");
     }
-    if(text === "Dashboard"){
-      router.push("/admin/areadashboard");
+    if(text === "Report"){
+      router.push("/admin/areareport");
     }
     if(text === "Promotion"){
       router.push("/admin/promotion");

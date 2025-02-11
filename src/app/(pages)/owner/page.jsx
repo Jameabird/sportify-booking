@@ -64,7 +64,7 @@ export default function OwnerHome() {
               title: "Management",
               buttons: [
                 { text: "Office Management", path: "/owner/management" },
-                { text: "Report", path: "/owner/report" },
+                { text: "Dashboard", path: "/owner/dashboard" },
                 { text: "New Field", path: "/owner/new-field" } // ✅ เพิ่มปุ่มใหม่ที่นี่
               ],
             }
