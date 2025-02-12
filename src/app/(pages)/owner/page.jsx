@@ -1,10 +1,13 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
 import TopBar_Owner from "@components/Topbar_Owner";
 
 export default function OwnerHome() {
+  const router = useRouter(); // ใช้ router เพื่อเปลี่ยนเส้นทาง
+
   return (
     <div
       className="app"
@@ -14,7 +17,7 @@ export default function OwnerHome() {
         className="content"
         style={{
           flex: 1,
-          overflow: "hidden", // Prevent vertical scrolling
+          overflow: "hidden",
           position: "relative",
         }}
       >
@@ -56,10 +59,16 @@ export default function OwnerHome() {
           sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
         >
           {/* Category Buttons */}
-          {[{
-            title: "Management",
-            buttons: ["Office Management", "Dashboard"],
-          }].map((category, categoryIndex) => (
+          {[
+            {
+              title: "Management",
+              buttons: [
+                { text: "Office Management", path: "/owner/management" },
+                { text: "Dashboard", path: "/owner/dashboard" },
+                { text: "New Field", path: "/owner/management.area" } // ✅ เพิ่มปุ่มใหม่ที่นี่
+              ],
+            }
+          ].map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
               sx={{
@@ -89,9 +98,10 @@ export default function OwnerHome() {
                 {category.title}
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
-                {category.buttons.map((text, index) => (
+                {category.buttons.map((button, index) => (
                   <Box
                     key={index}
+                    onClick={() => router.push(button.path)}
                     sx={{
                       backgroundColor: "rgba(0,123,255,0.9)",
                       padding: "16px 32px",
@@ -111,7 +121,7 @@ export default function OwnerHome() {
                       },
                     }}
                   >
-                    {text}
+                    {button.text}
                   </Box>
                 ))}
               </Box>

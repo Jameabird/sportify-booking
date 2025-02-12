@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "./ChooseField.css";
-import TopBar from "@components/Topbar";
+import TopBar_User from "@components/Topbar_User";
 
 const ChooseField = () => {
-  const [isClient, setIsClient] = useState(false);
   const [selectedField, setSelectedField] = useState(null);
-  const router = useRouter(); // ใช้ useRouter
-  const fields = new Set([
+  const router = useRouter();
+
+  const fields = [
     "Archer",
     "Badminton",
     "Baseball",
@@ -27,31 +27,12 @@ const ChooseField = () => {
     "Thai Boxing",
     "Waterpool",
     "Volleyball",
-  ]);
+  ];
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const handleFieldSelection = field => {
+  const handleFieldSelection = (field) => {
     setSelectedField(field);
-    if (isClient) {
-      // console.log("Field selected: ", field);
-      sessionStorage.setItem("SportType", field);
-      router.push("/search");
-    }
-  };
-
-  if (!isClient) {
-    return null;
-  }
-
-  const backgroundStyle = {
-    backgroundImage: "url('/gym_bg2.jpg')",
-    backgroundColor: "rgba(70, 80, 100, 0.7)",
-    backgroundBlendMode: "multiply",
-    opacity: 0.9,
-    zIndex: -1
+    sessionStorage.setItem("SportType", field);
+    router.push(`/search/${encodeURIComponent(field)}`);
   };
 
   return (
@@ -62,14 +43,14 @@ const ChooseField = () => {
         backgroundColor: "rgba(70, 80, 100, 0.7)",
         backgroundBlendMode: "multiply",
         opacity: 0.9,
-        zIndex: -1
+        zIndex: -1,
       }}
     >
-      <TopBar textColor={"white"} />
+      <TopBar_User textColor={"white"} />
       <div className="choose-field-container">
         <h1 className="title">CHOOSE FIELD</h1>
         <div className="fields">
-          {Array.from(fields).map((field, index) =>
+          {fields.map((field, index) => (
             <button
               key={index}
               className="field-button"
@@ -77,7 +58,7 @@ const ChooseField = () => {
             >
               {field}
             </button>
-          )}
+          ))}
         </div>
       </div>
     </div>

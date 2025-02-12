@@ -13,7 +13,7 @@ const adminCategories = [
   },
   {
     title: "Management",
-    buttons: ["Owner Management", "Dashboard", "Promotion"], // ✅ เพิ่ม "Promotion" เข้า Management
+    buttons: ["Owner Management", "Report", "Promotion"], // ✅ เพิ่ม "Promotion" เข้า Management
   },
 ];
 
@@ -26,7 +26,20 @@ const AdminButton = ({ text }) => {
     if (text === "Owner Management") {
       router.push("/admin/management"); // ✅ เปลี่ยนหน้าเมื่อกดปุ่ม "Owner Management"
     }
+    if(text === "Confirm Payment"){
+      router.push("/admin/areacomfirm");
+    }
+    if(text === "Refund"){
+      router.push("/admin/arearefund");
+    }
+    if(text === "Report"){
+      router.push("/admin/areareport");
+    }
+    if(text === "Promotion"){
+      router.push("/admin/promotion");
+    }
   };
+  
 
   return (
     <Box
