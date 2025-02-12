@@ -30,6 +30,10 @@ const LoginPage = () => {
         setSnackbarSeverity("success");
         setOpenSnackbar(true);
 
+        // เก็บข้อมูล token และ role ใน localStorage
+        localStorage.setItem("token", res.data.token); // เซฟ token
+        localStorage.setItem("role", res.data.role);   // เซฟ role
+
         // Redirect based on user role (หลังจาก login สำเร็จ)
         const userRole = res.data.role;
         setTimeout(() => {
@@ -81,6 +85,12 @@ const LoginPage = () => {
     try {
       const response = await axios.post("http://localhost:5000/api/login", { email, password });
       console.log("Login response:", response);
+
+      // เก็บข้อมูลใน localStorage
+      const { token, role } = response.data; // สมมติว่า API ส่ง token และ role กลับมา
+      localStorage.setItem("token", token);  // เก็บ token ใน localStorage
+      localStorage.setItem("role", role);    // เก็บ role ใน localStorage
+
       setSnackbarMessage(response.data.message || "เข้าสู่ระบบสำเร็จ!");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);

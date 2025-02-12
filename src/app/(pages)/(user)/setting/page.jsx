@@ -8,6 +8,7 @@ import TopBar_User from "../../components/Topbar_User";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import InputAdornment from "@mui/material/InputAdornment";
+import './profile.css';
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -135,62 +136,27 @@ export default function Profile() {
   };
 
   return (
-    <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
+    <Box display="flex" flexDirection="column" height="100vh" width="100vw" className="box-container">
       {/* Background Box */}
-      <Box sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "#f4f4f4",
-        zIndex: -1, // Keeps the background below the profile section
-      }} />
-
+      <Box className="background-box" />
+  
       <TopBar_User /> {/* Fixed top bar */}
-
+  
       {/* Profile Section */}
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          width="100%"
-          maxWidth="400px"
-          sx={{
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-            padding: "20px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            animation: "fadeInUp 0.5s ease-in-out",
-            "@keyframes fadeInUp": {
-              "0%": { opacity: 0, transform: "translateY(20px)" },
-              "100%": { opacity: 1, transform: "translateY(0)" },
-            },
-          }}
-        >
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" className="profile-section">
+        <Box className="profile-box">
           {!isChangingPassword ? (
             <>
               <Box position="relative" textAlign="center" mb={2}>
                 <Avatar
                   src={profileImage}
                   alt="Profile Picture"
-                  sx={{
-                    width: "100px",
-                    height: "100px",
-                    border: "2px solid #ddd",
-                    margin: "0 auto",
-                    transition: "transform 0.3s ease-in-out",
-                    "&:hover": {
-                      transform: "scale(1.1)",
-                    },
-                  }}
+                  className="avatar-style"
                 />
                 {isEditing && (
                   <IconButton
                     color="primary"
-                    sx={{ position: "absolute", bottom: 0, right: "calc(50% - 20px)", backgroundColor: "#fff", boxShadow: 1, border: "1px solid #ddd" }}
+                    className="avatar-edit-button"
                     onClick={() => document.getElementById("profile-image-input").click()}
                   >
                     <CameraAltIcon />
@@ -204,10 +170,10 @@ export default function Profile() {
                   onChange={handleProfileImageChange}
                 />
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
+              <Typography variant="h6" className="profile-title">
                 {isEditing ? "Edit Profile" : "Profile"}
               </Typography>
-
+  
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Name"
@@ -216,15 +182,7 @@ export default function Profile() {
                   value={profileData.name}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
                 <TextField
                   label="Email"
@@ -232,15 +190,7 @@ export default function Profile() {
                   fullWidth
                   value={profileData.email}
                   disabled={true}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
                 <TextField
                   label="Phone"
@@ -249,19 +199,11 @@ export default function Profile() {
                   value={profileData.phone}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
-
+  
                 {/* Bank Information Section */}
-                <Typography variant="h8" sx={{ fontWeight: "bold", marginTop: "px" }}>
+                <Typography variant="h8" className="bank-info-title">
                   Bank Information
                 </Typography>
                 <Box display="flex" gap={2}>
@@ -272,15 +214,7 @@ export default function Profile() {
                     value={profileData.firstName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        transition: "all 0.3s ease",
-                        "&.Mui-focused": {
-                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                          borderColor: "#0096ff",
-                        },
-                      },
-                    }}
+                    className="text-field"
                   />
                   <TextField
                     label="Last Name"
@@ -289,15 +223,7 @@ export default function Profile() {
                     value={profileData.lastName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        transition: "all 0.3s ease",
-                        "&.Mui-focused": {
-                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                          borderColor: "#0096ff",
-                        },
-                      },
-                    }}
+                    className="text-field"
                   />
                 </Box>
                 <TextField
@@ -307,33 +233,17 @@ export default function Profile() {
                   value={profileData.bankAccount}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
-                <FormControl fullWidth variant="outlined" sx={{ fontSize: "14px", marginTop: "8px" }}>
-                  <InputLabel sx={{ fontSize: "14px" }}>Bank Name</InputLabel>
+                <FormControl fullWidth variant="outlined" className="select-control">
+                  <InputLabel className="select-label">Bank Name</InputLabel>
                   <Select
                     name="bankName"
                     value={profileData.bankName}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     label="Bank Name"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        transition: "all 0.3s ease",
-                        "&.Mui-focused": {
-                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                          borderColor: "#0096ff",
-                        },
-                      },
-                    }}
+                    className="select-field"
                   >
                     <MenuItem value="SCB">SCB</MenuItem>
                     <MenuItem value="KBANK">KBANK</MenuItem>
@@ -341,9 +251,9 @@ export default function Profile() {
                     <MenuItem value="BKK">BKK</MenuItem>
                   </Select>
                 </FormControl>
-
+  
                 {/* Bank Account Image (Always visible, allows upload even in view mode) */}
-                <Typography variant="body1" sx={{ marginTop: "20px" }}>
+                <Typography variant="body1" className="bank-image-title">
                   Bank Account Image
                 </Typography>
                 <Box display="flex" justifyContent="center" alignItems="center" position="relative" textAlign="center" mb={2}>
@@ -351,45 +261,17 @@ export default function Profile() {
                     <Avatar
                       src={profileData.bankAccountImage}
                       alt="Bank Account"
-                      sx={{
-                        width: "150px",
-                        height: "150px",
-                        borderRadius: "8px",
-                        border: "2px solid #ddd",
-                        overflow: "hidden",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      className="bank-account-image"
                     />
-
                   ) : (
-                    <Box
-                      sx={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "8px",
-                        backgroundColor: "#f4f4f4",
-                        border: "2px solid #ddd",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Typography variant="body2" sx={{ color: "#888" }}>No Image</Typography>
+                    <Box className="no-image-box">
+                      <Typography variant="body2" className="no-image-text">No Image</Typography>
                     </Box>
                   )}
                   {isEditing && (
                     <IconButton
                       color="primary"
-                      sx={{
-                        position: "absolute",
-                        bottom: 0,
-                        right: "calc(50% - 20px)",
-                        backgroundColor: "#fff",
-                        boxShadow: 1,
-                        border: "1px solid #ddd",
-                      }}
+                      className="image-edit-button"
                       onClick={() => document.getElementById("bank-account-image-input").click()}
                     >
                       <CameraAltIcon />
@@ -403,41 +285,22 @@ export default function Profile() {
                     onChange={handleBankAccountImageChange}
                   />
                 </Box>
-
+  
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
                     <>
                       <Button
                         variant="contained"
                         onClick={handleSaveClick}
-                        sx={{
-                          backgroundColor: "#1e40af", // เปลี่ยนสีพื้นหลังเป็นน้ำเงินเข้ม
-                          color: "white", // เปลี่ยนสีตัวอักษรให้เป็นสีขาว
-                          width: "48%",
-                          fontSize: "13px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: "#162d68", // สีเข้มขึ้นเมื่อโฮเวอร์
-                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-                            transform: "scale(1.05)",
-                          },
-                        }}
+                        className="save-button"
                       >
                         Save
                       </Button>
-
+  
                       <Button
                         variant="contained"
                         color="error"
-                        sx={{
-                          width: "48%",
-                          fontSize: "13px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-                            transform: "scale(1.05)",
-                          },
-                        }}
+                        className="cancel-button"
                         onClick={handleCancelClick}
                       >
                         Cancel
@@ -448,20 +311,17 @@ export default function Profile() {
                       <Button
                         variant="contained"
                         onClick={handleChangePasswordClick}
-                        sx={{
-                          backgroundColor: "#1e40af", // กำหนดสีพื้นหลังเป็นน้ำเงินเข้ม
-                          "&:hover": {
-                            backgroundColor: "#162d68", // เปลี่ยนเป็นน้ำเงินเข้มขึ้นเมื่อโฮเวอร์
-                          },
-                          width: "48%",
-                          fontSize: "13px",
-                          color: "white", // ทำให้ข้อความอ่านง่ายขึ้น
-                        }}
+                        className="change-password-button"
                       >
                         Change Password
                       </Button>
-
-                      <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleEditClick}>
+  
+                      <Button
+                        variant="contained"
+                        color="error"
+                        className="edit-button"
+                        onClick={handleEditClick}
+                      >
                         Edit
                       </Button>
                     </>
@@ -471,37 +331,18 @@ export default function Profile() {
             </>
           ) : (
             <>
-              <Box
-                width="100%"
-                display="flex"
-                flexDirection="column"
-                gap={2}
-                sx={{
-                  backgroundColor: "#fff",
-                  padding: "20px",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    color: "#333",
-                    marginBottom: "10px",
-                  }}
-                >
+              <Box width="100%" display="flex" flexDirection="column" gap={2} className="change-password-section">
+                <Typography variant="h6" className="change-password-title">
                   Change Password
                 </Typography>
-
+  
                 <TextField
                   label="Old Password"
                   type={showOldPassword ? "text" : "password"}
                   fullWidth
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  sx={{ marginBottom: "20px" }}
+                  className="password-field"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -512,14 +353,14 @@ export default function Profile() {
                     ),
                   }}
                 />
-
+  
                 <TextField
                   label="New Password"
                   type={showNewPassword ? "text" : "password"}
                   fullWidth
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  sx={{ marginBottom: "20px" }}
+                  className="password-field"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -530,14 +371,14 @@ export default function Profile() {
                     ),
                   }}
                 />
-
+  
                 <TextField
                   label="Confirm Password"
                   type={showConfirmPassword ? "text" : "password"}
                   fullWidth
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  sx={{ marginBottom: "20px" }}
+                  className="password-field"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -548,103 +389,64 @@ export default function Profile() {
                     ),
                   }}
                 />
-
-                {error && <Typography color="error">{error}</Typography>}
-
+  
+                {error && <Typography color="error" className="error-message">{error}</Typography>}
+  
                 {/* Change Password Button */}
                 <Button
                   variant="contained"
                   fullWidth
                   onClick={handleChangePassword}
-                  sx={{
-                    backgroundColor: "#1e40af", // สีพื้นหลังเป็นน้ำเงินเข้ม
-                    "&:hover": {
-                      backgroundColor: "#162d68", // เปลี่ยนสีเข้มขึ้นเมื่อโฮเวอร์
-                    },
-                    fontSize: "13px",
-                  }}
+                  className="change-password-button"
                 >
                   Change Password
                 </Button>
-
+  
                 {/* Back to Setting Button */}
                 <Button
                   variant="contained"
                   color="error"
                   fullWidth
-                  sx={{ marginTop: "10px", fontSize: "13px" }}
+                  className="back-button"
                   onClick={() => setIsChangingPassword(false)}
                 >
                   Back to setting
                 </Button>
               </Box>
             </>
-
           )}
         </Box>
       </Box>
+  
       {/* Dialog for success/error */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        sx={{
-          '& .MuiDialog-paper': {
-            borderRadius: '12px', // Add rounded corners
-            padding: '20px',
-            maxWidth: '400px',
-            backgroundColor: '#f9f9f9',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          }
-        }}
+        className="dialog-box"
       >
         {/* Dialog Title */}
-        <DialogTitle
-          sx={{
-            textAlign: 'center',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: dialogSeverity === "success" ? '#1e40af' : '#f44336',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1,
-          }}
-        >
+        <DialogTitle className="dialog-title">
           {dialogSeverity === "success" ? (
-            <span style={{ color: '#1e40af' }}>✔</span>
+            <span className="success-icon">✔</span>
           ) : (
-            <span style={{ color: '#f44336' }}>❌</span>
+            <span className="error-icon">❌</span>
           )}
           {dialogSeverity === "success" ? "Success" : "Error"}
         </DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', paddingBottom: '20px' }}>
-          <Typography variant="body1" sx={{ fontSize: '16px', color: '#333' }}>
+        <DialogContent className="dialog-content">
+          <Typography variant="body1" className="dialog-message">
             {dialogMessage}
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', paddingTop: '10px' }}>
-          {/* Dialog Button */}
+        <DialogActions className="dialog-actions">
           <Button
             onClick={handleCloseDialog}
-            color={dialogSeverity === "success" ? "primary" : "error"} // ใช้ primary หรือกำหนดเองด้านล่าง
-            variant="contained"
-            sx={{
-              backgroundColor: dialogSeverity === "success" ? '#1e40af' : '#d32f2f',
-              '&:hover': {
-                backgroundColor: dialogSeverity === "success" ? '#162d68' : '#b71c1c',
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
-              },
-              fontSize: '14px',
-              fontWeight: 'bold',
-              padding: '8px 20px',
-              textTransform: 'none',
-              borderRadius: '8px',
-            }}
+            className="dialog-button"
           >
             OK
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
-  );
+  );  
 }
