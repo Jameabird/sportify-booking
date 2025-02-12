@@ -101,10 +101,19 @@ const RegisterPage = () => {
 
       if (image) {
         formData.append("profileImage", image);
+      } else {
+        console.warn("⚠️ ไม่มีไฟล์ profileImage ถูกส่งไป");
       }
 
       if (bankImage) {
         formData.append("bankImage", bankImage);
+      } else {
+        console.warn("⚠️ ไม่มีไฟล์ bankImage ถูกส่งไป");
+      }
+
+      // Log FormData ก่อนส่ง
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
       }
 
       const response = await axios.post("http://localhost:5000/api/register", formData, {
@@ -119,19 +128,34 @@ const RegisterPage = () => {
         }, 1500);
       }
     } catch (error) {
-      console.error("Registration Error:", error);
-
+      console.error("❌ Registration Error:", error);
       if (error.response) {
-        if (error.response.status === 400 && error.response.data.message === "Email already exists") {
-          setSnackbarMessage("อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น");
+        console.error("❌ Error Response Data:", error.response.data);
+        console.error("❌ Error Status Code:", error.response.status);
+    
+        if (error.response.status === 400) {
+          if (error.response.data.message === "Email already exists") {
+            setSnackbarMessage("อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น");
+          } else if (error.response.data.message) {
+            setSnackbarMessage(error.response.data.message);
+          } else {
+            setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+          }
+        } else if (error.response.status === 500) {
+          setSnackbarMessage("เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง");
         } else {
-          setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
+          setSnackbarMessage("เกิดข้อผิดพลาดที่ไม่คาดคิด");
         }
+      } else if (error.request) {
+        console.error("❌ No response received from server:", error.request);
+        setSnackbarMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตของคุณ");
       } else {
-        setSnackbarMessage("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+        console.error("❌ Unexpected Error:", error.message);
+        setSnackbarMessage("เกิดข้อผิดพลาดที่ไม่รู้จัก");
       }
+    
       setOpenSnackbar(true);
-    }
+    }    
   };
 
   return (

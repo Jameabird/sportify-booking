@@ -42,8 +42,7 @@ const bankStorage = multer.diskStorage({
   },
 });
 
-const uploadProfile = multer({ storage: profileStorage });
-const uploadBank = multer({ storage: bankStorage });
+const upload = multer({ dest: "uploads/" });
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
 const transporter = nodemailer.createTransport({
@@ -61,68 +60,80 @@ mongoose
   .catch((err) => console.log("MongoDB Connection Error:", err));
 
 // Route สำหรับการลงทะเบียน
-app.post("/api/register", uploadProfile.single("profileImage"), uploadBank.single("bankImage"), async (req, res) => {
-  try {
-    console.log("Received form data:", req.body);
-    console.log("Uploaded file:", req.file);
-    console.log("Uploaded files:", req.files);
+app.post(
+  "/api/register",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "bankImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      console.log("Received form data:", req.body);
+      console.log("Uploaded files:", req.files);
 
-    const {
-      username,
-      email,
-      password,
-      firstName,
-      lastName,
-      bank,
-      accountNumber,
-    } = req.body;
+      const {
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        bank,
+        accountNumber,
+      } = req.body;
 
-    if (!username || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "กรุณากรอก Username, Email และ Password ให้ครบ" });
+      if (!username || !email || !password) {
+        return res
+          .status(400)
+          .json({ message: "กรุณากรอก Username, Email และ Password ให้ครบ" });
+      }
+
+      // บังคับให้ email เป็นตัวพิมพ์เล็กทั้งหมด
+      const normalizedEmail = email.toLowerCase();
+
+      // ตรวจสอบรูปแบบอีเมล
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "อีเมลไม่ถูกต้อง" });
+      }
+
+      const existingUser = await User.findOne({
+        $or: [{ email }, { username }],
+      });
+      if (existingUser) {
+        return res
+          .status(400)
+          .json({ message: "Username หรือ email นี้ถูกใช้งานไปแล้ว" });
+      }
+
+      // เช็คไฟล์อัปโหลด
+      const profileImage = req.files.profileImage ? req.files.profileImage[0].path : null;
+      const bankImage = req.files.bankImage ? req.files.bankImage[0].path : null;
+      console.log("profileImage path:", profileImage);
+      console.log("bankImage path:", bankImage);
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // สร้าง object สำหรับบันทึกข้อมูล
+      const newUser = new User({
+        username,
+        email: normalizedEmail,
+        password: hashedPassword,
+        firstName: firstName || undefined, // ป้องกันการบันทึกค่าว่าง
+        lastName: lastName || undefined, // ป้องกันการบันทึกค่าว่าง
+        bank: bank || undefined,
+        accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
+        profileImage,
+        bankImage,
+      });
+
+      await newUser.save();
+      res.status(201).json({ message: "User registered successfully" });
+    } catch (error) {
+      console.error("❌ Server error:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
     }
-
-    // บังคับให้ email เป็นตัวพิมพ์เล็กทั้งหมด
-    const normalizedEmail = email.toLowerCase();
-
-    // ตรวจสอบรูปแบบอีเมล
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "อีเมลไม่ถูกต้อง" });
-    }
-
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Username หรือ email นี้ถูกใช้งานไปแล้ว" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const profileImage = req.file ? req.file.path : null;
-    const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : "";
-
-    // สร้าง object สำหรับบันทึกข้อมูล
-    const newUser = new User({
-      username,
-      email: normalizedEmail,
-      password: hashedPassword,
-      firstName: firstName || undefined, // ป้องกันการบันทึกค่าว่าง
-      lastName: lastName || undefined, // ป้องกันการบันทึกค่าว่าง
-      bank: bank || undefined,
-      accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
-      profileImage,
-      bankImage,
-    });
-
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (error) {
-    console.error("❌ Server error:", error);
-    res.status(500).json({ message: "Server error", error });
   }
-});
+);
 
 app.post("/api/login", async (req, res) => {
   try {
