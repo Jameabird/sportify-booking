@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import Snackbar from "@mui/material/Snackbar";
@@ -13,17 +14,8 @@ import './profile.css';
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: "Jennie Lee",
-    email: "SE@gmail.com",
-    phone: "0123456789",
-    firstName: "Jennie",
-    lastName: "Lee",
-    bankAccount: "1234567890",
-    bankName: "SCB",
-    bankAccountImage: null,
-  });
-
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -135,13 +127,49 @@ export default function Profile() {
     }
   };
 
+  useEffect(() => {
+    const tokenData = JSON.parse(localStorage.getItem('token'));
+    const token = tokenData ? tokenData.token : null;
+  
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return; // ถ้า token หายไปหรือหมดอายุ จะไม่ดำเนินการต่อ
+    } else {
+      console.log("Token is valid:", token);
+  
+      const fetchUserData = async () => {
+        setLoading(true); // เริ่มโหลดข้อมูล
+        try {
+          const res = await axios.get("http://localhost:5000/api/users/me", {
+            headers: {
+              Authorization: `Bearer ${token}`, // ใช้ token ที่ได้จาก localStorage
+            },
+          });
+  
+          setProfileData(res.data); // Set profile data เมื่อดึงข้อมูลสำเร็จ
+        } catch (error) {
+          console.error("Error fetching user data:", error.response?.data || error.message);
+          setError(error.response?.data?.message || "Failed to load profile");
+        } finally {
+          setLoading(false); // ปิดการโหลดข้อมูลเมื่อเสร็จ
+        }
+      };
+  
+      fetchUserData(); // เรียกฟังก์ชันดึงข้อมูล
+    }
+  }, []); // ขึ้นอยู่กับค่าที่เก็บใน localStorage
+  
+  if (loading) return <p>Loading...</p>; // หากกำลังโหลดข้อมูล
+  if (error) return <p>{error}</p>; // แสดง error message หากเกิดข้อผิดพลาด
+  if (!profileData) return <p>Error loading profile</p>; // หากไม่มีข้อมูลผู้ใช้    
+
   return (
     <Box display="flex" flexDirection="column" height="100vh" width="100vw" className="box-container">
       {/* Background Box */}
       <Box className="background-box" />
-  
       <TopBar_User /> {/* Fixed top bar */}
-  
       {/* Profile Section */}
       <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" className="profile-section">
         <Box className="profile-box">
@@ -173,7 +201,7 @@ export default function Profile() {
               <Typography variant="h6" className="profile-title">
                 {isEditing ? "Edit Profile" : "Profile"}
               </Typography>
-  
+
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Name"
@@ -201,7 +229,7 @@ export default function Profile() {
                   onChange={handleInputChange}
                   className="text-field"
                 />
-  
+
                 {/* Bank Information Section */}
                 <Typography variant="h8" className="bank-info-title">
                   Bank Information
@@ -251,7 +279,7 @@ export default function Profile() {
                     <MenuItem value="BKK">BKK</MenuItem>
                   </Select>
                 </FormControl>
-  
+
                 {/* Bank Account Image (Always visible, allows upload even in view mode) */}
                 <Typography variant="body1" className="bank-image-title">
                   Bank Account Image
@@ -285,7 +313,7 @@ export default function Profile() {
                     onChange={handleBankAccountImageChange}
                   />
                 </Box>
-  
+
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
                     <>
@@ -296,7 +324,7 @@ export default function Profile() {
                       >
                         Save
                       </Button>
-  
+
                       <Button
                         variant="contained"
                         color="error"
@@ -315,7 +343,7 @@ export default function Profile() {
                       >
                         Change Password
                       </Button>
-  
+
                       <Button
                         variant="contained"
                         color="error"
@@ -335,7 +363,7 @@ export default function Profile() {
                 <Typography variant="h6" className="change-password-title">
                   Change Password
                 </Typography>
-  
+
                 <TextField
                   label="Old Password"
                   type={showOldPassword ? "text" : "password"}
@@ -353,7 +381,7 @@ export default function Profile() {
                     ),
                   }}
                 />
-  
+
                 <TextField
                   label="New Password"
                   type={showNewPassword ? "text" : "password"}
@@ -371,7 +399,7 @@ export default function Profile() {
                     ),
                   }}
                 />
-  
+
                 <TextField
                   label="Confirm Password"
                   type={showConfirmPassword ? "text" : "password"}
@@ -389,9 +417,9 @@ export default function Profile() {
                     ),
                   }}
                 />
-  
+
                 {error && <Typography color="error" className="error-message">{error}</Typography>}
-  
+
                 {/* Change Password Button */}
                 <Button
                   variant="contained"
@@ -401,7 +429,7 @@ export default function Profile() {
                 >
                   Change Password
                 </Button>
-  
+
                 {/* Back to Setting Button */}
                 <Button
                   variant="contained"
@@ -417,7 +445,7 @@ export default function Profile() {
           )}
         </Box>
       </Box>
-  
+
       {/* Dialog for success/error */}
       <Dialog
         open={openDialog}
@@ -448,5 +476,5 @@ export default function Profile() {
         </DialogActions>
       </Dialog>
     </Box>
-  );  
+  );
 }

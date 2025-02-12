@@ -5,13 +5,10 @@ require("dotenv").config();
 const User = require("./models/user");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
-const path = require("path");
 const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
 
-console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const app = express();
 app.use(
   cors({
@@ -20,45 +17,62 @@ app.use(
   })
 );
 
+// Middleware สำหรับตรวจสอบ JWT
+const authenticate = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', ''); // ดึง token จาก header
+  if (!token) {
+    return res.status(401).json({ message: 'Authentication required' }); // ถ้าไม่มี token
+  }
+
+  try {
+    // ตรวจสอบ token ด้วย JWT_SECRET จาก environment variable
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    req.user = decoded; // ทำให้ข้อมูล user สามารถเข้าถึงได้ใน request
+    next(); // ไปที่ route handler
+  } catch (error) {
+    // ถ้าเกิดข้อผิดพลาดในการตรวจสอบ token
+    return res.status(401).json({ message: 'Invalid or expired token', error: error.message });
+  }
+};
+
+// ใช้ route ที่ต้องการ authentication
+app.get('/api/users/me', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id); // ใช้ข้อมูลจาก token ที่ได้รับ
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user); // ส่งข้อมูลผู้ใช้กลับไป
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
+module.exports = app;
+
+console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
-
-// ตั้งค่าการจัดเก็บไฟล์ (profileImage และ bankImage)
-const profileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/profile');  // กำหนด path ที่จะเก็บไฟล์ profileImage
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);  // ตั้งชื่อไฟล์เป็น timestamp และ originalname
-  }
-});
-
-const bankStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/bank');  // กำหนด path ที่จะเก็บไฟล์ bankImage
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);  // ตั้งชื่อไฟล์เป็น timestamp และ originalname
-  }
-});
 
 // ตั้งค่าการอัปโหลด
 const upload = multer({
   storage: multer.diskStorage({
     // กำหนดที่จัดเก็บไฟล์ตามประเภทของฟิลด์
     destination: (req, file, cb) => {
-      if (file.fieldname === 'profileImage') {
-        cb(null, 'uploads/profile');
-      } else if (file.fieldname === 'bankImage') {
-        cb(null, 'uploads/bank');
+      if (file.fieldname === "profileImage") {
+        cb(null, "uploads/profile");
+      } else if (file.fieldname === "bankImage") {
+        cb(null, "uploads/bank");
       } else {
-        cb(new Error('Invalid field name'), false);
+        cb(new Error("Invalid field name"), false);
       }
     },
     filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);  // ตั้งชื่อไฟล์เป็น timestamp และ originalname
-    }
-  })
+      cb(null, Date.now() + "-" + file.originalname); // ตั้งชื่อไฟล์เป็น timestamp และ originalname
+    },
+  }),
 });
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
@@ -191,12 +205,8 @@ app.post("/api/login", async (req, res) => {
 
     console.log("Password matches successfully!");
 
-    // สร้าง JWT token
-    const token = jwt.sign(
-      { userId: user._id, username: user.username },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    // สร้าง JWT token ด้วย method generateAuthToken
+    const token = user.generateAuthToken(); // เรียกใช้ generateAuthToken
 
     res
       .status(200)
@@ -261,7 +271,9 @@ app.post(
           email: payload.email,
           firstName: payload.given_name || "",
           lastName: payload.family_name || "Unknown", // กำหนดค่าเริ่มต้น
-          profileImage: req.files.profileImage ? req.files.profileImage[0].path : payload.picture || "", // ใช้ไฟล์ profileImage ถ้ามี
+          profileImage: req.files.profileImage
+            ? req.files.profileImage[0].path
+            : payload.picture || "", // ใช้ไฟล์ profileImage ถ้ามี
           bankImage,
           role: "user",
           phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
