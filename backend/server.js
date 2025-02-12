@@ -5,6 +5,7 @@ require("dotenv").config();
 const User = require("./models/user");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
+const path = require("path");
 const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
@@ -22,27 +23,43 @@ app.use(
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// ตั้งค่าการจัดเก็บไฟล์ profileImage ที่ path uploads/profile
+// ตั้งค่าการจัดเก็บไฟล์ (profileImage และ bankImage)
 const profileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/profile");
+    cb(null, 'uploads/profile');  // กำหนด path ที่จะเก็บไฟล์ profileImage
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+    cb(null, Date.now() + '-' + file.originalname);  // ตั้งชื่อไฟล์เป็น timestamp และ originalname
+  }
 });
 
-// ตั้งค่าการจัดเก็บไฟล์ bankImage ที่ path uploads/bank
 const bankStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/bank");
+    cb(null, 'uploads/bank');  // กำหนด path ที่จะเก็บไฟล์ bankImage
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+    cb(null, Date.now() + '-' + file.originalname);  // ตั้งชื่อไฟล์เป็น timestamp และ originalname
+  }
 });
 
-const upload = multer({ dest: "uploads/" });
+// ตั้งค่าการอัปโหลด
+const upload = multer({
+  storage: multer.diskStorage({
+    // กำหนดที่จัดเก็บไฟล์ตามประเภทของฟิลด์
+    destination: (req, file, cb) => {
+      if (file.fieldname === 'profileImage') {
+        cb(null, 'uploads/profile');
+      } else if (file.fieldname === 'bankImage') {
+        cb(null, 'uploads/bank');
+      } else {
+        cb(new Error('Invalid field name'), false);
+      }
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + '-' + file.originalname);  // ตั้งชื่อไฟล์เป็น timestamp และ originalname
+    }
+  })
+});
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
 const transporter = nodemailer.createTransport({
@@ -63,8 +80,8 @@ mongoose
 app.post(
   "/api/register",
   upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "bankImage", maxCount: 1 },
+    { name: 'profileImage', maxCount: 1 },
+    { name: 'bankImage', maxCount: 1 }
   ]),
   async (req, res) => {
     try {
@@ -106,8 +123,12 @@ app.post(
       }
 
       // เช็คไฟล์อัปโหลด
-      const profileImage = req.files.profileImage ? req.files.profileImage[0].path : null;
-      const bankImage = req.files.bankImage ? req.files.bankImage[0].path : null;
+      const profileImage = req.files.profileImage
+        ? req.files.profileImage[0].path
+        : null;
+      const bankImage = req.files.bankImage
+        ? req.files.bankImage[0].path
+        : null;
       console.log("profileImage path:", profileImage);
       console.log("bankImage path:", bankImage);
 
@@ -186,80 +207,98 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.post("/api/google-login", async (req, res) => {
-  const { token } = req.body;
+app.post(
+  "/api/google-login",
+  upload.fields([
+    { name: 'profileImage', maxCount: 1 },
+    { name: 'bankImage', maxCount: 1 }
+  ]),
+  async (req, res) => {
+    const { token } = req.body;
 
-  if (!token) {
-    return res.status(400).json({ message: "Token is required" });
-  }
-
-  try {
-    console.log("🔹 Received Token:", token);
-
-    // ตรวจสอบว่า GOOGLE_CLIENT_ID ถูกต้องหรือไม่
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      throw new Error("Missing GOOGLE_CLIENT_ID in environment variables");
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
     }
 
-    // ตรวจสอบ Token ที่ได้รับจาก Google
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    try {
+      console.log("🔹 Received Token:", token);
 
-    const payload = ticket.getPayload();
-    console.log("🔹 Google Payload:", payload);
+      // ตรวจสอบว่า GOOGLE_CLIENT_ID ถูกต้องหรือไม่
+      if (!process.env.GOOGLE_CLIENT_ID) {
+        throw new Error("Missing GOOGLE_CLIENT_ID in environment variables");
+      }
 
-    if (!payload || !payload.email) {
-      throw new Error("Invalid Google token payload");
-    }
-
-    // ตรวจสอบว่า user มีในระบบหรือไม่
-    let user = await User.findOne({ email: payload.email });
-
-    if (!user) {
-      // ถ้าไม่มีผู้ใช้ในระบบ ให้ลงทะเบียนใหม่
-      user = new User({
-        username: payload.name || payload.email.split("@")[0],
-        email: payload.email,
-        firstName: payload.given_name || "",
-        lastName: payload.family_name || "Unknown", // กำหนดค่าเริ่มต้น
-        profileImage: payload.picture || "",
-        role: "user",
-        phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
-        accountNumber: "Unknown", // ใส่ค่าเริ่มต้นชั่วคราว
-        password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
-        authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
+      // ตรวจสอบ Token ที่ได้รับจาก Google
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
-      await user.save();
-      console.log("✅ New user created:", user);
-    } else {
-      console.log("✅ User found:", user);
+
+      const payload = ticket.getPayload();
+      console.log("🔹 Google Payload:", payload);
+
+      if (!payload || !payload.email) {
+        throw new Error("Invalid Google token payload");
+      }
+
+      // เช็คไฟล์อัปโหลด
+      const profileImage = req.files.profileImage
+        ? req.files.profileImage[0].path
+        : null;
+      const bankImage = req.files.bankImage
+        ? req.files.bankImage[0].path
+        : null;
+      console.log("profileImage path:", profileImage);
+      console.log("bankImage path:", bankImage);
+
+      // ตรวจสอบว่า user มีในระบบหรือไม่
+      let user = await User.findOne({ email: payload.email });
+
+      if (!user) {
+        // ถ้าไม่มีผู้ใช้ในระบบ ให้ลงทะเบียนใหม่
+        user = new User({
+          username: payload.name || payload.email.split("@")[0],
+          email: payload.email,
+          firstName: payload.given_name || "",
+          lastName: payload.family_name || "Unknown", // กำหนดค่าเริ่มต้น
+          profileImage: req.files.profileImage ? req.files.profileImage[0].path : payload.picture || "", // ใช้ไฟล์ profileImage ถ้ามี
+          bankImage,
+          role: "user",
+          phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
+          accountNumber: "Unknown", // ใส่ค่าเริ่มต้นชั่วคราว
+          password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
+          authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
+        });
+        await user.save();
+        console.log("✅ New user created:", user);
+      } else {
+        console.log("✅ User found:", user);
+      }
+
+      // สร้าง JWT token สำหรับผู้ใช้
+      const jwtToken = jwt.sign(
+        { userId: user._id, username: user.username, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      console.log("✅ JWT Token Created:", jwtToken);
+
+      // ส่ง JWT token กลับไปยัง frontend
+      res.status(200).json({
+        message: "เข้าสู่ระบบสำเร็จ!",
+        token: jwtToken,
+        role: user.role,
+      });
+    } catch (error) {
+      console.error("🚨 Google Login Error:", error.message);
+      res.status(500).json({
+        message: "ไม่สามารถเข้าสู่ระบบผ่าน Google ได้",
+        error: error.message,
+      });
     }
-
-    // สร้าง JWT token สำหรับผู้ใช้
-    const jwtToken = jwt.sign(
-      { userId: user._id, username: user.username, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    console.log("✅ JWT Token Created:", jwtToken);
-
-    // ส่ง JWT token กลับไปยัง frontend
-    res.status(200).json({
-      message: "เข้าสู่ระบบสำเร็จ!",
-      token: jwtToken,
-      role: user.role,
-    });
-  } catch (error) {
-    console.error("🚨 Google Login Error:", error.message);
-    res.status(500).json({
-      message: "ไม่สามารถเข้าสู่ระบบผ่าน Google ได้",
-      error: error.message,
-    });
   }
-});
+);
 
 // Route สำหรับรีเซ็ตรหัสผ่าน
 app.post("/api/forget-password", async (req, res) => {
