@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");  // เรียกใช้ bcryptjs
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -84,6 +85,17 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// ฟังก์ชันตรวจสอบรหัสผ่านที่เข้ารหัสแล้ว
+userSchema.methods.isValidPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);  // ใช้ bcrypt เพื่อเปรียบเทียบรหัสผ่าน
+};
+
+// ฟังก์ชันสร้าง JWT Token
+userSchema.methods.generateAuthToken = function() {
+  const payload = { id: this._id, username: this.username, role: this.role };
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); // สร้าง token ด้วย secret key
+  return token;
+};
 
 userSchema.pre("save", async function (next) {
   if (this.email) {
