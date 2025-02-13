@@ -21,32 +21,36 @@ app.use("/uploads", express.static("uploads"));
 
 // Middleware สำหรับตรวจสอบ JWT
 const authenticate = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', ''); // ดึง token จาก header
+  const token = req.header("Authorization")?.replace("Bearer ", ""); // ดึง token จาก header
   if (!token) {
-    return res.status(401).json({ message: 'Authentication required' }); // ถ้าไม่มี token
+    return res.status(401).json({ message: "Authentication required" }); // ถ้าไม่มี token
   }
 
   try {
     // ตรวจสอบ token ด้วย JWT_SECRET จาก environment variable
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // ทำให้ข้อมูล user สามารถเข้าถึงได้ใน request
     next(); // ไปที่ route handler
   } catch (error) {
     // ถ้าเกิดข้อผิดพลาดในการตรวจสอบ token
-    return res.status(401).json({ message: 'Invalid or expired token', error: error.message });
+    return res
+      .status(401)
+      .json({ message: "Invalid or expired token", error: error.message });
   }
 };
 
 // ใช้ route ที่ต้องการ authentication
-app.get('/api/users/me', authenticate, async (req, res) => {
+app.get("/api/users/me", authenticate, async (req, res) => {
   try {
     const user = await User.findById(req.user.id); // ใช้ข้อมูลจาก token ที่ได้รับ
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
     res.json(user); // ส่งข้อมูลผู้ใช้กลับไป
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 
@@ -60,7 +64,16 @@ app.put("/api/users/me", authenticate, async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // ✅ อัปเดตเฉพาะฟิลด์ที่ถูกส่งมา
-    const allowedFields = ["username", "phoneNumber", "firstName", "lastName", "bank", "accountNumber", "bankImage", "profileImage"];
+    const allowedFields = [
+      "username",
+      "phoneNumber",
+      "firstName",
+      "lastName",
+      "bank",
+      "accountNumber",
+      "bankImage",
+      "profileImage",
+    ];
     allowedFields.forEach((field) => {
       if (req.body[field] !== undefined) {
         user[field] = req.body[field];
@@ -94,7 +107,9 @@ app.put("/api/users/me/reset-password", authenticate, async (req, res) => {
 
     // ตรวจสอบรหัสผ่านใหม่และยืนยันรหัสผ่าน
     if (!newPassword || !confirmPassword) {
-      return res.status(400).json({ message: "Please provide new password and confirm password" });
+      return res
+        .status(400)
+        .json({ message: "Please provide new password and confirm password" });
     }
 
     if (newPassword !== confirmPassword) {
@@ -102,9 +117,15 @@ app.put("/api/users/me/reset-password", authenticate, async (req, res) => {
     }
 
     // ตรวจสอบความแข็งแกร่งของรหัสผ่าน
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     if (!passwordRegex.test(newPassword)) {
-      return res.status(400).json({ message: "New password must contain at least one uppercase letter, one number, and one special character." });
+      return res
+        .status(400)
+        .json({
+          message:
+            "New password must contain at least one uppercase letter, one number, and one special character.",
+        });
     }
 
     // แฮชรหัสผ่านใหม่
@@ -159,8 +180,8 @@ mongoose
 app.post(
   "/api/register",
   upload.fields([
-    { name: 'profileImage', maxCount: 1 },
-    { name: 'bankImage', maxCount: 1 }
+    { name: "profileImage", maxCount: 1 },
+    { name: "bankImage", maxCount: 1 },
   ]),
   async (req, res) => {
     try {
@@ -290,8 +311,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 app.post(
   "/api/google-login",
   upload.fields([
-    { name: 'profileImage', maxCount: 1 },
-    { name: 'bankImage', maxCount: 1 }
+    { name: "profileImage", maxCount: 1 },
+    { name: "bankImage", maxCount: 1 },
   ]),
   async (req, res) => {
     const { token } = req.body;
@@ -303,12 +324,10 @@ app.post(
     try {
       console.log("🔹 Received Token:", token);
 
-      // ตรวจสอบว่า GOOGLE_CLIENT_ID ถูกต้องหรือไม่
       if (!process.env.GOOGLE_CLIENT_ID) {
         throw new Error("Missing GOOGLE_CLIENT_ID in environment variables");
       }
 
-      // ตรวจสอบ Token ที่ได้รับจาก Google
       const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.GOOGLE_CLIENT_ID,
@@ -321,29 +340,22 @@ app.post(
         throw new Error("Invalid Google token payload");
       }
 
-      // เช็คไฟล์อัปโหลด
-      const profileImage = req.files.profileImage
-        ? req.files.profileImage[0].path
-        : null;
-      const bankImage = req.files.bankImage
-        ? req.files.bankImage[0].path
-        : null;
+      // ตรวจสอบการอัปโหลดไฟล์
+      const profileImage = req.files && req.files.profileImage ? req.files.profileImage[0].path : payload.picture || null;
+      const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : null;
+
       console.log("profileImage path:", profileImage);
       console.log("bankImage path:", bankImage);
 
-      // ตรวจสอบว่า user มีในระบบหรือไม่
       let user = await User.findOne({ email: payload.email });
 
       if (!user) {
-        // ถ้าไม่มีผู้ใช้ในระบบ ให้ลงทะเบียนใหม่
         user = new User({
           username: payload.name || payload.email.split("@")[0],
           email: payload.email,
           firstName: payload.given_name || "",
-          lastName: payload.family_name || "Unknown", // กำหนดค่าเริ่มต้น
-          profileImage: req.files.profileImage
-            ? req.files.profileImage[0].path
-            : payload.picture || "", // ใช้ไฟล์ profileImage ถ้ามี
+          lastName: payload.family_name || "Unknown",
+          profileImage: profileImage,  // ใช้ค่า profileImage ที่กำหนดไว้
           bankImage,
           role: "user",
           phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
@@ -357,7 +369,6 @@ app.post(
         console.log("✅ User found:", user);
       }
 
-      // สร้าง JWT token สำหรับผู้ใช้
       const jwtToken = jwt.sign(
         { userId: user._id, username: user.username, role: user.role },
         process.env.JWT_SECRET,
@@ -366,7 +377,6 @@ app.post(
 
       console.log("✅ JWT Token Created:", jwtToken);
 
-      // ส่ง JWT token กลับไปยัง frontend
       res.status(200).json({
         message: "เข้าสู่ระบบสำเร็จ!",
         token: jwtToken,
