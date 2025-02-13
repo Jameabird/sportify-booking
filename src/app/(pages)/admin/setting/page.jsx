@@ -1,500 +1,537 @@
 "use client";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
 import TopBar_Admin from "../../components/Topbar_Admin";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import InputAdornment from "@mui/material/InputAdornment";
+import './profile.css';
 
 export default function Profile() {
-    const [isEditing, setIsEditing] = useState(false);
-    const [isChangingPassword, setIsChangingPassword] = useState(false);
-    const [profileData, setProfileData] = useState({
-        name: "Admin1",
-        email: "Admin1@gmail.com",
-        phone: "0123456789",
-        role: "Admin",
+  const [isEditing, setIsEditing] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [profileImage, setProfileImage] = useState("/default-profile.png");
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleChangePasswordClick = () => setIsChangingPassword(true);
+  const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
+  const [dialogSeverity, setDialogSeverity] = useState("success");  // เพิ่ม state สำหรับระดับของข้อความ (success หรือ error)
+
+  // เพิ่ม state สำหรับควบคุมการแสดงผลรหัสผ่าน
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleSaveClick = async () => {
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    const updatedData = {};
+    ["username", "phoneNumber", "firstName", "lastName", "accountNumber", "bank", "bankAccountImage", "profileImage"].forEach((field) => {
+      if (profileData[field] !== undefined) { // ✅ ส่งค่าที่เป็น "" ไปด้วย
+        updatedData[field] = profileData[field];
+      }
     });
 
-    const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
-    const [oldPassword, setOldPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
-    const [profileImage, setProfileImage] = useState("/default-profile.png");
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // เพิ่ม severity สำหรับแสดงใน Snackbar
-    const [openDialog, setOpenDialog] = useState(false);
-    const handleChangePasswordClick = () => setIsChangingPassword(true);
-    const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
-    const [dialogSeverity, setDialogSeverity] = useState("success");  // เพิ่ม state สำหรับระดับของข้อความ (success หรือ error)
+    if (Object.keys(updatedData).length === 0) {
+      setDialogMessage("No changes detected.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+      return;
+    }
 
-    // เพิ่ม state สำหรับควบคุมการแสดงผลรหัสผ่าน
-    const [showOldPassword, setShowOldPassword] = useState(false);
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    try {
+      await axios.put("http://localhost:5000/api/users/me", updatedData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    const handleSaveClick = () => {
-        if (!profileData.name || !profileData.phone || !profileData.role) {
-            setDialogMessage("Please fill out all required fields.");
-            setDialogSeverity("error");  // ใช้ "error" หากมีข้อผิดพลาด
-            setOpenDialog(true);
-            return;
-        }
+      setDialogMessage("Changes saved successfully!");
+      setDialogSeverity("success");
+      setOpenDialog(true);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      setDialogMessage(error.response?.data?.message || "Failed to update profile.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+    }
+  };
 
-        setIsEditing(false);
-        setDialogMessage("Changes saved successfully!");
-        setDialogSeverity("success");  // ใช้ "success" เมื่อบันทึกสำเร็จ
-        setOpenDialog(true);
-    };
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setDialogMessage("Please fill in all fields.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+      return;
+    }
 
-    const handleChangePassword = () => {
-        if (newPassword !== confirmPassword) {
-            setDialogMessage("Passwords do not match.");
-            setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านไม่ตรงกัน
-            setOpenDialog(true);
-            return;
-        }
+    if (newPassword !== confirmPassword) {
+      setDialogMessage("Passwords do not match.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+      return;
+    }
 
-        if (newPassword.length >= 6) {
-            setDialogMessage("Password changed successfully!");
-            setDialogSeverity("success");  // ใช้ "success" เมื่อเปลี่ยนรหัสผ่านสำเร็จ
-            setOpenDialog(true);
-        } else {
-            setDialogMessage("New password is too short.");
-            setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านสั้นเกินไป
-            setOpenDialog(true);
-        }
-    };
+    // ✅ ดึง token จาก localStorage
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
 
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
-    };
+    if (!token) {
+      setDialogMessage("Authentication failed. Please log in again.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+      return;
+    }
 
-    const handleEditClick = () => {
-        setOriginalProfileData(profileData); // เก็บค่าเดิมไว้
-        setIsEditing(true);
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/users/me/reset-password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ ส่ง token เพื่อ auth
+        },
+        body: JSON.stringify({ oldPassword, newPassword, confirmPassword }),
+      });
 
-    // Handle Dialog close
-    const handleDialogClose = () => {
-        setOpenDialog(false);
-    };
+      const data = await response.json();
 
-    const handleCancelClick = () => {
-        setProfileData(originalProfileData);
-        setIsEditing(false);
-    };
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to change password.");
+      }
 
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
+      setDialogMessage("Password changed successfully!");
+      setDialogSeverity("success");
+      setOpenDialog(true);
+
+      // ✅ ล้างฟอร์มหลังจากเปลี่ยนรหัสผ่านสำเร็จ
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      setDialogMessage(error.message);
+      setDialogSeverity("error");
+      setOpenDialog(true);
+    }
+  };
+
+  const handleEditClick = () => {
+    setOriginalProfileData(profileData); // เก็บค่าเดิมไว้
+    setIsEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setProfileData(originalProfileData);
+    setIsEditing(false);
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    console.log(`Changing ${name} to`, value);
+
+    setProfileData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+
+  // ฟังก์ชันสำหรับปิด Dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  // Function to handle the profile image change
+  const handleProfileImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Function to handle the bank account image change
+  const handleBankAccountImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
         setProfileData((prevState) => ({
-            ...prevState,
-            [name]: value,
+          ...prevState,
+          bankAccountImage: reader.result, // Store the uploaded image
         }));
-    };
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    // ฟังก์ชันสำหรับปิด Dialog
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-    };
+  useEffect(() => {
+    const tokenData = JSON.parse(localStorage.getItem('token'));
+    const token = tokenData ? tokenData.token : null;
 
-    // Function to handle the profile image change
-    const handleProfileImageChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfileImage(reader.result);
-            };
-            reader.readAsDataURL(file);
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return; // ถ้า token หายไปหรือหมดอายุ จะไม่ดำเนินการต่อ
+    } else {
+      console.log("Token is valid:", token);
+
+      const fetchUserData = async () => {
+        setLoading(true); // เริ่มโหลดข้อมูล
+        try {
+          const res = await axios.get("http://localhost:5000/api/users/me", {
+            headers: {
+              Authorization: `Bearer ${token}`, // ใช้ token ที่ได้จาก localStorage
+            },
+          });
+
+          setProfileData(res.data); // Set profile data เมื่อดึงข้อมูลสำเร็จ
+        } catch (error) {
+          console.error("Error fetching user data:", error.response?.data || error.message);
+          setError(error.response?.data?.message || "Failed to load profile");
+        } finally {
+          setLoading(false); // ปิดการโหลดข้อมูลเมื่อเสร็จ
         }
-    };
+      };
 
-    return (
-        <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
-            {/* Background Box */}
-            <Box sx={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "#f4f4f4",
-                zIndex: -1, // Keeps the background below the profile section
-            }} />
+      fetchUserData(); // เรียกฟังก์ชันดึงข้อมูล
+    }
+  }, []); // ขึ้นอยู่กับค่าที่เก็บใน localStorage
 
-            <TopBar_Admin /> {/* Fixed top bar */}
+  if (loading) return <p>Loading...</p>; // หากกำลังโหลดข้อมูล
+  if (error) return <p>{error}</p>; // แสดง error message หากเกิดข้อผิดพลาด
+  if (!profileData) return <p>Error loading profile</p>; // หากไม่มีข้อมูลผู้ใช้    
 
-            {/* Profile Section */}
-            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
-                <Box
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    width="100%"
-                    maxWidth="400px"
-                    sx={{
-                        backgroundColor: "#fff",
-                        borderRadius: "8px",
-                        padding: "20px",
-                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                        animation: "fadeInUp 0.5s ease-in-out",
-                        "@keyframes fadeInUp": {
-                            "0%": { opacity: 0, transform: "translateY(20px)" },
-                            "100%": { opacity: 1, transform: "translateY(0)" },
-                        },
-                    }}
-                >
-                    {!isChangingPassword ? (
-                        <>
-                            <Box position="relative" textAlign="center" mb={2}>
-                                <Avatar
-                                    src={profileImage}
-                                    alt="Profile Picture"
-                                    sx={{
-                                        width: "100px",
-                                        height: "100px",
-                                        border: "2px solid #ddd",
-                                        margin: "0 auto",
-                                        transition: "transform 0.3s ease-in-out",
-                                        "&:hover": {
-                                            transform: "scale(1.1)",
-                                        },
-                                    }}
-                                />
-                                {isEditing && (
-                                    <IconButton
-                                        color="primary"
-                                        sx={{ position: "absolute", bottom: 0, right: "calc(50% - 20px)", backgroundColor: "#fff", boxShadow: 1, border: "1px solid #ddd" }}
-                                        onClick={() => document.getElementById("profile-image-input").click()}
-                                    >
-                                        <CameraAltIcon />
-                                    </IconButton>
-                                )}
-                                <input
-                                    id="profile-image-input"
-                                    type="file"
-                                    accept="image/*"
-                                    style={{ display: "none" }}
-                                    onChange={handleProfileImageChange}
-                                />
-                            </Box>
-                            <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
-                                {isEditing ? "Edit Profile" : "Profile"}
-                            </Typography>
+  return (
+    <Box display="flex" flexDirection="column" height="100vh" width="100vw" className="box-container">
+      {/* Background Box */}
+      <Box className="background-box" />
+      <TopBar_Admin /> {/* Fixed top bar */}
+      {/* Profile Section */}
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" className="profile-section">
+        <Box className="profile-box">
+          {!isChangingPassword ? (
+            <>
+              <Box position="relative" textAlign="center" mb={2}>
+                <Avatar
+                  src={profileImage}
+                  alt="Profile Picture"
+                  className="avatar-style"
+                />
+                {isEditing && (
+                  <IconButton
+                    color="primary"
+                    className="avatar-edit-button"
+                    onClick={() => document.getElementById("profile-image-input").click()}
+                  >
+                    <CameraAltIcon />
+                  </IconButton>
+                )}
+                <input
+                  id="profile-image-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleProfileImageChange}
+                />
+              </Box>
+              <Typography variant="h6" className="profile-title">
+                {isEditing ? "Edit Profile" : "Profile"}
+              </Typography>
 
-                            <Box width="100%" display="flex" flexDirection="column" gap={2}>
-                                <TextField
-                                    label="Name"
-                                    name="name"
-                                    fullWidth
-                                    value={profileData.name}
-                                    disabled={!isEditing}
-                                    onChange={handleInputChange}
-                                    sx={{
-                                        "& .MuiOutlinedInput-root": {
-                                            transition: "all 0.3s ease",
-                                            "&.Mui-focused": {
-                                                boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                                                borderColor: "#0096ff",
-                                            },
-                                        },
-                                    }}
-                                />
-                                <TextField
-                                    label="Email"
-                                    name="email"
-                                    fullWidth
-                                    value={profileData.email}
-                                    disabled={true}
-                                    sx={{
-                                        "& .MuiOutlinedInput-root": {
-                                            transition: "all 0.3s ease",
-                                            "&.Mui-focused": {
-                                                boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                                                borderColor: "#0096ff",
-                                            },
-                                        },
-                                    }}
-                                />
-                                <TextField
-                                    label="Phone"
-                                    name="phone"
-                                    fullWidth
-                                    value={profileData.phone}
-                                    disabled={!isEditing}
-                                    onChange={handleInputChange}
-                                    sx={{
-                                        "& .MuiOutlinedInput-root": {
-                                            transition: "all 0.3s ease",
-                                            "&.Mui-focused": {
-                                                boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                                                borderColor: "#0096ff",
-                                            },
-                                        },
-                                    }}
-                                />  {/* Add the missing closing tag for Phone field here */}
-                                <TextField
-                                    label="Role"
-                                    name="role"
-                                    fullWidth
-                                    value={profileData.role}
-                                    disabled={true}
-                                    sx={{
-                                        "& .MuiOutlinedInput-root": {
-                                            transition: "all 0.3s ease",
-                                            "&.Mui-focused": {
-                                                boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                                                borderColor: "#0096ff",
-                                            },
-                                        },
-                                    }}
-                                />
-                                <Box display="flex" justifyContent="space-between" mt={2}>
-                                    {isEditing ? (
-                                        <>
-                                            <Button
-                                                variant="contained"
-                                                onClick={handleSaveClick}
-                                                sx={{
-                                                    backgroundColor: "#1e40af", // เปลี่ยนสีพื้นหลังเป็นน้ำเงินเข้ม
-                                                    color: "white", // เปลี่ยนสีตัวอักษรให้เป็นสีขาว
-                                                    width: "48%",
-                                                    fontSize: "13px",
-                                                    transition: "all 0.3s ease",
-                                                    "&:hover": {
-                                                        backgroundColor: "#162d68", // สีเข้มขึ้นเมื่อโฮเวอร์
-                                                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-                                                        transform: "scale(1.05)",
-                                                    },
-                                                }}
-                                            >
-                                                Save
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="error"
-                                                sx={{
-                                                    width: "48%",
-                                                    fontSize: "13px",
-                                                    transition: "all 0.3s ease",
-                                                    "&:hover": {
-                                                        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-                                                        transform: "scale(1.05)",
-                                                    },
-                                                }}
-                                                onClick={handleCancelClick}
-                                            >
-                                                Cancel
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Button
-                                                variant="contained"
-                                                onClick={handleChangePasswordClick}
-                                                sx={{
-                                                    backgroundColor: "#1e40af", // กำหนดสีพื้นหลังเป็นน้ำเงินเข้ม
-                                                    "&:hover": {
-                                                        backgroundColor: "#162d68", // เปลี่ยนเป็นน้ำเงินเข้มขึ้นเมื่อโฮเวอร์
-                                                    },
-                                                    width: "48%",
-                                                    fontSize: "13px",
-                                                    color: "white", // ทำให้ข้อความอ่านง่ายขึ้น
-                                                }}
-                                            >
-                                                Change Password
-                                            </Button>
-                                            <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleEditClick}>
-                                                Edit
-                                            </Button>
-                                        </>
-                                    )}
-                                </Box>
-                            </Box>
-                        </>
-                    ) : (
-                        <>
-                            <Box
-                                width="100%"
-                                display="flex"
-                                flexDirection="column"
-                                gap={2}
-                                sx={{
-                                    backgroundColor: "#fff",
-                                    padding: "20px",
-                                    borderRadius: "8px",
-                                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                }}
-                            >
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: "bold",
-                                        textAlign: "center",
-                                        color: "#333",
-                                        marginBottom: "10px",
-                                    }}
-                                >
-                                    Change Password
-                                </Typography>
+              <Box width="100%" display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Name"
+                  name="username"
+                  fullWidth
+                  value={profileData.username}
+                  disabled={true}
+                  onChange={handleInputChange}
+                  className="text-field"
+                />
+                <TextField
+                  label="Email"
+                  name="email"
+                  fullWidth
+                  value={profileData.email}
+                  disabled={true}
+                  className="text-field"
+                />
+                <TextField
+                  label="Phone"
+                  name="phoneNumber"
+                  fullWidth
+                  value={profileData.phoneNumber}
+                  disabled={!isEditing}
+                  onChange={handleInputChange}
+                  className="text-field"
+                />
 
-                                <TextField
-                                    label="Old Password"
-                                    type={showOldPassword ? "text" : "password"}
-                                    fullWidth
-                                    value={oldPassword}
-                                    onChange={(e) => setOldPassword(e.target.value)}
-                                    sx={{ marginBottom: "20px" }}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
-                                                    {showOldPassword ? <Visibility /> : <VisibilityOff />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-
-                                <TextField
-                                    label="New Password"
-                                    type={showNewPassword ? "text" : "password"}
-                                    fullWidth
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    sx={{ marginBottom: "20px" }}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
-                                                    {showNewPassword ? <Visibility /> : <VisibilityOff />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-
-                                <TextField
-                                    label="Confirm Password"
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    fullWidth
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    sx={{ marginBottom: "20px" }}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
-                                                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-
-                                {error && <Typography color="error">{error}</Typography>}
-
-                                {/* Change Password Button */}
-                                <Button
-                                    variant="contained"
-                                    fullWidth
-                                    onClick={handleChangePassword}
-                                    sx={{
-                                        backgroundColor: "#1e40af", // สีพื้นหลังเป็นน้ำเงินเข้ม
-                                        "&:hover": {
-                                            backgroundColor: "#162d68", // เปลี่ยนสีเข้มขึ้นเมื่อโฮเวอร์
-                                        },
-                                        fontSize: "13px",
-                                    }}
-                                >
-                                    Change Password
-                                </Button>
-
-                                {/* Back to Setting Button */}
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    fullWidth
-                                    sx={{ marginTop: "10px", fontSize: "13px" }}
-                                    onClick={() => setIsChangingPassword(false)}
-                                >
-                                    Back to setting
-                                </Button>
-                            </Box>
-                        </>
-
-                    )}
+                {/* Bank Information Section */}
+                <Typography variant="h8" className="bank-info-title">
+                  Bank Information
+                </Typography>
+                <Box display="flex" gap={2}>
+                  <TextField
+                    label="First Name"
+                    name="firstName"
+                    fullWidth
+                    value={profileData.firstName}
+                    disabled={!isEditing}
+                    onChange={handleInputChange}
+                    className="text-field"
+                  />
+                  <TextField
+                    label="Last Name"
+                    name="lastName"
+                    fullWidth
+                    value={profileData.lastName}
+                    disabled={!isEditing}
+                    onChange={handleInputChange}
+                    className="text-field"
+                  />
                 </Box>
-            </Box>
-            {/* Dialog for success/error */}
-            <Dialog
-                open={openDialog}
-                onClose={handleCloseDialog}
-                sx={{
-                    '& .MuiDialog-paper': {
-                        borderRadius: '12px', // Add rounded corners
-                        padding: '20px',
-                        maxWidth: '400px',
-                        backgroundColor: '#f9f9f9',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    }
-                }}
-            >
-                {/* Dialog Title */}
-                <DialogTitle
-                    sx={{
-                        textAlign: 'center',
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: dialogSeverity === "success" ? '#1e40af' : '#f44336',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 1,
-                    }}
-                >
-                    {dialogSeverity === "success" ? (
-                        <span style={{ color: '#1e40af' }}>✔</span>
-                    ) : (
-                        <span style={{ color: '#f44336' }}>❌</span>
-                    )}
-                    {dialogSeverity === "success" ? "Success" : "Error"}
-                </DialogTitle>
-                <DialogContent sx={{ textAlign: 'center', paddingBottom: '20px' }}>
-                    <Typography variant="body1" sx={{ fontSize: '16px', color: '#333' }}>
-                        {dialogMessage}
-                    </Typography>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: 'center', paddingTop: '10px' }}>
-                    {/* Dialog Button */}
-                    <Button
-                        onClick={handleCloseDialog}
-                        color={dialogSeverity === "success" ? "primary" : "error"} // ใช้ primary หรือกำหนดเองด้านล่าง
-                        variant="contained"
-                        sx={{
-                            backgroundColor: dialogSeverity === "success" ? '#1e40af' : '#d32f2f',
-                            '&:hover': {
-                                backgroundColor: dialogSeverity === "success" ? '#162d68' : '#b71c1c',
-                                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
-                            },
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            padding: '8px 20px',
-                            textTransform: 'none',
-                            borderRadius: '8px',
-                        }}
+                <TextField
+                  label="Bank Account"
+                  name="accountNumber"
+                  fullWidth
+                  value={profileData.accountNumber}
+                  disabled={!isEditing}
+                  onChange={handleInputChange}
+                  className="text-field"
+                />
+                <FormControl fullWidth variant="outlined" className="select-control">
+                  <InputLabel className="select-label">Bank Name</InputLabel>
+                  <Select
+                    name="bank"
+                    value={profileData.bank}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    label="Bank Name"
+                    className="select-field"
+                  >
+                    <MenuItem value="PromptPay"> PromptPay </MenuItem>
+                    <MenuItem value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</MenuItem>
+                    <MenuItem value="SCB">ไทยพาณิชย์ (SCB)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
+                    <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
+                    <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
+                    <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {/* Bank Account Image (Always visible, allows upload even in view mode) */}
+                <Typography variant="body1" className="bank-image-title">
+                  Bank Account Image
+                </Typography>
+                <Box display="flex" justifyContent="center" alignItems="center" position="relative" textAlign="center" mb={2}>
+                  {profileData.bankImage ? (
+                    <Avatar
+                      src={`http://localhost:5000/uploads/bank/${profileData.bankImage}`} // ใช้ URL ที่ได้จาก backend
+                      alt="Bank Account"
+                      className="bank-account-image"
+                    />
+                  ) : (
+                    <Box className="no-image-box">
+                      <Typography variant="body2" className="no-image-text">No Image</Typography>
+                    </Box>
+                  )}
+                  {isEditing && (
+                    <IconButton
+                      color="primary"
+                      className="image-edit-button"
+                      onClick={() => document.getElementById("bank-account-image-input").click()}
                     >
-                        OK
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                      <CameraAltIcon />
+                    </IconButton>
+                  )}
+                  <input
+                    id="bank-account-image-input"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleBankAccountImageChange}
+                  />
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" mt={2}>
+                  {isEditing ? (
+                    <>
+                      <Button
+                        variant="contained"
+                        onClick={handleSaveClick}
+                        className="save-button"
+                      >
+                        Save
+                      </Button>
+
+                      <Button
+                        variant="contained"
+                        color="error"
+                        className="cancel-button"
+                        onClick={handleCancelClick}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="contained"
+                        onClick={handleChangePasswordClick}
+                        className="change-password-button"
+                      >
+                        Change Password
+                      </Button>
+
+                      <Button
+                        variant="contained"
+                        color="error"
+                        className="edit-button"
+                        onClick={handleEditClick}
+                      >
+                        Edit
+                      </Button>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            </>
+          ) : (
+            <>
+              <Box width="100%" display="flex" flexDirection="column" gap={2} className="change-password-section">
+                <Typography variant="h6" className="change-password-title">
+                  Change Password
+                </Typography>
+
+                <TextField
+                  label="Old Password"
+                  type={showOldPassword ? "text" : "password"}
+                  fullWidth
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="password-field"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowOldPassword(!showOldPassword)} edge="end">
+                          {showOldPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  label="New Password"
+                  type={showNewPassword ? "text" : "password"}
+                  fullWidth
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="password-field"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                          {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  label="Confirm Password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  fullWidth
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="password-field"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                          {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                {error && <Typography color="error" className="error-message">{error}</Typography>}
+
+                {/* Change Password Button */}
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={handleChangePassword}
+                  className="change-password-button"
+                >
+                  Change Password
+                </Button>
+
+                {/* Back to Setting Button */}
+                <Button
+                  variant="contained"
+                  color="error"
+                  fullWidth
+                  className="back-button"
+                  onClick={() => setIsChangingPassword(false)}
+                >
+                  Back to setting
+                </Button>
+              </Box>
+            </>
+          )}
         </Box>
-    );
+      </Box>
+
+      {/* Dialog for success/error */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        className="dialog-box"
+      >
+        {/* Dialog Title */}
+        <DialogTitle className="dialog-title">
+          {dialogSeverity === "success" ? (
+            <span className="success-icon">✔</span>
+          ) : (
+            <span className="error-icon">❌</span>
+          )}
+          {dialogSeverity === "success" ? "Success" : "Error"}
+        </DialogTitle>
+        <DialogContent className="dialog-content">
+          <Typography variant="body1" className="dialog-message">
+            {dialogMessage}
+          </Typography>
+        </DialogContent>
+        <DialogActions className="dialog-actions">
+          <Button
+            onClick={handleCloseDialog}
+            className="dialog-button"
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
 }

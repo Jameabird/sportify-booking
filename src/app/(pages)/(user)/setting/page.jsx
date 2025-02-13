@@ -1,37 +1,25 @@
 "use client";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
 import TopBar_User from "../../components/Topbar_User";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import InputAdornment from "@mui/material/InputAdornment";
+import './profile.css';
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: "Jennie Lee",
-    email: "SE@gmail.com",
-    phone: "0123456789",
-    firstName: "Jennie",
-    lastName: "Lee",
-    bankAccount: "1234567890",
-    bankName: "SCB",
-    bankAccountImage: null,
-  });
-
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [originalProfileData, setOriginalProfileData] = useState({ ...profileData });
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [profileImage, setProfileImage] = useState("/default-profile.png");
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // เพิ่ม severity สำหรับแสดงใน Snackbar
   const [openDialog, setOpenDialog] = useState(false);
   const handleChangePasswordClick = () => setIsChangingPassword(true);
   const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
@@ -42,51 +30,104 @@ export default function Profile() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSaveClick = () => {
-    if (!profileData.name || !profileData.phone || !profileData.firstName || !profileData.lastName || !profileData.bankAccount) {
-      setDialogMessage("Please fill out all required fields.");
-      setDialogSeverity("error");  // ใช้ "error" หากมีข้อผิดพลาด
+  const handleSaveClick = async () => {
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    const updatedData = {};
+    ["username", "phoneNumber", "firstName", "lastName", "accountNumber", "bank", "bankAccountImage", "profileImage"].forEach((field) => {
+      if (profileData[field] !== undefined) { // ✅ ส่งค่าที่เป็น "" ไปด้วย
+        updatedData[field] = profileData[field];
+      }
+    });
+
+    if (Object.keys(updatedData).length === 0) {
+      setDialogMessage("No changes detected.");
+      setDialogSeverity("error");
       setOpenDialog(true);
       return;
     }
 
-    setIsEditing(false);
-    setDialogMessage("Changes saved successfully!");
-    setDialogSeverity("success");  // ใช้ "success" เมื่อบันทึกสำเร็จ
-    setOpenDialog(true);
+    try {
+      await axios.put("http://localhost:5000/api/users/me", updatedData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setDialogMessage("Changes saved successfully!");
+      setDialogSeverity("success");
+      setOpenDialog(true);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      setDialogMessage(error.response?.data?.message || "Failed to update profile.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setDialogMessage("Please fill in all fields.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setDialogMessage("Passwords do not match.");
-      setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านไม่ตรงกัน
+      setDialogSeverity("error");
       setOpenDialog(true);
       return;
     }
 
-    if (newPassword.length >= 6) {
-      setDialogMessage("Password changed successfully!");
-      setDialogSeverity("success");  // ใช้ "success" เมื่อเปลี่ยนรหัสผ่านสำเร็จ
+    // ✅ ดึง token จาก localStorage
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    if (!token) {
+      setDialogMessage("Authentication failed. Please log in again.");
+      setDialogSeverity("error");
       setOpenDialog(true);
-    } else {
-      setDialogMessage("New password is too short.");
-      setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านสั้นเกินไป
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/users/me/reset-password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ ส่ง token เพื่อ auth
+        },
+        body: JSON.stringify({ oldPassword, newPassword, confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to change password.");
+      }
+
+      setDialogMessage("Password changed successfully!");
+      setDialogSeverity("success");
+      setOpenDialog(true);
+
+      // ✅ ล้างฟอร์มหลังจากเปลี่ยนรหัสผ่านสำเร็จ
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      setDialogMessage(error.message);
+      setDialogSeverity("error");
       setOpenDialog(true);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
   };
 
   const handleEditClick = () => {
     setOriginalProfileData(profileData); // เก็บค่าเดิมไว้
     setIsEditing(true);
-  };
-
-  // Handle Dialog close
-  const handleDialogClose = () => {
-    setOpenDialog(false);
   };
 
   const handleCancelClick = () => {
@@ -96,11 +137,14 @@ export default function Profile() {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
+    console.log(`Changing ${name} to`, value);
+
     setProfileData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
+
 
   // ฟังก์ชันสำหรับปิด Dialog
   const handleCloseDialog = () => {
@@ -134,63 +178,64 @@ export default function Profile() {
     }
   };
 
-  return (
-    <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f4f4f4", position: "relative" }}>
-      {/* Background Box */}
-      <Box sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "#f4f4f4",
-        zIndex: -1, // Keeps the background below the profile section
-      }} />
+  useEffect(() => {
+    const tokenData = JSON.parse(localStorage.getItem('token'));
+    const token = tokenData ? tokenData.token : null;
 
-      <TopBar_User /> {/* Fixed top bar */}
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return; // ถ้า token หายไปหรือหมดอายุ จะไม่ดำเนินการต่อ
+    } else {
+      console.log("Token is valid:", token);
 
-      {/* Profile Section */}
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" sx={{ paddingTop: "50px" }}> {/* Adjust paddingTop to prevent overlap */}
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          width="100%"
-          maxWidth="400px"
-          sx={{
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-            padding: "20px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            animation: "fadeInUp 0.5s ease-in-out",
-            "@keyframes fadeInUp": {
-              "0%": { opacity: 0, transform: "translateY(20px)" },
-              "100%": { opacity: 1, transform: "translateY(0)" },
+      const fetchUserData = async () => {
+        setLoading(true); // เริ่มโหลดข้อมูล
+        try {
+          const res = await axios.get("http://localhost:5000/api/users/me", {
+            headers: {
+              Authorization: `Bearer ${token}`, // ใช้ token ที่ได้จาก localStorage
             },
-          }}
-        >
+          });
+
+          setProfileData(res.data); // Set profile data เมื่อดึงข้อมูลสำเร็จ
+        } catch (error) {
+          console.error("Error fetching user data:", error.response?.data || error.message);
+          setError(error.response?.data?.message || "Failed to load profile");
+        } finally {
+          setLoading(false); // ปิดการโหลดข้อมูลเมื่อเสร็จ
+        }
+      };
+
+      fetchUserData(); // เรียกฟังก์ชันดึงข้อมูล
+    }
+  }, []); // ขึ้นอยู่กับค่าที่เก็บใน localStorage
+
+  if (loading) return <p>Loading...</p>; // หากกำลังโหลดข้อมูล
+  if (error) return <p>{error}</p>; // แสดง error message หากเกิดข้อผิดพลาด
+  if (!profileData) return <p>Error loading profile</p>; // หากไม่มีข้อมูลผู้ใช้    
+
+  return (
+    <Box display="flex" flexDirection="column" height="100vh" width="100vw" className="box-container">
+      {/* Background Box */}
+      <Box className="background-box" />
+      <TopBar_User /> {/* Fixed top bar */}
+      {/* Profile Section */}
+      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" flexGrow={1} width="100%" className="profile-section">
+        <Box className="profile-box">
           {!isChangingPassword ? (
             <>
               <Box position="relative" textAlign="center" mb={2}>
                 <Avatar
                   src={profileImage}
                   alt="Profile Picture"
-                  sx={{
-                    width: "100px",
-                    height: "100px",
-                    border: "2px solid #ddd",
-                    margin: "0 auto",
-                    transition: "transform 0.3s ease-in-out",
-                    "&:hover": {
-                      transform: "scale(1.1)",
-                    },
-                  }}
+                  className="avatar-style"
                 />
                 {isEditing && (
                   <IconButton
                     color="primary"
-                    sx={{ position: "absolute", bottom: 0, right: "calc(50% - 20px)", backgroundColor: "#fff", boxShadow: 1, border: "1px solid #ddd" }}
+                    className="avatar-edit-button"
                     onClick={() => document.getElementById("profile-image-input").click()}
                   >
                     <CameraAltIcon />
@@ -204,27 +249,19 @@ export default function Profile() {
                   onChange={handleProfileImageChange}
                 />
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "20px" }}>
+              <Typography variant="h6" className="profile-title">
                 {isEditing ? "Edit Profile" : "Profile"}
               </Typography>
 
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Name"
-                  name="name"
+                  name="username"
                   fullWidth
-                  value={profileData.name}
-                  disabled={!isEditing}
+                  value={profileData.username}
+                  disabled={true}
                   onChange={handleInputChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
                 <TextField
                   label="Email"
@@ -232,36 +269,20 @@ export default function Profile() {
                   fullWidth
                   value={profileData.email}
                   disabled={true}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
                 <TextField
                   label="Phone"
-                  name="phone"
+                  name="phoneNumber"
                   fullWidth
-                  value={profileData.phone}
+                  value={profileData.phoneNumber}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
 
                 {/* Bank Information Section */}
-                <Typography variant="h8" sx={{ fontWeight: "bold", marginTop: "px" }}>
+                <Typography variant="h8" className="bank-info-title">
                   Bank Information
                 </Typography>
                 <Box display="flex" gap={2}>
@@ -272,15 +293,7 @@ export default function Profile() {
                     value={profileData.firstName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        transition: "all 0.3s ease",
-                        "&.Mui-focused": {
-                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                          borderColor: "#0096ff",
-                        },
-                      },
-                    }}
+                    className="text-field"
                   />
                   <TextField
                     label="Last Name"
@@ -289,107 +302,61 @@ export default function Profile() {
                     value={profileData.lastName}
                     disabled={!isEditing}
                     onChange={handleInputChange}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        transition: "all 0.3s ease",
-                        "&.Mui-focused": {
-                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                          borderColor: "#0096ff",
-                        },
-                      },
-                    }}
+                    className="text-field"
                   />
                 </Box>
                 <TextField
                   label="Bank Account"
-                  name="bankAccount"
+                  name="accountNumber"
                   fullWidth
-                  value={profileData.bankAccount}
+                  value={profileData.accountNumber}
                   disabled={!isEditing}
                   onChange={handleInputChange}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      transition: "all 0.3s ease",
-                      "&.Mui-focused": {
-                        boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                        borderColor: "#0096ff",
-                      },
-                    },
-                  }}
+                  className="text-field"
                 />
-                <FormControl fullWidth variant="outlined" sx={{ fontSize: "14px", marginTop: "8px" }}>
-                  <InputLabel sx={{ fontSize: "14px" }}>Bank Name</InputLabel>
+                <FormControl fullWidth variant="outlined" className="select-control">
+                  <InputLabel className="select-label">Bank Name</InputLabel>
                   <Select
-                    name="bankName"
-                    value={profileData.bankName}
+                    name="bank"
+                    value={profileData.bank}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     label="Bank Name"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        transition: "all 0.3s ease",
-                        "&.Mui-focused": {
-                          boxShadow: "0px 4px 10px rgba(0, 150, 255, 0.2)",
-                          borderColor: "#0096ff",
-                        },
-                      },
-                    }}
+                    className="select-field"
                   >
-                    <MenuItem value="SCB">SCB</MenuItem>
-                    <MenuItem value="KBANK">KBANK</MenuItem>
-                    <MenuItem value="BAY">BAY</MenuItem>
-                    <MenuItem value="BKK">BKK</MenuItem>
+                    <MenuItem value="PromptPay"> PromptPay </MenuItem>
+                    <MenuItem value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</MenuItem>
+                    <MenuItem value="SCB">ไทยพาณิชย์ (SCB)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
+                    <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
+                    <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
+                    <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
                   </Select>
                 </FormControl>
 
                 {/* Bank Account Image (Always visible, allows upload even in view mode) */}
-                <Typography variant="body1" sx={{ marginTop: "20px" }}>
+                <Typography variant="body1" className="bank-image-title">
                   Bank Account Image
                 </Typography>
                 <Box display="flex" justifyContent="center" alignItems="center" position="relative" textAlign="center" mb={2}>
-                  {profileData.bankAccountImage ? (
+                  {profileData.bankImage ? (
                     <Avatar
-                      src={profileData.bankAccountImage}
+                      src={`http://localhost:5000/uploads/bank/${profileData.bankImage}`} // ใช้ URL ที่ได้จาก backend
                       alt="Bank Account"
-                      sx={{
-                        width: "150px",
-                        height: "150px",
-                        borderRadius: "8px",
-                        border: "2px solid #ddd",
-                        overflow: "hidden",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                      className="bank-account-image"
                     />
-
                   ) : (
-                    <Box
-                      sx={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "8px",
-                        backgroundColor: "#f4f4f4",
-                        border: "2px solid #ddd",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Typography variant="body2" sx={{ color: "#888" }}>No Image</Typography>
+                    <Box className="no-image-box">
+                      <Typography variant="body2" className="no-image-text">No Image</Typography>
                     </Box>
                   )}
                   {isEditing && (
                     <IconButton
                       color="primary"
-                      sx={{
-                        position: "absolute",
-                        bottom: 0,
-                        right: "calc(50% - 20px)",
-                        backgroundColor: "#fff",
-                        boxShadow: 1,
-                        border: "1px solid #ddd",
-                      }}
+                      className="image-edit-button"
                       onClick={() => document.getElementById("bank-account-image-input").click()}
                     >
                       <CameraAltIcon />
@@ -410,18 +377,7 @@ export default function Profile() {
                       <Button
                         variant="contained"
                         onClick={handleSaveClick}
-                        sx={{
-                          backgroundColor: "#1e40af", // เปลี่ยนสีพื้นหลังเป็นน้ำเงินเข้ม
-                          color: "white", // เปลี่ยนสีตัวอักษรให้เป็นสีขาว
-                          width: "48%",
-                          fontSize: "13px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            backgroundColor: "#162d68", // สีเข้มขึ้นเมื่อโฮเวอร์
-                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-                            transform: "scale(1.05)",
-                          },
-                        }}
+                        className="save-button"
                       >
                         Save
                       </Button>
@@ -429,15 +385,7 @@ export default function Profile() {
                       <Button
                         variant="contained"
                         color="error"
-                        sx={{
-                          width: "48%",
-                          fontSize: "13px",
-                          transition: "all 0.3s ease",
-                          "&:hover": {
-                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.2)",
-                            transform: "scale(1.05)",
-                          },
-                        }}
+                        className="cancel-button"
                         onClick={handleCancelClick}
                       >
                         Cancel
@@ -448,20 +396,17 @@ export default function Profile() {
                       <Button
                         variant="contained"
                         onClick={handleChangePasswordClick}
-                        sx={{
-                          backgroundColor: "#1e40af", // กำหนดสีพื้นหลังเป็นน้ำเงินเข้ม
-                          "&:hover": {
-                            backgroundColor: "#162d68", // เปลี่ยนเป็นน้ำเงินเข้มขึ้นเมื่อโฮเวอร์
-                          },
-                          width: "48%",
-                          fontSize: "13px",
-                          color: "white", // ทำให้ข้อความอ่านง่ายขึ้น
-                        }}
+                        className="change-password-button"
                       >
                         Change Password
                       </Button>
 
-                      <Button variant="contained" color="error" sx={{ width: "48%", fontSize: "13px" }} onClick={handleEditClick}>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        className="edit-button"
+                        onClick={handleEditClick}
+                      >
                         Edit
                       </Button>
                     </>
@@ -471,27 +416,8 @@ export default function Profile() {
             </>
           ) : (
             <>
-              <Box
-                width="100%"
-                display="flex"
-                flexDirection="column"
-                gap={2}
-                sx={{
-                  backgroundColor: "#fff",
-                  padding: "20px",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    color: "#333",
-                    marginBottom: "10px",
-                  }}
-                >
+              <Box width="100%" display="flex" flexDirection="column" gap={2} className="change-password-section">
+                <Typography variant="h6" className="change-password-title">
                   Change Password
                 </Typography>
 
@@ -501,7 +427,7 @@ export default function Profile() {
                   fullWidth
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  sx={{ marginBottom: "20px" }}
+                  className="password-field"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -519,7 +445,7 @@ export default function Profile() {
                   fullWidth
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  sx={{ marginBottom: "20px" }}
+                  className="password-field"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -537,7 +463,7 @@ export default function Profile() {
                   fullWidth
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  sx={{ marginBottom: "20px" }}
+                  className="password-field"
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -549,20 +475,14 @@ export default function Profile() {
                   }}
                 />
 
-                {error && <Typography color="error">{error}</Typography>}
+                {error && <Typography color="error" className="error-message">{error}</Typography>}
 
                 {/* Change Password Button */}
                 <Button
                   variant="contained"
                   fullWidth
                   onClick={handleChangePassword}
-                  sx={{
-                    backgroundColor: "#1e40af", // สีพื้นหลังเป็นน้ำเงินเข้ม
-                    "&:hover": {
-                      backgroundColor: "#162d68", // เปลี่ยนสีเข้มขึ้นเมื่อโฮเวอร์
-                    },
-                    fontSize: "13px",
-                  }}
+                  className="change-password-button"
                 >
                   Change Password
                 </Button>
@@ -572,74 +492,41 @@ export default function Profile() {
                   variant="contained"
                   color="error"
                   fullWidth
-                  sx={{ marginTop: "10px", fontSize: "13px" }}
+                  className="back-button"
                   onClick={() => setIsChangingPassword(false)}
                 >
                   Back to setting
                 </Button>
               </Box>
             </>
-
           )}
         </Box>
       </Box>
+
       {/* Dialog for success/error */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        sx={{
-          '& .MuiDialog-paper': {
-            borderRadius: '12px', // Add rounded corners
-            padding: '20px',
-            maxWidth: '400px',
-            backgroundColor: '#f9f9f9',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          }
-        }}
+        className="dialog-box"
       >
         {/* Dialog Title */}
-        <DialogTitle
-          sx={{
-            textAlign: 'center',
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: dialogSeverity === "success" ? '#1e40af' : '#f44336',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1,
-          }}
-        >
+        <DialogTitle className="dialog-title">
           {dialogSeverity === "success" ? (
-            <span style={{ color: '#1e40af' }}>✔</span>
+            <span className="success-icon">✔</span>
           ) : (
-            <span style={{ color: '#f44336' }}>❌</span>
+            <span className="error-icon">❌</span>
           )}
           {dialogSeverity === "success" ? "Success" : "Error"}
         </DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', paddingBottom: '20px' }}>
-          <Typography variant="body1" sx={{ fontSize: '16px', color: '#333' }}>
+        <DialogContent className="dialog-content">
+          <Typography variant="body1" className="dialog-message">
             {dialogMessage}
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', paddingTop: '10px' }}>
-          {/* Dialog Button */}
+        <DialogActions className="dialog-actions">
           <Button
             onClick={handleCloseDialog}
-            color={dialogSeverity === "success" ? "primary" : "error"} // ใช้ primary หรือกำหนดเองด้านล่าง
-            variant="contained"
-            sx={{
-              backgroundColor: dialogSeverity === "success" ? '#1e40af' : '#d32f2f',
-              '&:hover': {
-                backgroundColor: dialogSeverity === "success" ? '#162d68' : '#b71c1c',
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.15)',
-              },
-              fontSize: '14px',
-              fontWeight: 'bold',
-              padding: '8px 20px',
-              textTransform: 'none',
-              borderRadius: '8px',
-            }}
+            className="dialog-button"
           >
             OK
           </Button>
