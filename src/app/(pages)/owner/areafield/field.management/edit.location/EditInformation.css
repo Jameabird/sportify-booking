@@ -1,0 +1,124 @@
+/* General Layout */
+.edit-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+/* ทำให้ฟอร์มอยู่ตรงกลาง */
+.edit-content {
+    display: flex;
+    flex-grow: 1; /* ทำให้ฟอร์มขยายตัวและอยู่ตรงกลาง */
+    justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน */
+    align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+}
+
+/* Card Layout */
+.edit-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Title */
+.edit-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #003366;
+    margin-bottom: 15px;
+}
+
+/* Image Upload */
+.edit-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.edit-image {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.edit-upload-text {
+    color: #007bff;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Input Fields */
+.edit-input-group {
+    margin-top: 15px;
+    text-align: left;
+}
+
+.edit-label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.edit-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Map Link */
+.edit-link {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/* Buttons */
+.edit-button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.edit-save-button,
+.edit-cancel-button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.edit-save-button {
+    background-color: #3b5998;
+    color: white;
+    margin-right: 10px;
+}
+
+.edit-save-button:hover {
+    background-color: #2d4373;
+}
+
+.edit-cancel-button {
+    background-color: #c82333;
+    color: white;
+    margin-left: 10px;
+}
+
+.edit-cancel-button:hover {
+    background-color: #a71d2a;
+}
