@@ -59,8 +59,8 @@ const HistoryPageAdmin = () => {
       status: "",
       startdate: "",
       enddate: "",
-      amount: "",
-      usage: "",
+      sale: "",
+      free: "",
     });
     setIsEditMode(false);
   };
@@ -78,8 +78,8 @@ const HistoryPageAdmin = () => {
       status: "",
       startdate: "",
       enddate: "",
-      amount: "",
-      usage: "",
+      sale: "",
+      free: "",
     });
     setShowModal(false);
   };
@@ -106,8 +106,8 @@ const HistoryPageAdmin = () => {
       status: "",
       startdate: "",
       enddate: "",
-      amount: "",
-      usage: "",
+      sale: "",
+      free: "",
     });
   };
 
@@ -118,25 +118,15 @@ const HistoryPageAdmin = () => {
     setPromotionsData(filteredData);
   };
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    newPromotions?.startdate ? new Date(newPromotions.startdate) : null
+  );
 
   const [isChecked, setIsChecked] = useState(false);
 
   const toggleCheckbox = () => {
     setIsChecked(!isChecked);
   };
-
-  const [usage, setUsage] = useState(1); // state สำหรับจำนวน
-  const [discount, setDiscount] = useState(1); // state สำหรับส่วนลด
-
-  // ฟังก์ชันเพิ่ม-ลดจำนวน
-  const increaseUsage = () => setUsage((prev) => prev + 1);
-  const decreaseUsage = () => setUsage((prev) => (prev > 0 ? prev - 1 : 0));
-
-  // ฟังก์ชันเพิ่ม-ลดส่วนลด
-  const increaseDiscount = () => setDiscount((prev) => prev + 1);
-  const decreaseDiscount = () =>
-    setDiscount((prev) => (prev > 0 ? prev - 1 : 0));
 
   const [isCheckedAmount, setIsCheckedAmount] = useState(false);
   const [isCheckedPercentage, setIsCheckedPercentage] = useState(false);
@@ -152,6 +142,10 @@ const HistoryPageAdmin = () => {
     setIsCheckedPercentage(!isCheckedPercentage);
     if (!isCheckedPercentage) setIsCheckedAmount(false); // ปิดอีกอัน
   };
+
+  const [endDate, setEndDate] = useState(null); // เปลี่ยนชื่อ selectedDate -> endDate
+  const [noEndDate, setNoEndDate] = useState(false);
+
   return (
     <>
       <TopBar_Admin textColor={"black"} />
@@ -189,6 +183,8 @@ const HistoryPageAdmin = () => {
                   <th>Name</th>
                   <th>Description</th>
                   <th>Status</th>
+                  <th>sale</th>
+                  <th>Free</th>
                   <th>start date</th>
                   <th>end date</th>
                   <th>actions</th>
@@ -205,6 +201,8 @@ const HistoryPageAdmin = () => {
                     <td>{promotion.name}</td>
                     <td>{promotion.description}</td>
                     <td>{promotion.status}</td>
+                    <td>{promotion.sale}</td>
+                    <td>{promotion.free}</td>
                     <td>{promotion.startdate}</td>
                     <td>{promotion.enddate}</td>
                     <td>
@@ -256,15 +254,22 @@ const HistoryPageAdmin = () => {
                   }
                 />
               </div>
-
+              
               <label className="container">วันเริ่มต้น: </label>
-              <div className="datepicker-container ">
+              <div className="datepicker-container">
                 <DatePicker
                   selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
+                  value={newPromotions.startdate}
+                  onChange={(date) => {
+                    setSelectedDate(date);
+                    setNewPromotions({
+                      ...newPromotions,
+                      startdate: date ? date.toISOString().split("T")[0] : "", // แปลงเป็น YYYY-MM-DD
+                    });
+                  }}
+                  placeholderText="mm/dd/yyyy"
                   dateFormat="MM/dd/yyyy"
                   className="datepicker-input"
-                  placeholderText="mm/dd/yyyy"
                   calendarClassName="custom-calendar"
                   renderCustomHeader={({
                     date,
@@ -279,7 +284,7 @@ const HistoryPageAdmin = () => {
                         disabled={prevMonthButtonDisabled}
                         className="navigation-button"
                       >
-                        &#8249; {/* HTML Code for "<" */}
+                        &#8249;
                       </button>
                       <span className="current-month">
                         {date.toLocaleString("default", { month: "long" })}{" "}
@@ -290,7 +295,7 @@ const HistoryPageAdmin = () => {
                         disabled={nextMonthButtonDisabled}
                         className="navigation-button"
                       >
-                        &#8250; {/* HTML Code for ">" */}
+                        &#8250;
                       </button>
                     </div>
                   )}
@@ -298,14 +303,26 @@ const HistoryPageAdmin = () => {
               </div>
 
               <label className="container">วันสิ้นสุด: </label>
-              <div>
+              <div className="flex items-center space-x-2">
                 <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
+                  selected={endDate}
+                  value={newPromotions.enddate || ""} // ถ้า null หรือ undefined ให้แสดงเป็นค่าว่าง
+                  onChange={(date) => {
+                    setEndDate(date);
+                    setNewPromotions({
+                      ...newPromotions,
+                      enddate: date ? date.toISOString().split("T")[0] : "", // แปลงเป็น string หรือให้ว่างถ้า null
+                    });
+                  }}
                   dateFormat="MM/dd/yyyy"
-                  className="datepicker-input"
                   placeholderText="mm/dd/yyyy"
                   calendarClassName="custom-calendar"
+                  disabled={noEndDate}
+                  className={`datepicker-input transition-colors ${
+                    noEndDate
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-white"
+                  }`}
                   renderCustomHeader={({
                     date,
                     decreaseMonth,
@@ -319,7 +336,7 @@ const HistoryPageAdmin = () => {
                         disabled={prevMonthButtonDisabled}
                         className="navigation-button"
                       >
-                        &#8249; {/* HTML Code for "<" */}
+                        &#8249;
                       </button>
                       <span className="current-month">
                         {date.toLocaleString("default", { month: "long" })}{" "}
@@ -330,66 +347,91 @@ const HistoryPageAdmin = () => {
                         disabled={nextMonthButtonDisabled}
                         className="navigation-button"
                       >
-                        &#8250; {/* HTML Code for ">" */}
+                        &#8250;
                       </button>
                     </div>
                   )}
                 />
+                <input
+                  type="checkbox"
+                  id="noEndDate"
+                  checked={noEndDate}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    setNoEndDate(isChecked);
+
+                    setEndDate(isChecked ? null : endDate);
+
+                    setNewPromotions({
+                      ...newPromotions,
+                      enddate: isChecked ? "null" : newPromotions.enddate, // ถ้าติ๊กช่องนี้ ให้ enddate เป็น ""
+                    });
+                  }}
+                />
+
+                <label htmlFor="noEndDate"> ไม่มีกำหนด</label>
               </div>
               <label className="container">จำนวนครั้งที่จองสนาม</label>
-              <div>             
+              <div>
                 <div className="container">
                   <label>จำนวน: </label>
-                  <button className="counter-button" onClick={decreaseUsage}>
-                    -
-                  </button>
                   <input
                     type="text"
-                    value={usage}
-                    readOnly
+                    value={newPromotions.sale}
                     className="inputnumber"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        setNewPromotions({
+                          ...newPromotions,
+                          sale: value === "" ? 0 : Number(value),
+                        });
+                      }
+                    }}
                   />
-                  <button className="counter-button" onClick={increaseUsage}>
-                    +
-                  </button>
+
                   <p> /ครั้ง</p>
                 </div>
-                </div>
-                <label className="container">ประเภทส่วนลด</label>
+              </div>
+              <label className="container">ประเภทส่วนลด</label>
 
-                <div
-                  className={`checkbox-container ${
-                    isCheckedAmount ? "" : "disabled"
-                  }`}
-                  onClick={toggleCheckbox}
-                >
-                  <input
-                    type="checkbox"
-                    id="promo-amount-checkbox"
-                    checked={isCheckedAmount}
-                    onChange={toggleAmountCheckbox}
-                  />
-                  <label htmlFor="promo-amount-checkbox">
-                    โปรโมชั่นแบบเลือกจำนวน
-                  </label>
-                </div>
-              
+              <div
+                className={`checkbox-container ${
+                  isCheckedAmount ? "" : "disabled"
+                }`}
+                onClick={toggleCheckbox}
+              >
+                <input
+                  type="checkbox"
+                  id="promo-amount-checkbox"
+                  checked={isCheckedAmount}
+                  onChange={toggleAmountCheckbox}
+                />
+                <label htmlFor="promo-amount-checkbox">
+                  โปรโมชั่นแบบเลือกจำนวน
+                </label>
+              </div>
 
               {isCheckedAmount && (
                 <div className="flex-container">
-                  <label>ส่วนลด: </label>
-                  <button className="counter-button" onClick={decreaseDiscount}>
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    value={discount}
-                    readOnly
-                    className="inputnumber"
-                  />
-                  <button className="counter-button" onClick={increaseDiscount}>
-                    +
-                  </button>
+                  <div className="container">
+                    <label>ส่วนลด: </label>
+                    <input
+                      type="text"
+                      value={newPromotions.free}
+                      className="inputnumber"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*$/.test(value)) {
+                          setNewPromotions({
+                            ...newPromotions,
+                            free: value === "" ? 0 : Number(value),
+                          });
+                        }
+                      }}
+                    />
+                    <p> /ครั้ง</p>
+                  </div>
                 </div>
               )}
 
@@ -414,10 +456,15 @@ const HistoryPageAdmin = () => {
                 <div className="percentage-selector">
                   <label>เลือกเปอร์เซ็นต์: </label>
                   <select
-                    value={selectedPercentage}
-                    onChange={(e) =>
-                      setSelectedPercentage(Number(e.target.value))
-                    }
+                    value={selectedPercentage ?? newPromotions.free ?? ""}
+                    onChange={(e) => {
+                      const percent = Number(e.target.value);
+                      setSelectedPercentage(percent);
+                      setNewPromotions((prevPromotions) => ({
+                        ...prevPromotions,
+                        free: `${percent}%`, // บันทึกเป็นตัวเลข
+                      }));
+                    }}
                     className="select-box"
                   >
                     {[10, 20, 30, 40, 50, 60, 70, 80, 90].map((percent) => (

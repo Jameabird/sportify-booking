@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Box, TextField, Button, IconButton, InputAdornment, Snackbar, Alert } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, TextField, Button, IconButton, InputAdornment, Snackbar, Alert, Typography } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ const CombinedPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
+  const [timeLeft, setTimeLeft] = useState(300);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -29,7 +30,7 @@ const CombinedPage = () => {
 
   const handleResetPassword = async () => {
     if (!validatePassword(newPassword)) {
-      setSnackbarMessage("รหัสผ่านต้องมีตัวพิมพ์ใหญ่, ตัวเลข, และอักขระพิเศษอย่างน้อย 1 ตัว");
+      setSnackbarMessage("รหัสผ่านต้องมีตัวพิมพ์ใหญ่, ตัวเลข, และอักขระพิเศษรวมอย่างน้อย 8 ตัว ");
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
       return;
@@ -67,7 +68,7 @@ const CombinedPage = () => {
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
     }
-};
+  };
 
 
   const handleOtpChange = (e) => {
@@ -77,14 +78,21 @@ const CombinedPage = () => {
 
   const handleVerifyOtp = async () => {
     if (otp.length === 6) {
+      if (timeLeft === 0) {
+        setSnackbarMessage("OTP หมดอายุ กรุณาขอรหัสใหม่");
+        setSnackbarSeverity("error");
+        setOpenSnackbar(true);
+        return;
+      }
+  
       try {
-        const response = await axios.post('http://localhost:5000/api/verify-otp', { otp });
+        const response = await axios.post("http://localhost:5000/api/verify-otp", { otp });
         setSnackbarMessage("OTP ถูกต้อง!");
         setSnackbarSeverity("success");
         setOpenSnackbar(true);
-        setIsOtpVerified(true);  // Mark OTP as verified
+        setIsOtpVerified(true); // Mark OTP as verified
       } catch (error) {
-        setSnackbarMessage(error.response ? error.response.data : 'เกิดข้อผิดพลาด');
+        setSnackbarMessage(error.response ? error.response.data : "เกิดข้อผิดพลาด");
         setSnackbarSeverity("error");
         setOpenSnackbar(true);
       }
@@ -93,6 +101,22 @@ const CombinedPage = () => {
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
     }
+  };
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
+
+  // แปลงเวลาที่เหลือเป็น นาที:วินาที
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -126,6 +150,9 @@ const CombinedPage = () => {
                     >
                       Verify OTP
                     </Button>
+                    <Typography variant="h6" sx={{ fontWeight: "bold", marginTop: "15px" }}>
+                      โปรดใส่ OTP ภายใน {formatTime(timeLeft)} นาที
+                    </Typography>
                   </>
                 ) : (
                   <>
@@ -182,6 +209,17 @@ const CombinedPage = () => {
                     >
                       Reset Password
                     </Button>
+                    <h3 style={{
+                      color: "#d32f2f",
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                      marginBottom: "10px",
+                      backgroundColor: "#ffebee",
+                      padding: "8px",
+                      borderRadius: "5px"
+                    }}>
+                      รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร ประกอบด้วย ตัวอักษรพิมพ์ใหญ่ (A-Z), ตัวเลข (0-9) และอักขระพิเศษ (@$!%*?&)
+                    </h3>
                   </>
                 )}
               </Box>
