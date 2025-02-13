@@ -23,8 +23,6 @@ export default function Profile() {
   const [error, setError] = useState("");
   const [profileImage, setProfileImage] = useState("/default-profile.png");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // เพิ่ม severity สำหรับแสดงใน Snackbar
   const [openDialog, setOpenDialog] = useState(false);
   const handleChangePasswordClick = () => setIsChangingPassword(true);
   const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
@@ -35,51 +33,104 @@ export default function Profile() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSaveClick = () => {
-    if (!profileData.name || !profileData.phone || !profileData.firstName || !profileData.lastName || !profileData.bankAccount) {
-      setDialogMessage("Please fill out all required fields.");
-      setDialogSeverity("error");  // ใช้ "error" หากมีข้อผิดพลาด
+  const handleSaveClick = async () => {
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    const updatedData = {};
+    ["username", "phoneNumber", "firstName", "lastName", "accountNumber", "bank", "bankAccountImage", "profileImage"].forEach((field) => {
+      if (profileData[field] !== undefined) { // ✅ ส่งค่าที่เป็น "" ไปด้วย
+        updatedData[field] = profileData[field];
+      }
+    });
+
+    if (Object.keys(updatedData).length === 0) {
+      setDialogMessage("No changes detected.");
+      setDialogSeverity("error");
       setOpenDialog(true);
       return;
     }
 
-    setIsEditing(false);
-    setDialogMessage("Changes saved successfully!");
-    setDialogSeverity("success");  // ใช้ "success" เมื่อบันทึกสำเร็จ
-    setOpenDialog(true);
+    try {
+      await axios.put("http://localhost:5000/api/users/me", updatedData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setDialogMessage("Changes saved successfully!");
+      setDialogSeverity("success");
+      setOpenDialog(true);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      setDialogMessage(error.response?.data?.message || "Failed to update profile.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setDialogMessage("Please fill in all fields.");
+      setDialogSeverity("error");
+      setOpenDialog(true);
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setDialogMessage("Passwords do not match.");
-      setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านไม่ตรงกัน
+      setDialogSeverity("error");
       setOpenDialog(true);
       return;
     }
 
-    if (newPassword.length >= 6) {
-      setDialogMessage("Password changed successfully!");
-      setDialogSeverity("success");  // ใช้ "success" เมื่อเปลี่ยนรหัสผ่านสำเร็จ
+    // ✅ ดึง token จาก localStorage
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    if (!token) {
+      setDialogMessage("Authentication failed. Please log in again.");
+      setDialogSeverity("error");
       setOpenDialog(true);
-    } else {
-      setDialogMessage("New password is too short.");
-      setDialogSeverity("error");  // ใช้ "error" หากรหัสผ่านสั้นเกินไป
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/users/me/reset-password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ ส่ง token เพื่อ auth
+        },
+        body: JSON.stringify({ oldPassword, newPassword, confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to change password.");
+      }
+
+      setDialogMessage("Password changed successfully!");
+      setDialogSeverity("success");
+      setOpenDialog(true);
+
+      // ✅ ล้างฟอร์มหลังจากเปลี่ยนรหัสผ่านสำเร็จ
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      setDialogMessage(error.message);
+      setDialogSeverity("error");
       setOpenDialog(true);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
   };
 
   const handleEditClick = () => {
     setOriginalProfileData(profileData); // เก็บค่าเดิมไว้
     setIsEditing(true);
-  };
-
-  // Handle Dialog close
-  const handleDialogClose = () => {
-    setOpenDialog(false);
   };
 
   const handleCancelClick = () => {
@@ -89,11 +140,14 @@ export default function Profile() {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
+    console.log(`Changing ${name} to`, value);
+
     setProfileData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
+
 
   // ฟังก์ชันสำหรับปิด Dialog
   const handleCloseDialog = () => {
@@ -130,7 +184,7 @@ export default function Profile() {
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem('token'));
     const token = tokenData ? tokenData.token : null;
-  
+
     if (!token || Date.now() > tokenData?.expirationTime) {
       console.log("Token is missing or expired.");
       setError("Token is missing or expired. Please log in again.");
@@ -138,7 +192,7 @@ export default function Profile() {
       return; // ถ้า token หายไปหรือหมดอายุ จะไม่ดำเนินการต่อ
     } else {
       console.log("Token is valid:", token);
-  
+
       const fetchUserData = async () => {
         setLoading(true); // เริ่มโหลดข้อมูล
         try {
@@ -147,7 +201,7 @@ export default function Profile() {
               Authorization: `Bearer ${token}`, // ใช้ token ที่ได้จาก localStorage
             },
           });
-  
+
           setProfileData(res.data); // Set profile data เมื่อดึงข้อมูลสำเร็จ
         } catch (error) {
           console.error("Error fetching user data:", error.response?.data || error.message);
@@ -156,11 +210,11 @@ export default function Profile() {
           setLoading(false); // ปิดการโหลดข้อมูลเมื่อเสร็จ
         }
       };
-  
+
       fetchUserData(); // เรียกฟังก์ชันดึงข้อมูล
     }
   }, []); // ขึ้นอยู่กับค่าที่เก็บใน localStorage
-  
+
   if (loading) return <p>Loading...</p>; // หากกำลังโหลดข้อมูล
   if (error) return <p>{error}</p>; // แสดง error message หากเกิดข้อผิดพลาด
   if (!profileData) return <p>Error loading profile</p>; // หากไม่มีข้อมูลผู้ใช้    
@@ -205,10 +259,10 @@ export default function Profile() {
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Name"
-                  name="name"
+                  name="username"
                   fullWidth
-                  value={profileData.name}
-                  disabled={!isEditing}
+                  value={profileData.username}
+                  disabled={true}
                   onChange={handleInputChange}
                   className="text-field"
                 />
@@ -222,9 +276,9 @@ export default function Profile() {
                 />
                 <TextField
                   label="Phone"
-                  name="phone"
+                  name="phoneNumber"
                   fullWidth
-                  value={profileData.phone}
+                  value={profileData.phoneNumber}
                   disabled={!isEditing}
                   onChange={handleInputChange}
                   className="text-field"
@@ -256,9 +310,9 @@ export default function Profile() {
                 </Box>
                 <TextField
                   label="Bank Account"
-                  name="bankAccount"
+                  name="accountNumber"
                   fullWidth
-                  value={profileData.bankAccount}
+                  value={profileData.accountNumber}
                   disabled={!isEditing}
                   onChange={handleInputChange}
                   className="text-field"
@@ -266,17 +320,23 @@ export default function Profile() {
                 <FormControl fullWidth variant="outlined" className="select-control">
                   <InputLabel className="select-label">Bank Name</InputLabel>
                   <Select
-                    name="bankName"
-                    value={profileData.bankName}
+                    name="bank"
+                    value={profileData.bank}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     label="Bank Name"
                     className="select-field"
                   >
-                    <MenuItem value="SCB">SCB</MenuItem>
-                    <MenuItem value="KBANK">KBANK</MenuItem>
-                    <MenuItem value="BAY">BAY</MenuItem>
-                    <MenuItem value="BKK">BKK</MenuItem>
+                    <MenuItem value="PromptPay"> PromptPay </MenuItem>
+                    <MenuItem value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</MenuItem>
+                    <MenuItem value="SCB">ไทยพาณิชย์ (SCB)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
+                    <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
+                    <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
+                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
+                    <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
+                    <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -285,9 +345,9 @@ export default function Profile() {
                   Bank Account Image
                 </Typography>
                 <Box display="flex" justifyContent="center" alignItems="center" position="relative" textAlign="center" mb={2}>
-                  {profileData.bankAccountImage ? (
+                  {profileData.bankImage ? (
                     <Avatar
-                      src={profileData.bankAccountImage}
+                      src={`http://localhost:5000/uploads/bank/${profileData.bankImage}`} // ใช้ URL ที่ได้จาก backend
                       alt="Bank Account"
                       className="bank-account-image"
                     />

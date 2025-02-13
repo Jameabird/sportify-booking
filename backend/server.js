@@ -16,6 +16,8 @@ app.use(
     credentials: true, // อนุญาตให้ cookies หรือ headers ที่จำเป็นถูกส่งไปกับคำขอ
   })
 );
+app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // Middleware สำหรับตรวจสอบ JWT
 const authenticate = (req, res, next) => {
@@ -48,13 +50,75 @@ app.get('/api/users/me', authenticate, async (req, res) => {
   }
 });
 
+// ✅ อัปเดตข้อมูลโปรไฟล์
+app.put("/api/users/me", authenticate, async (req, res) => {
+  try {
+    console.log("Request Body:", req.body);
+    const userId = req.user.id; // ดึง user ID จาก token
+    // ค้นหาผู้ใช้
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // ✅ อัปเดตเฉพาะฟิลด์ที่ถูกส่งมา
+    const allowedFields = ["username", "phoneNumber", "firstName", "lastName", "bank", "accountNumber", "bankImage", "profileImage"];
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    await user.save(); // บันทึกข้อมูลลง MongoDB
+    res.json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.put("/api/users/me/reset-password", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+    // ค้นหาผู้ใช้
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ตรวจสอบว่ารหัสผ่านเดิมถูกต้องหรือไม่
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    // ตรวจสอบรหัสผ่านใหม่และยืนยันรหัสผ่าน
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "Please provide new password and confirm password" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
+
+    // ตรวจสอบความแข็งแกร่งของรหัสผ่าน
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ message: "New password must contain at least one uppercase letter, one number, and one special character." });
+    }
+
+    // แฮชรหัสผ่านใหม่
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = app;
-
-console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 
 // ตั้งค่าการอัปโหลด
 const upload = multer({
@@ -73,6 +137,7 @@ const upload = multer({
       cb(null, Date.now() + "-" + file.originalname); // ตั้งชื่อไฟล์เป็น timestamp และ originalname
     },
   }),
+  limits: { fileSize: 500 * 1024 * 1024 },
 });
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
@@ -216,6 +281,9 @@ app.post("/api/login", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
+
+console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 app.post(
   "/api/google-login",
