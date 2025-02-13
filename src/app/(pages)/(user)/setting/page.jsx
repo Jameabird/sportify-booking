@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
 import TopBar_User from "../../components/Topbar_User";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -22,7 +20,6 @@ export default function Profile() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [profileImage, setProfileImage] = useState("/default-profile.png");
-  const [openSnackbar, setOpenSnackbar] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const handleChangePasswordClick = () => setIsChangingPassword(true);
   const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
