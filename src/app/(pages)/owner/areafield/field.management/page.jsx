@@ -24,7 +24,7 @@ const initialCourtData = [
 const CourtManagement = () => {
     const [courtData, setCourtData] = useState(initialCourtData);
     const [filterType, setFilterType] = useState("ทั้งหมด");
-    const [searchQuery, setSearchQuery] = useState("");  
+    const [searchQuery, setSearchQuery] = useState("");
     const [open, setOpen] = useState(false);
     const [selectedBuilding, setSelectedBuilding] = useState(null);
 
@@ -62,6 +62,10 @@ const CourtManagement = () => {
         router.push("/owner/areafield/field.management/add.building");
     };
 
+    const handleEditlocation = () => {
+        router.push("/owner/areafield/field.management/edit.location");
+    };
+
     if (!isClient) {
         return null; // Render nothing until client-side
     }
@@ -75,15 +79,21 @@ const CourtManagement = () => {
                         จัดการสนามกีฬา
                     </Typography>
                     <Box display="flex" gap={2}>
-                        <Button variant="contained" color="error" startIcon={<EditLocationIcon />} className={styles.button}>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<EditLocationIcon />}
+                            className={styles.button}
+                            onClick={handleEditlocation}
+                        >
                             แก้ไขสถานที่
                         </Button>
-                        <Button 
-                            variant="contained" 
-                            color="primary" 
-                            startIcon={<AddIcon />} 
-                            className={styles.button} 
-                            onClick={handleAddBuilding}  
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            className={styles.button}
+                            onClick={handleAddBuilding}
                         >
                             เพิ่มข้อมูลอาคาร
                         </Button>
@@ -106,7 +116,7 @@ const CourtManagement = () => {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className={styles.searchField}
-                            style={{ flex: 1, width: "300px" }} 
+                            style={{ flex: 1, width: "300px" }}
                         />
                     </Box>
                 </Box>
@@ -148,6 +158,24 @@ const CourtManagement = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={open} onClose={handleClose}>
+                    <DialogTitle>ยืนยันการลบ</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            คุณต้องการลบข้อมูลสนามกีฬา {selectedBuilding?.building} ใช่หรือไม่?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                            ยกเลิก
+                        </Button>
+                        <Button onClick={handleDelete} color="error">
+                            ลบ
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
         </Box>
     );
