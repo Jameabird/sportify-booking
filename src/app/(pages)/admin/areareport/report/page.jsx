@@ -15,7 +15,7 @@ const FinancialReport = () => {
   };
   const router = useRouter();
   const handleArrowClick = () => {
-    router.push("/admin/areadashboard"); // Route to /admin/area
+    router.push("/admin/areareport"); // Route to /admin/area
   };
   return (
     <>
@@ -23,7 +23,12 @@ const FinancialReport = () => {
       <div className="p-6 bg-gray-50 min-h-screen flex flex-col items-center">
         {/* Header */}
         <div className="flex items-center w-full mb-4 justify-between">
-          <button className="p-2 bg-gray-200 rounded hover:bg-gray-300 transition" onClick={handleArrowClick}>←</button>
+        <button
+            className="p-4  text-black font-bold rounded-full text-3xl"
+            
+          >
+            <span className="text-3xl" onClick={handleArrowClick}>&lt;</span>
+          </button>
           <h1 className="text-xl font-semibold">Financial Report</h1>
           <div className="w-10" /> {/* สำหรับความสมดุลของการจัดกลาง */}
         </div>
