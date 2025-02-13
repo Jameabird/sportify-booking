@@ -9,8 +9,6 @@ const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้า�
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
 
-console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const app = express();
 app.use(
   cors({
@@ -18,32 +16,150 @@ app.use(
     credentials: true, // อนุญาตให้ cookies หรือ headers ที่จำเป็นถูกส่งไปกับคำขอ
   })
 );
-
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
-// ตั้งค่าการจัดเก็บไฟล์ profileImage ที่ path uploads/profile
-const profileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/profile");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+// Middleware สำหรับตรวจสอบ JWT
+const authenticate = (req, res, next) => {
+  const token = req.header("Authorization")?.replace("Bearer ", ""); // ดึง token จาก header
+  if (!token) {
+    return res.status(401).json({ message: "Authentication required" }); // ถ้าไม่มี token
+  }
+
+  try {
+    // ตรวจสอบ token ด้วย JWT_SECRET จาก environment variable
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // ทำให้ข้อมูล user สามารถเข้าถึงได้ใน request
+    next(); // ไปที่ route handler
+  } catch (error) {
+    // ถ้าเกิดข้อผิดพลาดในการตรวจสอบ token
+    return res
+      .status(401)
+      .json({ message: "Invalid or expired token", error: error.message });
+  }
+};
+
+// ใช้ route ที่ต้องการ authentication
+app.get("/api/users/me", authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id); // ใช้ข้อมูลจาก token ที่ได้รับ
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user); // ส่งข้อมูลผู้ใช้กลับไป
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
 });
 
-// ตั้งค่าการจัดเก็บไฟล์ bankImage ที่ path uploads/bank
-const bankStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/bank");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+// ✅ อัปเดตข้อมูลโปรไฟล์
+app.put("/api/users/me", authenticate, async (req, res) => {
+  try {
+    console.log("Request Body:", req.body);
+    const userId = req.user.id; // ดึง user ID จาก token
+    // ค้นหาผู้ใช้
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // ✅ อัปเดตเฉพาะฟิลด์ที่ถูกส่งมา
+    const allowedFields = [
+      "username",
+      "phoneNumber",
+      "firstName",
+      "lastName",
+      "bank",
+      "accountNumber",
+      "bankImage",
+      "profileImage",
+    ];
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    await user.save(); // บันทึกข้อมูลลง MongoDB
+    res.json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
-const uploadProfile = multer({ storage: profileStorage });
-const uploadBank = multer({ storage: bankStorage });
+app.put("/api/users/me/reset-password", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+
+    // ค้นหาผู้ใช้
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ตรวจสอบว่ารหัสผ่านเดิมถูกต้องหรือไม่
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    // ตรวจสอบรหัสผ่านใหม่และยืนยันรหัสผ่าน
+    if (!newPassword || !confirmPassword) {
+      return res
+        .status(400)
+        .json({ message: "Please provide new password and confirm password" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
+
+    // ตรวจสอบความแข็งแกร่งของรหัสผ่าน
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "New password must contain at least one uppercase letter, one number, and one special character.",
+        });
+    }
+
+    // แฮชรหัสผ่านใหม่
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+module.exports = app;
+
+// ตั้งค่าการอัปโหลด
+const upload = multer({
+  storage: multer.diskStorage({
+    // กำหนดที่จัดเก็บไฟล์ตามประเภทของฟิลด์
+    destination: (req, file, cb) => {
+      if (file.fieldname === "profileImage") {
+        cb(null, "uploads/profile");
+      } else if (file.fieldname === "bankImage") {
+        cb(null, "uploads/bank");
+      } else {
+        cb(new Error("Invalid field name"), false);
+      }
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + "-" + file.originalname); // ตั้งชื่อไฟล์เป็น timestamp และ originalname
+    },
+  }),
+  limits: { fileSize: 500 * 1024 * 1024 },
+});
 
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
 const transporter = nodemailer.createTransport({
@@ -61,68 +177,86 @@ mongoose
   .catch((err) => console.log("MongoDB Connection Error:", err));
 
 // Route สำหรับการลงทะเบียน
-app.post("/api/register", uploadProfile.single("profileImage"), uploadBank.single("bankImage"), async (req, res) => {
-  try {
-    console.log("Received form data:", req.body);
-    console.log("Uploaded file:", req.file);
-    console.log("Uploaded files:", req.files);
+app.post(
+  "/api/register",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "bankImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      console.log("Received form data:", req.body);
+      console.log("Uploaded files:", req.files);
 
-    const {
-      username,
-      email,
-      password,
-      firstName,
-      lastName,
-      bank,
-      accountNumber,
-    } = req.body;
+      const {
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        bank,
+        accountNumber,
+        role = "user",
+      } = req.body;
 
-    if (!username || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "กรุณากรอก Username, Email และ Password ให้ครบ" });
+      if (!username || !email || !password || !role) {
+        return res
+          .status(400)
+          .json({ message: "กรุณากรอก Username, Email และ Password ให้ครบ" });
+      }
+
+      // บังคับให้ email เป็นตัวพิมพ์เล็กทั้งหมด
+      const normalizedEmail = email.toLowerCase();
+
+      // ตรวจสอบรูปแบบอีเมล
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "อีเมลไม่ถูกต้อง" });
+      }
+
+      const existingUser = await User.findOne({
+        $or: [{ email }, { username }],
+      });
+      if (existingUser) {
+        return res
+          .status(400)
+          .json({ message: "Username หรือ email นี้ถูกใช้งานไปแล้ว" });
+      }
+
+      // เช็คไฟล์อัปโหลด
+      const profileImage = req.files.profileImage
+        ? req.files.profileImage[0].path
+        : null;
+      const bankImage = req.files.bankImage
+        ? req.files.bankImage[0].path
+        : null;
+      console.log("profileImage path:", profileImage);
+      console.log("bankImage path:", bankImage);
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // สร้าง object สำหรับบันทึกข้อมูล
+      const newUser = new User({
+        username,
+        email: normalizedEmail,
+        password: hashedPassword,
+        firstName: firstName || undefined, // ป้องกันการบันทึกค่าว่าง
+        lastName: lastName || undefined, // ป้องกันการบันทึกค่าว่าง
+        bank: bank || undefined,
+        accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
+        profileImage,
+        bankImage,
+        role,
+      });
+
+      await newUser.save();
+      res.status(201).json({ message: "User registered successfully" });
+    } catch (error) {
+      console.error("❌ Server error:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
     }
-
-    // บังคับให้ email เป็นตัวพิมพ์เล็กทั้งหมด
-    const normalizedEmail = email.toLowerCase();
-
-    // ตรวจสอบรูปแบบอีเมล
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "อีเมลไม่ถูกต้อง" });
-    }
-
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Username หรือ email นี้ถูกใช้งานไปแล้ว" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const profileImage = req.file ? req.file.path : null;
-    const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : "";
-
-    // สร้าง object สำหรับบันทึกข้อมูล
-    const newUser = new User({
-      username,
-      email: normalizedEmail,
-      password: hashedPassword,
-      firstName: firstName || undefined, // ป้องกันการบันทึกค่าว่าง
-      lastName: lastName || undefined, // ป้องกันการบันทึกค่าว่าง
-      bank: bank || undefined,
-      accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
-      profileImage,
-      bankImage,
-    });
-
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (error) {
-    console.error("❌ Server error:", error);
-    res.status(500).json({ message: "Server error", error });
   }
-});
+);
 
 app.post("/api/login", async (req, res) => {
   try {
@@ -159,12 +293,8 @@ app.post("/api/login", async (req, res) => {
 
     console.log("Password matches successfully!");
 
-    // สร้าง JWT token
-    const token = jwt.sign(
-      { userId: user._id, username: user.username },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    // สร้าง JWT token ด้วย method generateAuthToken
+    const token = user.generateAuthToken(); // เรียกใช้ generateAuthToken
 
     res
       .status(200)
@@ -175,80 +305,92 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.post("/api/google-login", async (req, res) => {
-  const { token } = req.body;
+console.log("Google Client ID:", process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-  if (!token) {
-    return res.status(400).json({ message: "Token is required" });
-  }
+app.post(
+  "/api/google-login",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "bankImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { token } = req.body;
 
-  try {
-    console.log("🔹 Received Token:", token);
-
-    // ตรวจสอบว่า GOOGLE_CLIENT_ID ถูกต้องหรือไม่
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      throw new Error("Missing GOOGLE_CLIENT_ID in environment variables");
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
     }
 
-    // ตรวจสอบ Token ที่ได้รับจาก Google
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    try {
+      console.log("🔹 Received Token:", token);
 
-    const payload = ticket.getPayload();
-    console.log("🔹 Google Payload:", payload);
+      if (!process.env.GOOGLE_CLIENT_ID) {
+        throw new Error("Missing GOOGLE_CLIENT_ID in environment variables");
+      }
 
-    if (!payload || !payload.email) {
-      throw new Error("Invalid Google token payload");
-    }
-
-    // ตรวจสอบว่า user มีในระบบหรือไม่
-    let user = await User.findOne({ email: payload.email });
-
-    if (!user) {
-      // ถ้าไม่มีผู้ใช้ในระบบ ให้ลงทะเบียนใหม่
-      user = new User({
-        username: payload.name || payload.email.split("@")[0],
-        email: payload.email,
-        firstName: payload.given_name || "",
-        lastName: payload.family_name || "Unknown", // กำหนดค่าเริ่มต้น
-        profileImage: payload.picture || "",
-        role: "user",
-        phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
-        accountNumber: "Unknown", // ใส่ค่าเริ่มต้นชั่วคราว
-        password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
-        authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
-      await user.save();
-      console.log("✅ New user created:", user);
-    } else {
-      console.log("✅ User found:", user);
+
+      const payload = ticket.getPayload();
+      console.log("🔹 Google Payload:", payload);
+
+      if (!payload || !payload.email) {
+        throw new Error("Invalid Google token payload");
+      }
+
+      // ตรวจสอบการอัปโหลดไฟล์
+      const profileImage = req.files && req.files.profileImage ? req.files.profileImage[0].path : payload.picture || null;
+      const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : null;
+
+      console.log("profileImage path:", profileImage);
+      console.log("bankImage path:", bankImage);
+
+      let user = await User.findOne({ email: payload.email });
+
+      if (!user) {
+        user = new User({
+          username: payload.name || payload.email.split("@")[0],
+          email: payload.email,
+          firstName: payload.given_name || "",
+          lastName: payload.family_name || "Unknown",
+          profileImage: profileImage,  // ใช้ค่า profileImage ที่กำหนดไว้
+          bankImage,
+          role: "user",
+          phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
+          accountNumber: "Unknown", // ใส่ค่าเริ่มต้นชั่วคราว
+          password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
+          authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
+        });
+        await user.save();
+        console.log("✅ New user created:", user);
+      } else {
+        console.log("✅ User found:", user);
+      }
+
+      const jwtToken = jwt.sign(
+        { userId: user._id, username: user.username, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      console.log("✅ JWT Token Created:", jwtToken);
+
+      res.status(200).json({
+        message: "เข้าสู่ระบบสำเร็จ!",
+        token: jwtToken,
+        role: user.role,
+      });
+    } catch (error) {
+      console.error("🚨 Google Login Error:", error.message);
+      res.status(500).json({
+        message: "ไม่สามารถเข้าสู่ระบบผ่าน Google ได้",
+        error: error.message,
+      });
     }
-
-    // สร้าง JWT token สำหรับผู้ใช้
-    const jwtToken = jwt.sign(
-      { userId: user._id, username: user.username, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    console.log("✅ JWT Token Created:", jwtToken);
-
-    // ส่ง JWT token กลับไปยัง frontend
-    res.status(200).json({
-      message: "เข้าสู่ระบบสำเร็จ!",
-      token: jwtToken,
-      role: user.role,
-    });
-  } catch (error) {
-    console.error("🚨 Google Login Error:", error.message);
-    res.status(500).json({
-      message: "ไม่สามารถเข้าสู่ระบบผ่าน Google ได้",
-      error: error.message,
-    });
   }
-});
+);
 
 // Route สำหรับรีเซ็ตรหัสผ่าน
 app.post("/api/forget-password", async (req, res) => {
