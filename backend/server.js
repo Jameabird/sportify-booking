@@ -175,9 +175,10 @@ app.post(
         lastName,
         bank,
         accountNumber,
+        role = "user",
       } = req.body;
 
-      if (!username || !email || !password) {
+      if (!username || !email || !password || !role) {
         return res
           .status(400)
           .json({ message: "กรุณากรอก Username, Email และ Password ให้ครบ" });
@@ -224,6 +225,7 @@ app.post(
         accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
         profileImage,
         bankImage,
+        role,
       });
 
       await newUser.save();
