@@ -121,43 +121,44 @@ const CourtManagement = () => {
                     </Box>
                 </Box>
 
-                <TableContainer component={Paper} className={styles.tableContainer}>
-                    <Table>
-                        <TableHead className={styles.tableHead}>
-                            <TableRow>
-                                {["No.", "Building", "Courts Count", "ประเภทสนาม", "Price", "Open", "Close", "Actions"].map((head, index) => (
-                                    <TableCell key={index} className={styles.tableHeadCell}>
-                                        {head}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-
-                        <TableBody>
-                            {filteredCourts.map((court, index) => (
-                                <TableRow key={court.id} className={styles.tableRow}>
-                                    <TableCell align="center">{index + 1}</TableCell>
-                                    <TableCell align="center">{court.building}</TableCell>
-                                    <TableCell align="center">{court.courtsCount}</TableCell>
-                                    <TableCell align="center">{court.type}</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "green" }}>
-                                        {court.price}
-                                    </TableCell>
-                                    <TableCell align="center">{court.open}</TableCell>
-                                    <TableCell align="center">{court.close}</TableCell>
-                                    <TableCell align="center">
-                                        <IconButton color="primary" className={styles.iconButton}>
-                                            <Edit />
-                                        </IconButton>
-                                        <IconButton color="error" className={styles.iconButton} onClick={() => handleClickOpen(court)}>
-                                            <Delete />
-                                        </IconButton>
-                                    </TableCell>
+                <Box className={styles.contentBox} mt={4}> {/* เพิ่ม mt={4} หรือค่าอื่นๆ เพื่อขยับลง */}
+                    <TableContainer component={Paper} className={styles.tableContainer}>
+                        <Table>
+                            <TableHead className={styles.tableHead}>
+                                <TableRow>
+                                    {["No.", "Building", "Courts Count", "ประเภทสนาม", "Price", "Open", "Close", "Actions"].map((head, index) => (
+                                        <TableCell key={index} className={styles.tableHeadCell}>
+                                            {head}
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {filteredCourts.map((court, index) => (
+                                    <TableRow key={court.id} className={styles.tableRow}>
+                                        <TableCell align="center">{index + 1}</TableCell>
+                                        <TableCell align="center">{court.building}</TableCell>
+                                        <TableCell align="center">{court.courtsCount}</TableCell>
+                                        <TableCell align="center">{court.type}</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: "bold", color: "green" }}>
+                                            {court.price}
+                                        </TableCell>
+                                        <TableCell align="center">{court.open}</TableCell>
+                                        <TableCell align="center">{court.close}</TableCell>
+                                        <TableCell align="center">
+                                            <IconButton color="primary" className={styles.iconButton}>
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton color="error" className={styles.iconButton} onClick={() => handleClickOpen(court)}>
+                                                <Delete />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
 
                 {/* Delete Confirmation Dialog */}
                 <Dialog open={open} onClose={handleClose}>
