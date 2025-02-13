@@ -1,0 +1,138 @@
+/* 🌐 General Page Styling */
+.page-container {
+  font-family: 'Poppins', sans-serif;
+  background-color: transparent; /* เปลี่ยนพื้นหลังให้เป็นโปร่งใส */
+}
+
+/* 🎨 Form Container Styling */
+.form-container {
+  background: transparent;  /* เปลี่ยนพื้นหลังเป็นโปร่งใส */
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  margin: 50px auto;
+  border: 1px solid #ddd; /* เพิ่มเส้นขอบสีอ่อนเพื่อเพิ่มความชัดเจน */
+}
+
+.form-container h2 {
+  font-size: 32px;  
+  font-weight: 700; 
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+}
+
+/* 📝 Style each form group */
+.form-group {
+  margin-bottom: 22px;
+}
+
+/* 🏷️ Label styling */
+label {
+  display: block;
+  font-size: 15px;
+  color: #444;
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+
+/* 🔘 Input and select styling */
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+  background-color: #f9f9f9;
+}
+
+input:focus,
+select:focus {
+  border-color: #007bff;
+  background-color: #ffffff;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.2);
+}
+
+/* ⚠️ Error message styling */
+.error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+/* 🔵 Save Button (สีน้ำเงิน) */
+.save-btn {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  font-size: 17px;
+  padding: 14px;
+  width: 48%;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, #0056b3, #004494);
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+}
+
+/* 🔴 Cancel Button (สีแดง) */
+.cancel-btn {
+  background: linear-gradient(135deg, #dc3545, #a71d2a);
+  color: white;
+  font-size: 17px;
+  padding: 14px;
+  width: 48%;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+}
+
+.cancel-btn:hover {
+  background: linear-gradient(135deg, #a71d2a, #8a161f);
+}
+
+.cancel-btn:active {
+  transform: scale(0.98);
+}
+
+/* 📌 Button Container for Save & Cancel */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* 📱 Responsive layout */
+@media screen and (max-width: 768px) {
+  .form-container {
+    padding: 25px;
+    width: 95%;
+    border: 1px solid #ddd; /* ให้เส้นขอบแสดงผลบนหน้าจอเล็กๆ */
+    background-color: transparent; /* ใช้พื้นหลังโปร่งใส */
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .save-btn,
+  .cancel-btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
