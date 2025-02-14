@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"; // แก้ไขจาก next/ro
 import {
     Button, Table, TableBody, TableCell, TableContainer, TableHead,
     TableRow, Paper, IconButton, Typography, Box, MenuItem, Select, FormControl, InputLabel, TextField,
-    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditLocationIcon from "@mui/icons-material/EditLocation";
@@ -15,10 +15,10 @@ import styles from "./CourtManagement.module.css"; // นำเข้า CSS
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 const initialCourtData = [
-    { id: 1, building: "อาคารแบด 1", courtsCount: 5, type: "สนามแบดมินตัน", price: "200 บาท", open: "08:00", close: "20:00" },
-    { id: 2, building: "อาคารฟุตบอล", courtsCount: 2, type: "สนามฟุตบอล", price: "500 บาท", open: "10:00", close: "22:00" },
-    { id: 3, building: "อาคารเทนนิส", courtsCount: 3, type: "สนามเทนนิส", price: "300 บาท", open: "09:00", close: "21:00" },
-    { id: 4, building: "อาคารแบด 2", courtsCount: 10, type: "สนามแบดมินตัน", price: "200 บาท", open: "08:00", close: "20:00" },
+    { id: 1, building: "อาคารแบด 1", courtsCount: 5, type: "สนามแบดมินตัน", price: "200 บาท", open: "08:00", close: "20:00", status: "เปิด" },
+    { id: 2, building: "อาคารฟุตบอล", courtsCount: 2, type: "สนามฟุตบอล", price: "500 บาท", open: "10:00", close: "22:00", status: "ปิด" },
+    { id: 3, building: "อาคารเทนนิส", courtsCount: 3, type: "สนามเทนนิส", price: "300 บาท", open: "09:00", close: "21:00", status: "เปิด" },
+    { id: 4, building: "อาคารแบด 2", courtsCount: 10, type: "สนามแบดมินตัน", price: "200 บาท", open: "08:00", close: "20:00", status: "ปิด" },
 ];
 
 const CourtManagement = () => {
@@ -27,9 +27,28 @@ const CourtManagement = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [open, setOpen] = useState(false);
     const [selectedBuilding, setSelectedBuilding] = useState(null);
-
+    const [editingRowId, setEditingRowId] = useState(null);
     const [isClient, setIsClient] = useState(false); // Track client-side render
     const router = useRouter();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedCourt, setSelectedCourt] = useState(null);
+    const handleToggleStatus = (courtId) => {
+        setCourtData((prevData) =>
+            prevData.map((court) =>
+                court.id === courtId ? { ...court, status: court.status === "เปิด" ? "ปิด" : "เปิด" } : court
+            )
+        );
+    };
+
+    const handleMenuOpen = (event, court) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedCourt(court);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+        setSelectedCourt(null);
+    };
 
     useEffect(() => {
         setIsClient(true);
@@ -126,15 +145,16 @@ const CourtManagement = () => {
                         <Table>
                             <TableHead className={styles.tableHead}>
                                 <TableRow>
-                                    {["No.", "Building", "Courts Count", "ประเภทสนาม", "Price", "Open", "Close", "Actions"].map((head, index) => (
+                                    {["No.", "Building", "Courts Count", "ประเภทสนาม", "Price", "Open", "Close", "Status", "Actions"].map((head, index) => (
                                         <TableCell key={index} className={styles.tableHeadCell}>
                                             {head}
                                         </TableCell>
                                     ))}
                                 </TableRow>
                             </TableHead>
+
                             <TableBody>
-                                {filteredCourts.map((court, index) => (
+                                {courtData.map((court, index) => (
                                     <TableRow key={court.id} className={styles.tableRow}>
                                         <TableCell align="center">{index + 1}</TableCell>
                                         <TableCell align="center">{court.building}</TableCell>
@@ -145,14 +165,54 @@ const CourtManagement = () => {
                                         </TableCell>
                                         <TableCell align="center">{court.open}</TableCell>
                                         <TableCell align="center">{court.close}</TableCell>
+
+                                        {/* คอลัมน์สถานะ */}
                                         <TableCell align="center">
-                                            <IconButton color="primary" className={styles.iconButton}>
-                                                <Edit />
-                                            </IconButton>
-                                            <IconButton color="error" className={styles.iconButton} onClick={() => handleClickOpen(court)}>
-                                                <Delete />
-                                            </IconButton>
+                                            <Button
+                                                variant="contained"
+                                                color={court.status === "เปิด" ? "success" : "error"}
+                                                onClick={() => handleToggleStatus(court.id)} // เปลี่ยนสถานะเมื่อคลิก
+                                            >
+                                                {court.status}  {/* แสดงสถานะของสนาม */}
+                                            </Button>
                                         </TableCell>
+
+                                        {/* ปุ่มแก้ไข */}
+                                        <IconButton
+                                            color="primary"
+                                            className={styles.iconButton}
+                                            onClick={(event) => handleMenuOpen(event, court)}
+                                        >
+                                            <Edit />
+                                        </IconButton>
+
+                                        {/* ปุ่มลบ */}
+                                        <IconButton
+                                            color="error"
+                                            className={styles.iconButton}
+                                            onClick={() => handleClickOpen(court)}
+                                        >
+                                            <Delete />
+                                        </IconButton>
+
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            open={Boolean(anchorEl)}
+                                            onClose={handleMenuClose}
+                                        >
+                                            <MenuItem onClick={() => {
+                                                router.push(`/owner/areafield/field.management/add.chords?building=${selectedCourt?.id}`);
+                                                handleMenuClose();
+                                            }}>
+                                                เพิ่มคอร์ด
+                                            </MenuItem>
+                                            <MenuItem onClick={() => {
+                                                router.push(`/owner/areafield/field.management/manage.chords?building=${selectedCourt?.id}`);
+                                                handleMenuClose();
+                                            }}>
+                                                จัดการคอร์ด
+                                            </MenuItem>
+                                        </Menu>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -178,7 +238,7 @@ const CourtManagement = () => {
                     </DialogActions>
                 </Dialog>
             </Box>
-        </Box>
+        </Box >
     );
 };
 
