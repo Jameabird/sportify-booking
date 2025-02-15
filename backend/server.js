@@ -428,6 +428,21 @@ app.post("/api/forget-password", async (req, res) => {
       return res.status(404).send("ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
     }
 
+    // เช็คว่า authProvider เป็น Google หรือไม่
+    if (user.authProvider === "google") {
+      return res.status(400).json({ 
+        message: "ไม่สามารถดำเนินการรีเซ็ตรหัสผ่านสำหรับบัญชีนี้ได้ กรุณาเข้าสู่ระบบด้วยวิธีที่คุณใช้ลงทะเบียน" 
+      });
+    }
+
+    // เช็ค role ถ้าเป็น officer, owner, admin ให้แจ้งเตือนแบบไม่ระบุเจาะจง
+    const restrictedRoles = ["officer", "owner", "admin"];
+    if (restrictedRoles.includes(user.role)) {
+      return res.status(400).json({ 
+        message: "ไม่สามารถดำเนินการรีเซ็ตรหัสผ่านสำหรับบัญชีนี้ได้ โปรดติดต่อผู้ดูแลระบบหากคุณต้องการความช่วยเหลือ" 
+      });
+    }
+    
     // อัปเดตรหัสรีเซ็ตและเวลาหมดอายุในฐานข้อมูล
     user.resetCode = resetCode;
     user.resetCodeExpires = expiryTime;
