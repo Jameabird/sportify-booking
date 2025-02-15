@@ -92,7 +92,7 @@ userSchema.methods.isValidPassword = async function(password) {
 
 // ฟังก์ชันสร้าง JWT Token
 userSchema.methods.generateAuthToken = function() {
-  const payload = { id: this._id, username: this.username, role: this.role };
+  const payload = { userId: this._id, username: this.username, role: this.role }; // เปลี่ยน 'id' เป็น 'userId'
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); // สร้าง token ด้วย secret key
   return token;
 };
