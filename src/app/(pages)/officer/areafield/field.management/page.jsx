@@ -75,15 +75,7 @@ const CourtManagement = () => {
             handleClose();
         }
     };
-
-    const handleAddBuilding = () => {
-        router.push("/owner/areafield/field.management/add.building");
-    };
-
-    const handleEditlocation = () => {
-        router.push("/owner/areafield/field.management/edit.location");
-    };
-
+    
     const [openModal, setOpenModal] = useState(false); // ใช้เปิด/ปิด Modal
     const [formData, setFormData] = useState({
         building: "",
