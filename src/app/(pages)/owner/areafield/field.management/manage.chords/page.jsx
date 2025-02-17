@@ -1,25 +1,76 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@mui/material";
-import { Pencil, Trash, Plus } from "lucide-react";
+import { 
+  Button, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, 
+  TextField, MenuItem 
+} from "@mui/material";
+import { Edit, Delete } from "@mui/icons-material"; // Import necessary icons
 import TopBar_Owner from "@components/Topbar_Owner"; // Import TopBar_Owner
 
-const courts = [
-  { id: 1, name: "Court 1", open: "08:00", close: "20:00" },
-  { id: 2, name: "Court 2", open: "08:00", close: "20:00" },
-  { id: 3, name: "Court 3", open: "08:00", close: "20:00" },
-  { id: 4, name: "Court 4", open: "08:00", close: "20:00" },
-  { id: 5, name: "Court 5", open: "08:00", close: "20:00" },
-  { id: 6, name: "Court 6", open: "08:00", close: "20:00" },
+const courtsData = [
+  { id: 1, name: "Court 1", type: "สนามแบดมินตัน", open: "08:00", close: "20:00" },
+  { id: 2, name: "Court 2", type: "สนามแบดมินตัน", open: "08:00", close: "20:00" },
+  { id: 3, name: "Court 3", type: "สนามแบดมินตัน", open: "08:00", close: "20:00" },
+  { id: 4, name: "Court 4", type: "สนามแบดมินตัน", open: "08:00", close: "20:00" },
+  { id: 5, name: "Court 5", type: "สนามแบดมินตัน", open: "08:00", close: "20:00" },
+  { id: 6, name: "Court 6", type: "สนามแบดมินตัน", open: "08:00", close: "20:00" },
 ];
 
 export default function CourtList() {
   const router = useRouter();
 
-  const handleAddCourt = () => {
-    router.push("/owner/areafield/field.management/manage.chords/add.chords");
+  const [courts, setCourts] = useState(courtsData); // ใช้ State เก็บข้อมูลสนาม
+  const [openDelete, setOpenDelete] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedCourt, setSelectedCourt] = useState(null);
+  const [editCourt, setEditCourt] = useState({ id: "", name: "", type: "", open: "", close: "" });
+
+  // เปิด Popup ยืนยันการลบ
+  const handleClickOpenDelete = (court) => {
+    setSelectedCourt(court);
+    setOpenDelete(true);
   };
+
+  // ปิด Popup ยืนยันการลบ
+  const handleCloseDelete = () => {
+    setOpenDelete(false);
+    setSelectedCourt(null);
+  };
+
+  // ลบสนาม
+  const handleDelete = () => {
+    setCourts(courts.filter(court => court.id !== selectedCourt.id));
+    handleCloseDelete();
+  };
+
+  // เปิด Popup แก้ไข
+  const handleClickOpenEdit = (court) => {
+    setEditCourt(court);
+    setOpenEdit(true);
+  };
+
+  // ปิด Popup แก้ไข
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
+  };
+
+  // อัปเดตค่าฟิลด์ที่แก้ไข
+  const handleChange = (e) => {
+    setEditCourt({ ...editCourt, [e.target.name]: e.target.value });
+  };
+
+  const handleSaveEdit = () => {
+    setCourts(courts.map(court => (court.id === editCourt.id ? editCourt : court)));
+    handleCloseEdit();
+    alert('บันทึกข้อมูลสนามเรียบร้อยแล้ว');  // เพิ่ม alert หลังจากบันทึกข้อมูล
+  };  
+
+    // ฟังก์ชั่นที่เรียกใช้งานเมื่อคลิกปุ่ม "เพิ่มคอร์ด"
+    const handleAddCourtClick = () => {
+      // ใช้ router.push เพื่อเปลี่ยนเส้นทางไปยังหน้าใหม่
+      router.push('/owner/areafield/field.management/manage.chords/add.chords');
+    };
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -27,24 +78,14 @@ export default function CourtList() {
       <TopBar_Owner />
 
       <div className="max-w-5xl mx-auto p-6 mt-6 bg-white shadow-lg rounded-lg">
-        {/* ✅ ใช้ flex จัดเรียงหัวข้อ & ปุ่มเพิ่มคอร์ด */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
-            รายการสนามแบดมินตัน
-          </h1>
-          {/* ✅ ปุ่มเพิ่มคอร์ด */}
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Plus size={20} />}
-            onClick={handleAddCourt}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
+          <h1 className="text-3xl font-bold text-gray-800">รายการสนามแบดมินตัน</h1>
+          {/* ✅ เพิ่มปุ่ม "เพิ่มคอร์ด" */}
+          <Button variant="contained" color="primary" onClick={handleAddCourtClick}>
             เพิ่มคอร์ด
           </Button>
         </div>
 
-        {/* ✅ ใช้ Tailwind ปรับตารางให้สวยขึ้น */}
         <div className="overflow-x-auto">
           <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
             <thead className="bg-blue-600 text-white">
@@ -59,31 +100,22 @@ export default function CourtList() {
             </thead>
             <tbody>
               {courts.map((court, index) => (
-                <tr
-                  key={court.id}
-                  className="border-b transition hover:bg-blue-100"
-                >
+                <tr key={court.id} className="border-b transition hover:bg-blue-100">
                   <td className="p-3">{index + 1}</td>
                   <td className="p-3 font-medium">{court.name}</td>
-                  <td className="p-3 text-gray-700">สนามแบดมินตัน</td>
+                  <td className="p-3 text-gray-700">{court.type}</td>
                   <td className="p-3">{court.open}</td>
                   <td className="p-3">{court.close}</td>
                   <td className="p-3 flex justify-center space-x-2">
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      className="border-green-500 text-green-500 hover:bg-green-100"
-                    >
-                      <Pencil size={16} />
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      size="small"
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      <Trash size={16} />
-                    </Button>
+                    {/* ปุ่มแก้ไข */}
+                    <IconButton color="primary" onClick={() => handleClickOpenEdit(court)}>
+                      <Edit />
+                    </IconButton>
+
+                    {/* ปุ่มลบ */}
+                    <IconButton color="error" onClick={() => handleClickOpenDelete(court)}>
+                      <Delete />
+                    </IconButton>
                   </td>
                 </tr>
               ))}
@@ -91,6 +123,39 @@ export default function CourtList() {
           </table>
         </div>
       </div>
+
+      {/* ✅ Popup ยืนยันการลบ */}
+      <Dialog open={openDelete} onClose={handleCloseDelete}>
+        <DialogTitle>ยืนยันการลบ</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            คุณต้องการลบข้อมูลสนามกีฬา {selectedCourt?.name} ใช่หรือไม่?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelete} color="primary">ยกเลิก</Button>
+          <Button onClick={handleDelete} color="error">ลบ</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ✅ Popup แก้ไขสนาม */}
+      <Dialog open={openEdit} onClose={handleCloseEdit}>
+        <DialogTitle>แก้ไขข้อมูลสนาม</DialogTitle>
+        <DialogContent>
+          <TextField fullWidth margin="dense" label="Court Name" name="name" value={editCourt.name} onChange={handleChange} />
+          <TextField fullWidth select margin="dense" label="ประเภทสนาม" name="type" value={editCourt.type} onChange={handleChange}>
+            <MenuItem value="สนามแบดมินตัน">สนามแบดมินตัน</MenuItem>
+            <MenuItem value="สนามฟุตบอล">สนามฟุตบอล</MenuItem>
+            <MenuItem value="สนามเทนนิส">สนามเทนนิส</MenuItem>
+          </TextField>
+          <TextField fullWidth margin="dense" label="Open Time" name="open" type="time" value={editCourt.open} onChange={handleChange} />
+          <TextField fullWidth margin="dense" label="Close Time" name="close" type="time" value={editCourt.close} onChange={handleChange} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} color="secondary">ยกเลิก</Button>
+          <Button onClick={handleSaveEdit} variant="contained" color="primary">บันทึก</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
