@@ -7,18 +7,15 @@ import {
     TableRow, Paper, IconButton, Typography, Box, MenuItem, Select, FormControl, InputLabel, TextField,
     Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditLocationIcon from "@mui/icons-material/EditLocation";
 import { Edit, Delete } from "@mui/icons-material";
-import TopBar_Owner from "@components/Topbar_Owner";
+import TopBar_Officer from "@components/Topbar_Officer";
 import styles from "./CourtManagement.module.css"; // นำเข้า CSS
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 const initialCourtData = [
-    { id: 1, building: "อาคารแบด 1", courtsCount: 5, type: "สนามแบดมินตัน", price: "200 บาท", open: "08:00", close: "20:00", status: "เปิด" },
-    { id: 2, building: "อาคารฟุตบอล", courtsCount: 2, type: "สนามฟุตบอล", price: "500 บาท", open: "10:00", close: "22:00", status: "ปิด" },
-    { id: 3, building: "อาคารเทนนิส", courtsCount: 3, type: "สนามเทนนิส", price: "300 บาท", open: "09:00", close: "21:00", status: "เปิด" },
-    { id: 4, building: "อาคารแบด 2", courtsCount: 10, type: "สนามแบดมินตัน", price: "200 บาท", open: "08:00", close: "20:00", status: "ปิด" },
+    { id: 1, building: "อาคารแบด 1", courtsCount: 5, type: "สนามแบดมินตัน", open: "08:00", close: "20:00", status: "เปิด" },
+    { id: 2, building: "อาคารฟุตบอล", courtsCount: 2, type: "สนามฟุตบอล", open: "10:00", close: "22:00", status: "ปิด" },
+    { id: 3, building: "อาคารเทนนิส", courtsCount: 3, type: "สนามเทนนิส", open: "09:00", close: "21:00", status: "เปิด" },
+    { id: 4, building: "อาคารแบด 2", courtsCount: 10, type: "สนามแบดมินตัน", open: "08:00", close: "20:00", status: "ปิด" },
 ];
 
 const CourtManagement = () => {
@@ -110,7 +107,7 @@ const CourtManagement = () => {
         setOpenModal(true);
         handleMenuClose(); // ปิดเมนูก่อน
     };
-    
+
 
     const handleModalClose = () => {
         setOpenModal(false);
@@ -129,7 +126,7 @@ const CourtManagement = () => {
             console.error("No building selected for update.");
             return;
         }
-    
+
         setCourtData((prevData) =>
             prevData.map((court) =>
                 court.id === selectedBuilding.id
@@ -139,7 +136,7 @@ const CourtManagement = () => {
         );
         handleModalClose(); // ปิด Modal
         setIsPopupVisible(true); // แสดง Popup แจ้งเตือน
-    };    
+    };
 
     if (!isClient) {
         return null; // Render nothing until client-side
@@ -147,62 +144,13 @@ const CourtManagement = () => {
 
     return (
         <Box className={styles.container}>
-            <TopBar_Owner textColor={"black"} />
+            <TopBar_Officer textColor={"black"} />
             <Box className={styles.contentBox}>
                 <Box className={styles.header} display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h4" fontWeight="bold" color="primary">
                         จัดการสนามกีฬา
                     </Typography>
-                    <Box display="flex" gap={2}>
-                        <Button
-                            variant="contained"
-                            color="error"
-                            startIcon={<EditLocationIcon />}
-                            className={styles.button}
-                            onClick={handleEditlocation}
-                        >
-                            แก้ไขสถานที่
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            className={styles.button}
-                            onClick={handleAddBuilding}
-                        >
-                            เพิ่มข้อมูลอาคาร
-                        </Button>
-                    </Box>
                 </Box>
-                {/* Popup for Success Message */}
-                {isPopupVisible && (
-                    <Box
-                        sx={{
-                            position: "fixed",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            backgroundColor: "rgba(0, 0, 0, 0.7)",
-                            color: "white",
-                            padding: "20px",
-                            borderRadius: "8px",
-                            zIndex: 1000,
-                        }}
-                    >
-                        <Typography variant="h6" color="inherit" align="center">
-                            ข้อมูลได้รับการบันทึกสำเร็จ
-                        </Typography>
-                        <Box display="flex" justifyContent="center" marginTop="10px">
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => setIsPopupVisible(false)} // Close the popup when button clicked
-                            >
-                                ปิด
-                            </Button>
-                        </Box>
-                    </Box>
-                )}
 
                 <Box display="flex" justifyContent="space-between" alignItems="center" className={styles.buttonFilterGroup}>
                     <Box display="flex" gap={2} width="100%">
@@ -230,7 +178,7 @@ const CourtManagement = () => {
                         <Table>
                             <TableHead className={styles.tableHead}>
                                 <TableRow>
-                                    {["No.", "Building", "Courts Count", "ประเภทสนาม", "Price", "Open", "Close", "Status", "Actions"].map((head, index) => (
+                                    {["No.", "Building", "Courts Count", "ประเภทสนาม", "Open", "Close", "Status", "Actions"].map((head, index) => (
                                         <TableCell key={index} className={styles.tableHeadCell}>
                                             {head}
                                         </TableCell>
@@ -245,9 +193,6 @@ const CourtManagement = () => {
                                         <TableCell align="center">{court.building}</TableCell>
                                         <TableCell align="center">{court.courtsCount}</TableCell>
                                         <TableCell align="center">{court.type}</TableCell>
-                                        <TableCell align="center" sx={{ fontWeight: "bold", color: "green" }}>
-                                            {court.price}
-                                        </TableCell>
                                         <TableCell align="center">{court.open}</TableCell>
                                         <TableCell align="center">{court.close}</TableCell>
 
@@ -269,15 +214,6 @@ const CourtManagement = () => {
                                             onClick={(event) => handleMenuOpen(event, court)}
                                         >
                                             <Edit />
-                                        </IconButton>
-
-                                        {/* ปุ่มลบ */}
-                                        <IconButton
-                                            color="error"
-                                            className={styles.iconButton}
-                                            onClick={() => handleClickOpen(court)}
-                                        >
-                                            <Delete />
                                         </IconButton>
 
                                         <Menu
@@ -319,22 +255,13 @@ const CourtManagement = () => {
                                                         </Select>
                                                     </FormControl>
                                                     <TextField
-                                                        label="Price"
-                                                        name="price"
-                                                        value={formData.price}
-                                                        onChange={handleChange}
-                                                        fullWidth
-                                                        margin="normal"
-                                                        type="number"
-                                                    />
-                                                    <TextField
                                                         label="Open"
                                                         name="open"
+                                                        type="time"
                                                         value={formData.open}
                                                         onChange={handleChange}
                                                         fullWidth
                                                         margin="normal"
-                                                        type="time"
                                                     />
                                                     <TextField
                                                         label="Close"
@@ -356,7 +283,7 @@ const CourtManagement = () => {
                                                 </DialogActions>
                                             </Dialog>
                                             <MenuItem onClick={() => {
-                                                router.push(`/owner/areafield/field.management/manage.chords?building=${selectedCourt?.id}`);
+                                                router.push(`/officer/areafield/field.management/manage.chords?building=${selectedCourt?.id}`);
                                                 handleMenuClose();
                                             }}>
                                                 จัดการคอร์ด
@@ -368,27 +295,9 @@ const CourtManagement = () => {
                         </Table>
                     </TableContainer>
                 </Box>
-
-                {/* Delete Confirmation Dialog */}
-                <Dialog open={open} onClose={handleClose}>
-                    <DialogTitle>ยืนยันการลบ</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            คุณต้องการลบข้อมูลสนามกีฬา {selectedBuilding?.building} ใช่หรือไม่?
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleClose} color="primary">
-                            ยกเลิก
-                        </Button>
-                        <Button onClick={handleDelete} color="error">
-                            ลบ
-                        </Button>
-                    </DialogActions>
-                </Dialog>
             </Box>
-        </Box >
+        </Box>
     );
 };
 
-export default CourtManagement; // ส่งออก Default ถูกต้อง
+export default CourtManagement;

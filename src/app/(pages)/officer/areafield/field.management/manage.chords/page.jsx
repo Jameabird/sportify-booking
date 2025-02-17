@@ -2,8 +2,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@mui/material";
-import { Pencil, Trash, Plus } from "lucide-react";
-import TopBar_Owner from "@components/Topbar_Owner"; // Import TopBar_Owner
+import { Pencil, Trash } from "lucide-react";
+import TopBar_Officer from "@components/Topbar_Officer"; // Import TopBar_Owner
 
 const courts = [
   { id: 1, name: "Court 1", open: "08:00", close: "20:00" },
@@ -15,33 +15,17 @@ const courts = [
 ];
 
 export default function CourtList() {
-  const router = useRouter();
-
-  const handleAddCourt = () => {
-    router.push("/owner/areafield/field.management/manage.chords/add.chords");
-  };
-
   return (
     <div className="bg-gray-100 min-h-screen">
-      {/* ✅ เพิ่ม TopBar_Owner */}
-      <TopBar_Owner />
+      {/* ✅ เพิ่ม TopBar_Officer */}
+      <TopBar_Officer />
 
       <div className="max-w-5xl mx-auto p-6 mt-6 bg-white shadow-lg rounded-lg">
-        {/* ✅ ใช้ flex จัดเรียงหัวข้อ & ปุ่มเพิ่มคอร์ด */}
+        {/* ✅ ลบปุ่มเพิ่มคอร์ดออก */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">
             รายการสนามแบดมินตัน
           </h1>
-          {/* ✅ ปุ่มเพิ่มคอร์ด */}
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Plus size={20} />}
-            onClick={handleAddCourt}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            เพิ่มคอร์ด
-          </Button>
         </div>
 
         {/* ✅ ใช้ Tailwind ปรับตารางให้สวยขึ้น */}
