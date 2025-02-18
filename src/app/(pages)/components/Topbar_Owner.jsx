@@ -38,6 +38,26 @@ const TopBar_Owner = (props) => {
     },
   });
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      // ทำสิ่งที่ต้องการเช่นการเช็คสิทธิ์ของผู้ใช้ตาม role
+      console.log("Token:", token);
+      console.log("Role:", role);
+    } else {
+      // หากไม่มี token หรือ role ก็อาจจะทำการรีไดเรกต์ไปยังหน้า login
+      router.push("/login");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    router.push("/login");
+  };
+
   return (
     <Box
       display="flex"
@@ -91,7 +111,7 @@ const TopBar_Owner = (props) => {
         <MenuItem onClick={() => navigateTo("/owner/setting")}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
-        <MenuItem onClick={() => navigateTo("/login")}>
+        <MenuItem onClick={handleLogout}>
           <Typography variant="body1">Sign Out</Typography>
         </MenuItem>
       </Menu>
