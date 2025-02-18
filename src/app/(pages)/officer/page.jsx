@@ -3,10 +3,10 @@ import React from "react";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
 import TopBar_Officer from "@components/Topbar_Officer";
-import { useRouter } from "next/navigation"; // เพิ่ม useRouter
+import { useRouter } from "next/navigation";
 
 export default function Officer() {
-  const router = useRouter(); // สร้างอินสแตนซ์ของ useRouter
+  const router = useRouter();
 
   // ฟังก์ชันเปลี่ยนเส้นทาง
   const handleNavigation = (path) => {
@@ -20,7 +20,7 @@ export default function Officer() {
         display: "flex",
         flexDirection: "column",
         height: "100vh",
-        overflow: "hidden", // Prevent vertical scrolling
+        overflow: "hidden",
       }}
     >
       <main
@@ -99,38 +99,32 @@ export default function Officer() {
                 marginBottom: "10px",
               }}
             >
-              Court Management
+              Management
             </Typography>
-            <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
-              {[
-                { text: "Manage", path: "/officer/management" },
-                { text: "Inform to Owner", path: "/officer/Inform" },
-              ].map((item, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    backgroundColor: "rgba(0,123,255,0.9)",
-                    padding: "16px 32px",
-                    borderRadius: "12px",
-                    color: "white",
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    cursor: "pointer",
-                    transition: "0.3s",
-                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-                    minWidth: "180px",
-                    "&:hover": {
-                      backgroundColor: "rgba(0,123,255,1)",
-                      boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
-                      transform: "scale(1.05)",
-                    },
-                  }}
-                  onClick={() => handleNavigation(item.path)} // เพิ่มการคลิกเพื่อนำทาง
-                >
-                  {item.text}
-                </Box>
-              ))}
+
+            {/* ✅ แสดงแค่ "Field Management" */}
+            <Box
+              sx={{
+                backgroundColor: "rgba(0,123,255,0.9)",
+                padding: "16px 32px",
+                borderRadius: "12px",
+                color: "white",
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+                textAlign: "center",
+                cursor: "pointer",
+                transition: "0.3s",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
+                minWidth: "180px",
+                "&:hover": {
+                  backgroundColor: "rgba(0,123,255,1)",
+                  boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
+                  transform: "scale(1.05)",
+                },
+              }}
+              onClick={() => handleNavigation("/officer/areafield")}
+            >
+              Field Management
             </Box>
           </Box>
         </Box>
