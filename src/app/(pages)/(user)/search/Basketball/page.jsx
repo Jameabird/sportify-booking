@@ -17,7 +17,7 @@ function SearchPages() {
   const handleBook = (placeName) => {
     // console.log(placeName);
     sessionStorage.setItem("booking_place", placeName);
-    router.push("/booking");
+    router.push("/booking/bookingbasketball");
   }
 
   return (
