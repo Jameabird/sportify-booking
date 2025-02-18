@@ -174,6 +174,7 @@ const AdminPaidTable = () => {
                     </TableCell>
                   </TableRow>
                 ))}
+                
               </TableBody>
             </Table>
           </CardContent>

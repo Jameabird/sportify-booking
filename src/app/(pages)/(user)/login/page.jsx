@@ -19,26 +19,52 @@ const LoginPage = () => {
   const router = useRouter();
 
   const handleGoogleLogin = async (response) => {
-    if (response?.credential) {
-      try {
-        const googleToken = response.credential; // รับ Google Token
+    if (isLoggingIn) return; // ป้องกันการกดล็อกอินซ้ำ
+    setIsLoggingIn(true);
 
-        // ส่ง Token ไปยัง backend สำหรับการตรวจสอบและเข้าสู่ระบบ
-        const res = await axios.post("http://localhost:5000/api/google-login", { token: googleToken });
+    console.log("Google Credential:", response?.credential);
 
-        // แสดงข้อความ snackbar ที่ได้จาก backend
-        setSnackbarMessage(res.data.message || "เข้าสู่ระบบสำเร็จ!");
+    if (!response?.credential) {
+      setSnackbarMessage("การเข้าสู่ระบบผ่าน Google ล้มเหลว");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+      setIsLoggingIn(false);
+      return;
+    }
+
+    try {
+      const googleToken = response.credential; // รับ Google Token
+
+      // ส่ง Token ไปยัง backend สำหรับการตรวจสอบและเข้าสู่ระบบ
+      const res = await axios.post("http://localhost:5000/api/google-login", { token: googleToken });
+      console.log("Google Login Response:", res);
+
+      // ดึงข้อมูลจาก response
+      const { token, role, message } = res.data;
+
+      if (token) {
+        // ✅ Decode JWT Token เพื่อดึงค่า expiration time
+        const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT Payload
+        const expirationTime = decoded.exp * 1000; // แปลงเป็น milliseconds
+
+        // ✅ เก็บ token และเวลาหมดอายุใน localStorage
+        localStorage.setItem("token", JSON.stringify({ token, expirationTime }));
+        console.log("Token saved:", localStorage.getItem("token"));
+
+        // ✅ เก็บข้อมูล role ใน localStorage
+        if (role) {
+          localStorage.setItem("role", role);
+          console.log("Role saved:", localStorage.getItem("role"));
+        }
+
+        // ✅ แสดงข้อความ snackbar ที่ได้จาก backend
+        setSnackbarMessage(message || "เข้าสู่ระบบสำเร็จ!");
         setSnackbarSeverity("success");
         setOpenSnackbar(true);
 
-        // เก็บข้อมูล token และ role ใน localStorage
-        localStorage.setItem("token", res.data.token); // เซฟ token
-        localStorage.setItem("role", res.data.role);   // เซฟ role
-
-        // Redirect based on user role (หลังจาก login สำเร็จ)
-        const userRole = res.data.role;
+        // ✅ Redirect based on user role
         setTimeout(() => {
-          switch (userRole) {
+          switch (role) {
             case 'user':
               router.push("/home");
               break;
@@ -52,19 +78,24 @@ const LoginPage = () => {
               router.push("/admin");
               break;
             default:
-              router.push("/home");
+              router.push("/home"); // Default path in case of unknown role
           }
-        }, 1500);
-      } catch (error) {
-        console.error("Error during Google login:", error);
-        setSnackbarMessage("การเข้าสู่ระบบผ่าน Google ล้มเหลว");
-        setSnackbarSeverity("error");
-        setOpenSnackbar(true);
+        }, 3000); // Time delay for snackbar to show
+
+      } else {
+        throw new Error("Token not found in response.");
       }
-    } else {
-      setSnackbarMessage("การเข้าสู่ระบบผ่าน Google ล้มเหลว");
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      console.error("Error response data:", error.response?.data);
+
+      // แสดงข้อความ error ให้ชัดเจน
+      const errorMessage = error.response?.data?.message || error.message || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ";
+      setSnackbarMessage(errorMessage);
       setSnackbarSeverity("error");
       setOpenSnackbar(true);
+    } finally {
+      setIsLoggingIn(false); // Reset login status after process is finished
     }
   };
 
@@ -91,34 +122,34 @@ const LoginPage = () => {
       // ส่งข้อมูลอีเมลและรหัสผ่านไปยัง backend
       const response = await axios.post("http://localhost:5000/api/login", { email, password });
       console.log("Login response:", response);
-    
+
       // ดึงข้อมูลจาก response
       const { token, role, message } = response.data;
-    
+
       if (token) {
         const expirationTime = Date.now() + 3600000; // กำหนดเวลา expiration ใน 1 ชั่วโมง
-    
+
         // เก็บ token และเวลาหมดอายุใน localStorage
         localStorage.setItem("token", JSON.stringify({ token, expirationTime }));
         console.log("Token saved:", localStorage.getItem("token"));
-    
+
         // ใช้ token เพื่อร้องขอข้อมูลผู้ใช้
         const userResponse = await axios.get("http://localhost:5000/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("User data:", userResponse.data);
-    
+
         // เก็บข้อมูล role ใน localStorage
         if (role) {
           localStorage.setItem("role", role);
           console.log("Role saved:", localStorage.getItem("role"));
         }
-    
+
         // Set message or navigate based on role
         setSnackbarMessage(message || "เข้าสู่ระบบสำเร็จ!");
         setSnackbarSeverity("success");
         setOpenSnackbar(true);
-    
+
         // Redirect based on user role
         const userRole = role;
         setTimeout(() => {
@@ -139,7 +170,7 @@ const LoginPage = () => {
               router.push("/home"); // Default path in case of unknown role
           }
         }, 3000); // Time delay for snackbar to show
-    
+
       } else {
         throw new Error("Token not found in response.");
       }

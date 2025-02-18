@@ -35,7 +35,6 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
   const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะการแสดง Snackbar
-  const [role, setRole] = useState("user");
   const router = useRouter();
 
   const handleBankChange = (event) => {
@@ -99,7 +98,6 @@ const RegisterPage = () => {
       formData.append("lastName", lastName);
       formData.append("bank", bank);
       formData.append("accountNumber", accountNumber);
-      formData.append("role", role); // ส่ง role ไปด้วย
 
       if (image) {
         formData.append("profileImage", image);
@@ -235,21 +233,6 @@ const RegisterPage = () => {
                     ),
                   }}
                 />
-                
-                <FormControl fullWidth sx={{ marginBottom: "16px" }}>
-                  <InputLabel>Role</InputLabel>
-                  <Select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    label="Role"
-                  >
-                    <MenuItem value="user">User</MenuItem>
-                    <MenuItem value="officer">Officer</MenuItem>
-                    <MenuItem value="owner">Owner</MenuItem>
-                    <MenuItem value="admin">Admin</MenuItem>
-                  </Select>
-                </FormControl>
-
                 <h3 style={{
                   color: "#d32f2f",
                   fontWeight: "bold",
