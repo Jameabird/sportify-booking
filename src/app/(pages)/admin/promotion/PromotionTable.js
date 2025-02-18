@@ -37,8 +37,8 @@ const PromotionTable = ({ promotions, handleEdit, handleDelete }) => {
                 <td>{promo.startdate}</td>
                 <td>{promo.enddate}</td>
                 <td>
-                  <button onClick={() => handleEdit(promo.id)}><Edit size={20} /></button>
-                  <button onClick={() => handleDelete(promo.id)}><Trash size={20} /></button>
+                  <button onClick={() => handleEdit(promo.id)} className="text-blue-500 hover:text-blue-700"><Edit size={20} /></button>
+                  <button onClick={() => handleDelete(promo.id)} className="text-red-500 hover:text-red-700 ml-2"><Trash size={20} /></button>
                 </td>
               </tr>
             ))}
