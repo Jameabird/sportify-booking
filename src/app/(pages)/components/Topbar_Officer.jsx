@@ -2,7 +2,7 @@
 import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Officer = (props) => {
