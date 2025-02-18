@@ -27,6 +27,7 @@ const authenticate = (req, res, next) => {
   }
 
   try {
+    console.log("🔹 Received Token:", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("🔹 Decoded JWT:", decoded);
 
@@ -46,6 +47,121 @@ const authenticate = (req, res, next) => {
     return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
+
+// ✅ สร้าง Owner ใหม่ โดยต้องเป็น Admin เท่านั้น
+app.post("/api/owners", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
+  try {
+    const { name, email, password } = req.body;
+    const adminId = req.user.userId; // ดึงจาก JWT
+
+    // ตรวจสอบว่า admin มีสิทธิ์หรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied: Only admins can create owners" });
+    }
+
+    // ตรวจสอบว่าอีเมลนี้ถูกใช้แล้วหรือไม่
+    const existingOwner = await User.findOne({ email });
+    if (existingOwner) {
+      return res.status(400).json({ error: "Email is already registered" });
+    }
+
+    // Hash รหัสผ่านก่อนบันทึก
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // สร้าง Owner ใหม่
+    const newOwner = new User({
+      username: name,
+      email,
+      password: hashedPassword,
+      role: "owner",
+      adminId,
+      createdAt: new Date(),
+    });
+
+    await newOwner.save();
+    res.status(201).json(newOwner);
+  } catch (error) {
+    console.error("Error creating owner:", error);
+    res.status(500).json({ error: "Failed to create owner" });
+  }
+});
+
+// ✅ ดึง Owner ทั้งหมดที่อ้างอิง adminId (Admin เท่านั้น)
+app.get("/api/owners", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
+  try {
+    const adminId = req.user.userId; // ดึงจาก JWT
+
+    // ตรวจสอบสิทธิ์ว่าเป็น admin จริงหรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    const owners = await User.find({ adminId });
+    res.status(200).json(owners);
+  } catch (error) {
+    console.error("Error fetching owners:", error);
+    res.status(500).json({ error: "Failed to fetch owners" });
+  }
+});
+
+// ✅ อัปเดตข้อมูล Owner (Admin เท่านั้น)
+app.put("/api/owners/:ownerId", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
+  try {
+    const { ownerId } = req.params;
+    const updates = req.body;
+    const adminId = req.user.userId;
+
+    // ตรวจสอบสิทธิ์ว่าเป็น Admin จริงหรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    // ตรวจสอบว่า ownerId มีอยู่จริงและเป็นของ admin นี้หรือไม่
+    const owner = await User.findOne({ _id: ownerId, adminId });
+    if (!owner) {
+      return res.status(404).json({ error: "Owner not found or unauthorized" });
+    }
+
+    // อัปเดตข้อมูล Owner
+    Object.assign(owner, updates);
+    await owner.save();
+
+    res.status(200).json(owner);
+  } catch (error) {
+    console.error("Error updating owner:", error);
+    res.status(500).json({ error: "Failed to update owner" });
+  }
+});
+
+// ✅ Route สำหรับลบ Owner
+app.delete("/api/owners/:id", authenticate, async (req, res) => {
+  try {
+    const adminId = req.user.userId; // ดึง adminId จาก JWT token ที่ตรวจสอบแล้ว
+
+    // ตรวจสอบว่า user ที่ส่งคำขอมีสิทธิ์เป็น admin หรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    const ownerId = req.params.id;
+
+    // ลบข้อมูล Owner โดยใช้ ID
+    const owner = await User.findByIdAndDelete(ownerId);
+    if (!owner) {
+      return res.status(404).json({ error: "Owner not found" });
+    }
+
+    // ส่ง response กลับเมื่อการลบสำเร็จ
+    res.status(200).json({ message: "Owner deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting owner:", error);
+    res.status(500).json({ error: "Failed to delete owner" });
+  }
+});
 
 // ใช้ route ที่ต้องการ authentication
 app.get("/api/users/me", authenticate, async (req, res) => {

@@ -83,6 +83,13 @@ const userSchema = new mongoose.Schema({
     enum: ['local', 'google'],
     default: 'local',
   },
+  adminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: function () {
+      return this.role === "owner"; // ถ้าเป็น owner ต้องมี adminId
+    },
+  },  
 });
 
 // ฟังก์ชันตรวจสอบรหัสผ่านที่เข้ารหัสแล้ว
