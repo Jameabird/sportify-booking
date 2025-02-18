@@ -129,7 +129,7 @@ export default function AccountPage() {
                     <tr key={acc._id} className="text-center hover:bg-gray-50">
                       <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.username}</td>
                       <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.email}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phone || "N/A"}</td>
+                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phoneNumber || "N/A"}</td>
                       <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.role}</td>
                       <td className="border border-gray-300 px-4 py-3 text-sm">
                         <button

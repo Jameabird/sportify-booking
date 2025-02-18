@@ -19,6 +19,7 @@ export default function AddAccountPage() {
     name: "",
     email: "",
     password: "",
+    phoneNumber: "",
     role: "Owner",
   });
 
@@ -58,25 +59,25 @@ export default function AddAccountPage() {
       setOpenSnackbar(true);
       return;
     }
-
+  
     setLoading(true);
     try {
       const res = await axios.post(
         "http://localhost:5000/api/owners", // เพิ่ม /api เพื่อให้เชื่อมต่อกับ backend ได้ถูกต้อง
-        formData,
+        formData, // ตรวจสอบให้แน่ใจว่า formData รวมถึง phoneNumber
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
+  
       console.log("✅ Owner created:", res.data);
-
+  
       setSnackbarMessage("Account saved successfully!");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
-
+  
       setDialogMessage("The account has been added successfully.");
       setDialogSeverity("success");
       setOpenDialog(true);
@@ -88,7 +89,7 @@ export default function AddAccountPage() {
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -103,8 +104,8 @@ export default function AddAccountPage() {
       <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f7fafc", position: "relative", overflow: "hidden" }}>
         <TopBar_Admin />
 
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div className="flex flex-col items-center justify-between min-h-screen bg-gray-100 p-6">
+          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md overflow-hidden flex-grow">
             <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">Add New Account</h2>
 
             <div className="space-y-5">
@@ -136,6 +137,17 @@ export default function AddAccountPage() {
                   type="password"
                   name="password"
                   value={formData.password}
+                  onChange={handleChange}
+                  className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium text-gray-600">Phone Number</label>
+                <input
+                  type="text"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
                   onChange={handleChange}
                   className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

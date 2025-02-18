@@ -49,9 +49,9 @@ const authenticate = (req, res, next) => {
 };
 
 // ✅ สร้าง Owner ใหม่ โดยต้องเป็น Admin เท่านั้น
-app.post("/api/owners", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
+app.post("/api/owners", authenticate, async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phoneNumber } = req.body; // รับ phoneNumber จาก body
     const adminId = req.user.userId; // ดึงจาก JWT
 
     // ตรวจสอบว่า admin มีสิทธิ์หรือไม่
@@ -75,6 +75,7 @@ app.post("/api/owners", authenticate, async (req, res) => { // เพิ่ม `
       email,
       password: hashedPassword,
       role: "owner",
+      phoneNumber: phoneNumber, // เพิ่มฟิลด์นี้ในข้อมูลที่บันทึก
       adminId,
       createdAt: new Date(),
     });
@@ -190,7 +191,7 @@ app.get("/api/users/me", authenticate, async (req, res) => {
 app.put("/api/users/me", authenticate, async (req, res) => {
   try {
     console.log("Request Body:", req.body);
-    const userId = req.user.id; // ดึง user ID จาก token
+    const userId = req.user.userId; // ดึง user ID จาก token
     // ค้นหาผู้ใช้
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
