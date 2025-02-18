@@ -21,36 +21,52 @@ app.use("/uploads", express.static("uploads"));
 
 // Middleware สำหรับตรวจสอบ JWT
 const authenticate = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", ""); // ดึง token จาก header
+  const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
-    return res.status(401).json({ message: "Authentication required" }); // ถ้าไม่มี token
+    return res.status(401).json({ message: "Authentication required" });
   }
 
   try {
-    // ตรวจสอบ token ด้วย JWT_SECRET จาก environment variable
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // ทำให้ข้อมูล user สามารถเข้าถึงได้ใน request
-    next(); // ไปที่ route handler
+    console.log("🔹 Decoded JWT:", decoded);
+
+    if (!decoded.userId) {
+      throw new Error("Invalid token payload: Missing userId");
+    }
+
+    req.user = decoded;
+    next();
   } catch (error) {
-    // ถ้าเกิดข้อผิดพลาดในการตรวจสอบ token
-    return res
-      .status(401)
-      .json({ message: "Invalid or expired token", error: error.message });
+    console.error("🚨 JWT Authentication Error:", error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token has expired, please log in again" });
+    }
+
+    return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
 
 // ใช้ route ที่ต้องการ authentication
 app.get("/api/users/me", authenticate, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id); // ใช้ข้อมูลจาก token ที่ได้รับ
+    console.log("🔹 Request received in /api/users/me");
+    console.log("🔹 Decoded Token User:", req.user);
+
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: "Unauthorized: No user data found in token" });
+    }
+
+    const user = await User.findById(req.user.userId); // เปลี่ยนจาก req.user.id เป็น req.user.userId
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user); // ส่งข้อมูลผู้ใช้กลับไป
+
+    res.json(user);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    console.error("🚨 Error in /api/users/me:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 });
 
@@ -340,14 +356,19 @@ app.post(
         throw new Error("Invalid Google token payload");
       }
 
+      // ✅ ตรวจสอบว่าผู้ใช้เคยลงทะเบียนด้วย email/password หรือไม่
+      let user = await User.findOne({ email: payload.email });
+
+      if (user && user.authProvider !== "google") {
+        return res.status(400).json({ message: "Email นี้เคยลงทะเบียนแบบปกติ กรุณาใช้วิธี login เดิม" });
+      }
+
       // ตรวจสอบการอัปโหลดไฟล์
       const profileImage = req.files && req.files.profileImage ? req.files.profileImage[0].path : payload.picture || null;
       const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : null;
 
       console.log("profileImage path:", profileImage);
       console.log("bankImage path:", bankImage);
-
-      let user = await User.findOne({ email: payload.email });
 
       if (!user) {
         user = new User({
@@ -407,6 +428,21 @@ app.post("/api/forget-password", async (req, res) => {
       return res.status(404).send("ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
     }
 
+    // เช็คว่า authProvider เป็น Google หรือไม่
+    if (user.authProvider === "google") {
+      return res.status(400).json({ 
+        message: "ไม่สามารถดำเนินการรีเซ็ตรหัสผ่านสำหรับบัญชีนี้ได้ กรุณาเข้าสู่ระบบด้วยวิธีที่คุณใช้ลงทะเบียน" 
+      });
+    }
+
+    // เช็ค role ถ้าเป็น officer, owner, admin ให้แจ้งเตือนแบบไม่ระบุเจาะจง
+    const restrictedRoles = ["officer", "owner", "admin"];
+    if (restrictedRoles.includes(user.role)) {
+      return res.status(400).json({ 
+        message: "ไม่สามารถดำเนินการรีเซ็ตรหัสผ่านสำหรับบัญชีนี้ได้ โปรดติดต่อผู้ดูแลระบบหากคุณต้องการความช่วยเหลือ" 
+      });
+    }
+    
     // อัปเดตรหัสรีเซ็ตและเวลาหมดอายุในฐานข้อมูล
     user.resetCode = resetCode;
     user.resetCodeExpires = expiryTime;
