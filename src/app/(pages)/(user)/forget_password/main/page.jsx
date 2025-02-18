@@ -13,34 +13,37 @@ const ForgetPasswordPage = () => {
   const router = useRouter();
 
   const handleSendLink = async () => {
-    if (email) {
-      const normalizedEmail = email.toLowerCase();
-      console.log("Sending reset link to email:", normalizedEmail);  // ดูค่าของ email ที่จะส่ง
-      try {
-        // ส่งคำขอไปยัง backend เพื่อเช็คอีเมล
-        await axios.post('http://localhost:5000/api/forget-password', {email: normalizedEmail });
-        
-        setSnackbarMessage("ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
-        setOpenSnackbar(true);
-  
-        setTimeout(() => {
-          router.push(`/forget_password/Combined?email=${email}`);
-        }, 1500);
-        
-      } catch (error) {
-        if (error.response) {
-          setSnackbarMessage(error.response.data); // ข้อความจากเซิร์ฟเวอร์
-        } else {
-          setSnackbarMessage('ไม่สามารถส่งลิงค์รีเซ็ตรหัสผ่านได้');
-        }
-        setOpenSnackbar(true);
-      }
-    } else {
+    if (!email) {
       setSnackbarMessage("กรุณากรอกอีเมลของคุณ");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    const normalizedEmail = email.toLowerCase();
+    console.log("Sending reset link to email:", normalizedEmail);
+
+    try {
+      // ส่งคำขอไปยัง backend เพื่อเช็คอีเมล
+      const response = await axios.post('http://localhost:5000/api/forget-password', { email: normalizedEmail });
+
+      setSnackbarMessage(response.data.message || "ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
+      setOpenSnackbar(true);
+
+      setTimeout(() => {
+        router.push(`/forget_password/Combined?email=${email}`);
+      }, 1500);
+
+    } catch (error) {
+      console.error("Error:", error.response?.data);
+
+      // ตรวจสอบว่ามีข้อความ error หรือไม่
+      const errorMessage = error.response?.data?.message || "ไม่สามารถส่งลิงค์รีเซ็ตรหัสผ่านได้";
+      setSnackbarMessage(errorMessage);
       setOpenSnackbar(true);
     }
   };
-  
+
+
   return (
     <div className="app">
       <main className="content">
