@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 
-const promotionSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    description: String,
-    status: { type: String, enum: ["online", "offline"], default: "offline" },
-    startdate: Date,
-    enddate: Date,
-    sale: String,
-    free: String,
+const PromotionSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  status: { type: String, enum: ["online", "offline"], default: "online" },
+  startdate: { type: Date, required: true },
+  enddate: { type: Date },
+  sale: { type: Number, required: true },
+  free: { type: String, required: true },
 });
 
-const Promotion = mongoose.model("Promotion", promotionSchema);
-module.exports = Promotion;
+module.exports = mongoose.models.Promotion || mongoose.model("Promotion", PromotionSchema);
