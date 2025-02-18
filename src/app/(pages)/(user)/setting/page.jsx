@@ -179,36 +179,37 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    const tokenData = JSON.parse(localStorage.getItem('token'));
+    const tokenData = JSON.parse(localStorage.getItem("token"));
     const token = tokenData ? tokenData.token : null;
 
     if (!token || Date.now() > tokenData?.expirationTime) {
-      console.log("Token is missing or expired.");
+      console.log("❌ Token is missing or expired.");
       setError("Token is missing or expired. Please log in again.");
       setLoading(false);
-      return; // ถ้า token หายไปหรือหมดอายุ จะไม่ดำเนินการต่อ
+      return;
     } else {
-      console.log("Token is valid:", token);
+      console.log("✅ Token is valid:", token);
 
       const fetchUserData = async () => {
-        setLoading(true); // เริ่มโหลดข้อมูล
+        setLoading(true);
         try {
           const res = await axios.get("http://localhost:5000/api/users/me", {
             headers: {
-              Authorization: `Bearer ${token}`, // ใช้ token ที่ได้จาก localStorage
+              Authorization: `Bearer ${token}`,
             },
           });
 
-          setProfileData(res.data); // Set profile data เมื่อดึงข้อมูลสำเร็จ
+          console.log("✅ User data received:", res.data);
+          setProfileData(res.data);
         } catch (error) {
-          console.error("Error fetching user data:", error.response?.data || error.message);
+          console.error("🚨 Error fetching user data:", error.response?.data || error.message);
           setError(error.response?.data?.message || "Failed to load profile");
         } finally {
-          setLoading(false); // ปิดการโหลดข้อมูลเมื่อเสร็จ
+          setLoading(false);
         }
       };
 
-      fetchUserData(); // เรียกฟังก์ชันดึงข้อมูล
+      fetchUserData();
     }
   }, []); // ขึ้นอยู่กับค่าที่เก็บใน localStorage
 
