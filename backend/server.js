@@ -27,6 +27,7 @@ const authenticate = (req, res, next) => {
   }
 
   try {
+    console.log("🔹 Received Token:", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("🔹 Decoded JWT:", decoded);
 
@@ -46,6 +47,251 @@ const authenticate = (req, res, next) => {
     return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
+
+// ✅ สร้าง Owner ใหม่ โดยต้องเป็น Admin เท่านั้น
+app.post("/api/owners", authenticate, async (req, res) => {
+  try {
+    const { name, email, password, phoneNumber } = req.body; // รับ phoneNumber จาก body
+    const adminId = req.user.userId; // ดึงจาก JWT
+
+    // ตรวจสอบว่า admin มีสิทธิ์หรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied: Only admins can create owners" });
+    }
+
+    // ตรวจสอบว่าอีเมลนี้ถูกใช้แล้วหรือไม่
+    const existingOfficerByEmail = await User.findOne({ email });
+    if (existingOfficerByEmail) {
+      return res.status(400).json({ error: "Email is already registered" });
+    }
+
+    // ตรวจสอบว่า username นี้ถูกใช้แล้วหรือไม่
+    const existingOfficerByUsername = await User.findOne({ username: name });
+    if (existingOfficerByUsername) {
+      return res.status(400).json({ error: "Username is already taken" });
+    }
+
+    // Hash รหัสผ่านก่อนบันทึก
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // สร้าง Owner ใหม่
+    const newOwner = new User({
+      username: name,
+      email,
+      password: hashedPassword,
+      role: "owner",
+      phoneNumber: phoneNumber, // เพิ่มฟิลด์นี้ในข้อมูลที่บันทึก
+      adminId,
+      createdAt: new Date(),
+    });
+
+    await newOwner.save();
+    res.status(201).json(newOwner);
+  } catch (error) {
+    console.error("Error creating owner:", error);
+    res.status(500).json({ error: "Failed to create owner" });
+  }
+});
+
+// ✅ ดึง Owner ทั้งหมดที่อ้างอิง adminId (Admin เท่านั้น)
+app.get("/api/owners", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
+  try {
+    const adminId = req.user.userId; // ดึงจาก JWT
+
+    // ตรวจสอบสิทธิ์ว่าเป็น admin จริงหรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    const owners = await User.find({ adminId });
+    res.status(200).json(owners);
+  } catch (error) {
+    console.error("Error fetching owners:", error);
+    res.status(500).json({ error: "Failed to fetch owners" });
+  }
+});
+
+// ✅ อัปเดตข้อมูล Owner (Admin เท่านั้น)
+app.put("/api/owners/:ownerId", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
+  try {
+    const { ownerId } = req.params;
+    const updates = req.body;
+    const adminId = req.user.userId;
+
+    // ตรวจสอบสิทธิ์ว่าเป็น Admin จริงหรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    // ตรวจสอบว่า ownerId มีอยู่จริงและเป็นของ admin นี้หรือไม่
+    const owner = await User.findOne({ _id: ownerId, adminId });
+    if (!owner) {
+      return res.status(404).json({ error: "Owner not found or unauthorized" });
+    }
+
+    // อัปเดตข้อมูล Owner
+    Object.assign(owner, updates);
+    await owner.save();
+
+    res.status(200).json(owner);
+  } catch (error) {
+    console.error("Error updating owner:", error);
+    res.status(500).json({ error: "Failed to update owner" });
+  }
+});
+
+// ✅ Route สำหรับลบ Owner
+app.delete("/api/owners/:id", authenticate, async (req, res) => {
+  try {
+    const adminId = req.user.userId; // ดึง adminId จาก JWT token ที่ตรวจสอบแล้ว
+
+    // ตรวจสอบว่า user ที่ส่งคำขอมีสิทธิ์เป็น admin หรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    const ownerId = req.params.id;
+
+    // ลบข้อมูล Owner โดยใช้ ID
+    const owner = await User.findByIdAndDelete(ownerId);
+    if (!owner) {
+      return res.status(404).json({ error: "Owner not found" });
+    }
+
+    // ส่ง response กลับเมื่อการลบสำเร็จ
+    res.status(200).json({ message: "Owner deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting owner:", error);
+    res.status(500).json({ error: "Failed to delete owner" });
+  }
+});
+
+// ✅ สร้าง Officer ใหม่ โดยต้องมี ownerId จาก owner
+app.post("/api/officers", authenticate, async (req, res) => {
+  try {
+    const { name, email, password, phoneNumber } = req.body;
+    const ownerId = req.user.userId; // ดึง ownerId จาก JWT
+
+    // ตรวจสอบว่า user เป็น owner หรือไม่
+    const owner = await User.findById(ownerId);
+    if (!owner || owner.role !== "owner") {
+      return res.status(403).json({ error: "Permission denied: Only owners can create officers" });
+    }
+
+    // ตรวจสอบว่าอีเมลนี้ถูกใช้แล้วหรือไม่
+    const existingOfficerByEmail = await User.findOne({ email });
+    if (existingOfficerByEmail) {
+      return res.status(400).json({ error: "Email is already registered" });
+    }
+
+    // ตรวจสอบว่า username นี้ถูกใช้แล้วหรือไม่
+    const existingOfficerByUsername = await User.findOne({ username: name });
+    if (existingOfficerByUsername) {
+      return res.status(400).json({ error: "Username is already taken" });
+    }
+    
+    // Hash รหัสผ่านก่อนบันทึก
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // สร้าง Officer ใหม่
+    const newOfficer = new User({
+      username: name,
+      email,
+      password: hashedPassword,
+      role: "officer",
+      phoneNumber: phoneNumber,
+      ownerId,  // เก็บ ownerId ใน officer
+      createdAt: new Date(),
+    });
+
+    await newOfficer.save();
+    res.status(201).json(newOfficer);
+  } catch (error) {
+    console.error("Error creating officer:", error);
+    res.status(500).json({ error: "Failed to create officer" });
+  }
+});
+
+// ✅ ดึง Officer ทั้งหมดโดยอ้างอิง ownerId
+app.get("/api/officers", authenticate, async (req, res) => {
+  try {
+    const ownerId = req.user.userId; // ดึงจาก JWT 
+
+    // ตรวจสอบว่าเป็น owner หรือไม่
+    const owner = await User.findById(ownerId);
+    if (!owner || owner.role !== "owner") {
+      return res.status(403).json({ error: "Permission denied: Only owners can fetch officers" });
+    }
+
+    const officers = await User.find({ ownerId });
+    res.status(200).json(officers);
+  } catch (error) {
+    console.error("Error fetching officers:", error);
+    res.status(500).json({ error: "Failed to fetch officers" });
+  }
+});
+
+// ✅ อัปเดตข้อมูล Officer
+app.put("/api/officers/:officerId", authenticate, async (req, res) => {
+  try {
+    const { officerId } = req.params;
+    const updates = req.body;
+    const ownerId = req.user.userId; // ดึง ownerId จาก JWT
+
+    // ตรวจสอบว่าเป็น owner หรือไม่
+    const owner = await User.findById(ownerId);
+    if (!owner || owner.role !== "owner") {
+      return res.status(403).json({ error: "Permission denied: Only owners can update officers" });
+    }
+
+    // ตรวจสอบว่า officerId นี้ถูกอ้างอิงกับ ownerId หรือไม่
+    const officer = await User.findOne({ _id: officerId, ownerId });
+    if (!officer) {
+      return res.status(404).json({ error: "Officer not found or unauthorized" });
+    }
+
+    // อัปเดตข้อมูล Officer
+    Object.assign(officer, updates);
+    await officer.save();
+
+    res.status(200).json(officer);
+  } catch (error) {
+    console.error("Error updating officer:", error);
+    res.status(500).json({ error: "Failed to update officer" });
+  }
+});
+
+// ✅ ลบ Officer
+app.delete("/api/officers/:officerId", authenticate, async (req, res) => {
+  try {
+    const { officerId } = req.params;
+    const ownerId = req.user.userId; // ดึง ownerId จาก JWT
+
+    // ตรวจสอบว่าเป็น owner หรือไม่
+    const owner = await User.findById(ownerId);
+    if (!owner || owner.role !== "owner") {
+      return res.status(403).json({ error: "Permission denied: Only owners can delete officers" });
+    }
+
+    // ตรวจสอบว่า officerId นี้ถูกอ้างอิงกับ ownerId หรือไม่
+    const officer = await User.findOne({ _id: officerId, ownerId });
+    if (!officer) {
+      return res.status(404).json({ error: "Officer not found or unauthorized" });
+    }
+
+    // ลบ Officer
+    await officer.deleteOne();
+
+    res.status(200).json({ message: "Officer deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting officer:", error);
+    res.status(500).json({ error: "Failed to delete officer" });
+  }
+});
 
 // ใช้ route ที่ต้องการ authentication
 app.get("/api/users/me", authenticate, async (req, res) => {
@@ -74,7 +320,7 @@ app.get("/api/users/me", authenticate, async (req, res) => {
 app.put("/api/users/me", authenticate, async (req, res) => {
   try {
     console.log("Request Body:", req.body);
-    const userId = req.user.id; // ดึง user ID จาก token
+    const userId = req.user.userId; // ดึง user ID จาก token
     // ค้นหาผู้ใช้
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
