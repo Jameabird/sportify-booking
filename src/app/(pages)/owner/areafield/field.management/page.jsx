@@ -73,8 +73,8 @@ const CourtManagement = () => {
     };
 
     const handleDelete = () => {
-        if (selectedBuilding) {
-            setCourtData(courtData.filter((court) => court.id !== selectedBuilding.id));
+        if (selectedCourt) {
+            setCourtData(courtData.filter((court) => court.id !== selectedCourt.id));
             handleClose();
         }
     };
@@ -98,19 +98,19 @@ const CourtManagement = () => {
     });
 
     const handleModalOpen = (court) => {
+        if (!court) return;
+        setSelectedCourt(court);
         setFormData({
             building: court.building || "",
             courtsCount: court.courtsCount || "",
             courtType: court.type || "",
             price: court.price || "",
             open: court.open || "",
-            close: court.close || ""
+            close: court.close || "",
         });
-        setSelectedBuilding(court); // ต้องเซ็ตตัวที่กำลังแก้ไข
         setOpenModal(true);
-        handleMenuClose(); // ปิดเมนูก่อน
     };
-    
+
 
     const handleModalClose = () => {
         setOpenModal(false);
@@ -125,21 +125,28 @@ const CourtManagement = () => {
     };
 
     const handleSubmit = () => {
-        if (!selectedBuilding) {
+        if (!selectedCourt) {
             console.error("No building selected for update.");
             return;
         }
-    
+
         setCourtData((prevData) =>
             prevData.map((court) =>
-                court.id === selectedBuilding.id
+                court.id === selectedCourt.id
                     ? { ...court, ...formData }
                     : court
             )
         );
-        handleModalClose(); // ปิด Modal
-        setIsPopupVisible(true); // แสดง Popup แจ้งเตือน
-    };    
+
+        handleModalClose();
+        setIsPopupVisible(true);
+
+        // ปิด popup อัตโนมัติ
+        setTimeout(() => {
+            setIsPopupVisible(false);
+        }, 2000);
+    };
+
 
     if (!isClient) {
         return null; // Render nothing until client-side
@@ -262,23 +269,14 @@ const CourtManagement = () => {
                                             </Button>
                                         </TableCell>
 
-                                        {/* ปุ่มแก้ไข */}
-                                        <IconButton
-                                            color="primary"
-                                            className={styles.iconButton}
-                                            onClick={(event) => handleMenuOpen(event, court)}
-                                        >
-                                            <Edit />
-                                        </IconButton>
-
-                                        {/* ปุ่มลบ */}
-                                        <IconButton
-                                            color="error"
-                                            className={styles.iconButton}
-                                            onClick={() => handleClickOpen(court)}
-                                        >
-                                            <Delete />
-                                        </IconButton>
+                                        <TableCell align="center">
+                                            <IconButton color="primary" onClick={(event) => handleMenuOpen(event, court)}>
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton color="error" onClick={() => handleClickOpen(court)}>
+                                                <Delete />
+                                            </IconButton>
+                                        </TableCell>
 
                                         <Menu
                                             anchorEl={anchorEl}
@@ -292,7 +290,7 @@ const CourtManagement = () => {
                                                     <TextField
                                                         label="Building"
                                                         name="building"
-                                                        value={formData.building}
+                                                        value={formData.building || ""}
                                                         onChange={handleChange}
                                                         fullWidth
                                                         margin="normal"
@@ -300,28 +298,16 @@ const CourtManagement = () => {
                                                     <TextField
                                                         label="Courts Count"
                                                         name="courtsCount"
-                                                        value={formData.courtsCount}
+                                                        value={formData.courtsCount || ""}
                                                         onChange={handleChange}
                                                         fullWidth
                                                         margin="normal"
                                                         type="number"
                                                     />
-                                                    <FormControl fullWidth margin="normal">
-                                                        <InputLabel>ประเภทสนาม</InputLabel>
-                                                        <Select
-                                                            name="courtType"
-                                                            value={formData.courtType}
-                                                            onChange={handleChange}
-                                                        >
-                                                            <MenuItem value="indoor">สนามแบดมินตัน</MenuItem>
-                                                            <MenuItem value="outdoor">สนามฟุตบอล</MenuItem>
-                                                            <MenuItem value="synthetic">สนามเทนนิส</MenuItem>
-                                                        </Select>
-                                                    </FormControl>
                                                     <TextField
                                                         label="Price"
                                                         name="price"
-                                                        value={formData.price}
+                                                        value={formData.price || ""}
                                                         onChange={handleChange}
                                                         fullWidth
                                                         margin="normal"
@@ -330,7 +316,7 @@ const CourtManagement = () => {
                                                     <TextField
                                                         label="Open"
                                                         name="open"
-                                                        value={formData.open}
+                                                        value={formData.open || ""}
                                                         onChange={handleChange}
                                                         fullWidth
                                                         margin="normal"
@@ -339,7 +325,7 @@ const CourtManagement = () => {
                                                     <TextField
                                                         label="Close"
                                                         name="close"
-                                                        value={formData.close}
+                                                        value={formData.close || ""}
                                                         onChange={handleChange}
                                                         fullWidth
                                                         margin="normal"
