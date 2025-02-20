@@ -355,6 +355,9 @@ tbody tr:nth-child(even) {
 }
 
 .flex-row-button { 
+  margin-top: 50px;
+  margin-bottom: 10px;
+  margin-left: 10px;
   background-color: rgb(17, 108, 255);   
   border-radius: 8px;
   padding: 8px 16px;
