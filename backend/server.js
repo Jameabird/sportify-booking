@@ -331,8 +331,6 @@ app.put("/api/users/me", authenticate, async (req, res) => {
       "lastName",
       "bank",
       "accountNumber",
-      "bankImage",
-      "profileImage",
     ];
     allowedFields.forEach((field) => {
       if (req.body[field] !== undefined) {
@@ -350,7 +348,7 @@ app.put("/api/users/me", authenticate, async (req, res) => {
 
 app.put("/api/users/me/reset-password", authenticate, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const { oldPassword, newPassword, confirmPassword } = req.body;
 
     // ค้นหาผู้ใช้

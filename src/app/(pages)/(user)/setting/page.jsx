@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Avatar, TextField, Button, IconButton, Typography, Select, MenuItem, FormControl, InputLabel, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import TopBar_User from "../../components/Topbar_User";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -19,7 +18,6 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [profileImage, setProfileImage] = useState("/default-profile.png");
   const [openDialog, setOpenDialog] = useState(false);
   const handleChangePasswordClick = () => setIsChangingPassword(true);
   const [dialogMessage, setDialogMessage] = useState("");  // เพิ่ม state สำหรับข้อความใน Dialog
@@ -35,7 +33,7 @@ export default function Profile() {
     const token = tokenData ? tokenData.token : null;
 
     const updatedData = {};
-    ["username", "phoneNumber", "firstName", "lastName", "accountNumber", "bank", "bankAccountImage", "profileImage"].forEach((field) => {
+    ["username", "phoneNumber", "firstName", "lastName", "accountNumber", "bank"].forEach((field) => {
       if (profileData[field] !== undefined) { // ✅ ส่งค่าที่เป็น "" ไปด้วย
         updatedData[field] = profileData[field];
       }
@@ -151,33 +149,6 @@ export default function Profile() {
     setOpenDialog(false);
   };
 
-  // Function to handle the profile image change
-  const handleProfileImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Function to handle the bank account image change
-  const handleBankAccountImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileData((prevState) => ({
-          ...prevState,
-          bankAccountImage: reader.result, // Store the uploaded image
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem("token"));
     const token = tokenData ? tokenData.token : null;
@@ -227,33 +198,10 @@ export default function Profile() {
         <Box className="profile-box">
           {!isChangingPassword ? (
             <>
-              <Box position="relative" textAlign="center" mb={2}>
-                <Avatar
-                  src={profileImage}
-                  alt="Profile Picture"
-                  className="avatar-style"
-                />
-                {isEditing && (
-                  <IconButton
-                    color="primary"
-                    className="avatar-edit-button"
-                    onClick={() => document.getElementById("profile-image-input").click()}
-                  >
-                    <CameraAltIcon />
-                  </IconButton>
-                )}
-                <input
-                  id="profile-image-input"
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleProfileImageChange}
-                />
-              </Box>
               <Typography variant="h6" className="profile-title">
                 {isEditing ? "Edit Profile" : "Profile"}
               </Typography>
-
+  
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <TextField
                   label="Name"
@@ -281,7 +229,7 @@ export default function Profile() {
                   onChange={handleInputChange}
                   className="text-field"
                 />
-
+  
                 {/* Bank Information Section */}
                 <Typography variant="h8" className="bank-info-title">
                   Bank Information
@@ -332,46 +280,11 @@ export default function Profile() {
                     <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
                     <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
                     <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
-                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
                     <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
                     <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
                   </Select>
                 </FormControl>
-
-                {/* Bank Account Image (Always visible, allows upload even in view mode) */}
-                <Typography variant="body1" className="bank-image-title">
-                  Bank Account Image
-                </Typography>
-                <Box display="flex" justifyContent="center" alignItems="center" position="relative" textAlign="center" mb={2}>
-                  {profileData.bankImage ? (
-                    <Avatar
-                      src={`http://localhost:5000/uploads/bank/${profileData.bankImage}`} // ใช้ URL ที่ได้จาก backend
-                      alt="Bank Account"
-                      className="bank-account-image"
-                    />
-                  ) : (
-                    <Box className="no-image-box">
-                      <Typography variant="body2" className="no-image-text">No Image</Typography>
-                    </Box>
-                  )}
-                  {isEditing && (
-                    <IconButton
-                      color="primary"
-                      className="image-edit-button"
-                      onClick={() => document.getElementById("bank-account-image-input").click()}
-                    >
-                      <CameraAltIcon />
-                    </IconButton>
-                  )}
-                  <input
-                    id="bank-account-image-input"
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    onChange={handleBankAccountImageChange}
-                  />
-                </Box>
-
+  
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
                     <>
@@ -382,7 +295,7 @@ export default function Profile() {
                       >
                         Save
                       </Button>
-
+  
                       <Button
                         variant="contained"
                         color="error"
@@ -401,7 +314,7 @@ export default function Profile() {
                       >
                         Change Password
                       </Button>
-
+  
                       <Button
                         variant="contained"
                         color="error"
@@ -421,7 +334,7 @@ export default function Profile() {
                 <Typography variant="h6" className="change-password-title">
                   Change Password
                 </Typography>
-
+  
                 <TextField
                   label="Old Password"
                   type={showOldPassword ? "text" : "password"}
@@ -439,7 +352,7 @@ export default function Profile() {
                     ),
                   }}
                 />
-
+  
                 <TextField
                   label="New Password"
                   type={showNewPassword ? "text" : "password"}
@@ -457,7 +370,7 @@ export default function Profile() {
                     ),
                   }}
                 />
-
+  
                 <TextField
                   label="Confirm Password"
                   type={showConfirmPassword ? "text" : "password"}
@@ -475,9 +388,9 @@ export default function Profile() {
                     ),
                   }}
                 />
-
+  
                 {error && <Typography color="error" className="error-message">{error}</Typography>}
-
+  
                 {/* Change Password Button */}
                 <Button
                   variant="contained"
@@ -487,7 +400,7 @@ export default function Profile() {
                 >
                   Change Password
                 </Button>
-
+  
                 {/* Back to Setting Button */}
                 <Button
                   variant="contained"
@@ -503,7 +416,7 @@ export default function Profile() {
           )}
         </Box>
       </Box>
-
+  
       {/* Dialog for success/error */}
       <Dialog
         open={openDialog}
@@ -534,5 +447,5 @@ export default function Profile() {
         </DialogActions>
       </Dialog>
     </Box>
-  );
+  );  
 }
