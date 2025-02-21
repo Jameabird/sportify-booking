@@ -4,7 +4,6 @@ const cors = require("cors");
 require("dotenv").config();
 const User = require("./models/user");
 const bcrypt = require("bcryptjs");
-const multer = require("multer");
 const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้าง JWT token
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
@@ -17,7 +16,6 @@ app.use(
   })
 );
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 
 // Middleware สำหรับตรวจสอบ JWT
 const authenticate = (req, res, next) => {
@@ -403,26 +401,6 @@ app.put("/api/users/me/reset-password", authenticate, async (req, res) => {
 
 module.exports = app;
 
-// ตั้งค่าการอัปโหลด
-const upload = multer({
-  storage: multer.diskStorage({
-    // กำหนดที่จัดเก็บไฟล์ตามประเภทของฟิลด์
-    destination: (req, file, cb) => {
-      if (file.fieldname === "profileImage") {
-        cb(null, "uploads/profile");
-      } else if (file.fieldname === "bankImage") {
-        cb(null, "uploads/bank");
-      } else {
-        cb(new Error("Invalid field name"), false);
-      }
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + "-" + file.originalname); // ตั้งชื่อไฟล์เป็น timestamp และ originalname
-    },
-  }),
-  limits: { fileSize: 500 * 1024 * 1024 },
-});
-
 // ตั้งค่าการเชื่อมต่อกับ nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -441,14 +419,9 @@ mongoose
 // Route สำหรับการลงทะเบียน
 app.post(
   "/api/register",
-  upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "bankImage", maxCount: 1 },
-  ]),
   async (req, res) => {
     try {
       console.log("Received form data:", req.body);
-      console.log("Uploaded files:", req.files);
 
       const {
         username,
@@ -485,16 +458,6 @@ app.post(
           .json({ message: "Username หรือ email นี้ถูกใช้งานไปแล้ว" });
       }
 
-      // เช็คไฟล์อัปโหลด
-      const profileImage = req.files.profileImage
-        ? req.files.profileImage[0].path
-        : null;
-      const bankImage = req.files.bankImage
-        ? req.files.bankImage[0].path
-        : null;
-      console.log("profileImage path:", profileImage);
-      console.log("bankImage path:", bankImage);
-
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // สร้าง object สำหรับบันทึกข้อมูล
@@ -506,8 +469,6 @@ app.post(
         lastName: lastName || undefined, // ป้องกันการบันทึกค่าว่าง
         bank: bank || undefined,
         accountNumber: accountNumber || undefined, // ป้องกันการบันทึกค่าว่าง
-        profileImage,
-        bankImage,
         role,
       });
 
@@ -572,10 +533,6 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 app.post(
   "/api/google-login",
-  upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "bankImage", maxCount: 1 },
-  ]),
   async (req, res) => {
     const { token } = req.body;
 
@@ -609,24 +566,15 @@ app.post(
         return res.status(400).json({ message: "Email นี้เคยลงทะเบียนแบบปกติ กรุณาใช้วิธี login เดิม" });
       }
 
-      // ตรวจสอบการอัปโหลดไฟล์
-      const profileImage = req.files && req.files.profileImage ? req.files.profileImage[0].path : payload.picture || null;
-      const bankImage = req.files && req.files.bankImage ? req.files.bankImage[0].path : null;
-
-      console.log("profileImage path:", profileImage);
-      console.log("bankImage path:", bankImage);
-
       if (!user) {
         user = new User({
           username: payload.name || payload.email.split("@")[0],
           email: payload.email,
           firstName: payload.given_name || "",
-          lastName: payload.family_name || "Unknown",
-          profileImage: profileImage,  // ใช้ค่า profileImage ที่กำหนดไว้
-          bankImage,
+          lastName: payload.family_name || "",
           role: "user",
-          phoneNumber: "0000000000", // ใส่ค่าเริ่มต้นชั่วคราว
-          accountNumber: "Unknown", // ใส่ค่าเริ่มต้นชั่วคราว
+          phoneNumber: "", // ใส่ค่าเริ่มต้นชั่วคราว
+          accountNumber: "", // ใส่ค่าเริ่มต้นชั่วคราว
           password: "google-auth", // ใส่ค่าเริ่มต้นชั่วคราว (อาจใช้ Hashing ทีหลัง)
           authProvider: "google", // ระบุว่าผู้ใช้มาจาก Google Login
         });
@@ -818,13 +766,6 @@ app.get("/api/users", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
-
-// สร้างโฟลเดอร์ uploads ถ้ายังไม่มี
-const fs = require("fs");
-const uploadsDir = "./uploads";
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); // แจ้งเตือนเมื่อเซิร์ฟเวอร์เริ่มทำงาน
