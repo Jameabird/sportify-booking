@@ -1,40 +1,43 @@
 "use client";
 import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import MailIcon from "@mui/icons-material/Mail";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Owner = (props) => {
-  const [anchorEl, setAnchorEl] = useState(null); // State สำหรับเปิด/ปิดเมนู
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mailCount, setMailCount] = useState(3); // จำนวนข้อความใหม่
   const currentPath = usePathname();
   const router = useRouter();
 
-  // เปิดเมนูเมื่อคลิก Avatar
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // ปิดเมนู
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // ฟังก์ชันเปลี่ยนหน้า
   const navigateTo = (path) => {
     router.push(path);
     handleClose();
   };
 
+  const handleInboxClick = () => {
+    router.push("/owner/inbox");
+  };
+
   const getLinkStyle = (path) => ({
     padding: "0 15px",
-    color: currentPath === path ? "#1e40af" : props.textColor, // เปลี่ยนเป็นสีน้ำเงินถ้า path ตรงกับ currentPath
+    color: currentPath === path ? "#1e40af" : props.textColor,
     fontSize: "1.25rem",
     fontWeight: "bold",
     cursor: "pointer",
     textDecoration: "none",
     "&:hover": {
-      color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
+      color: "#1e40af",
     },
   });
 
@@ -43,11 +46,9 @@ const TopBar_Owner = (props) => {
     const role = localStorage.getItem("role");
 
     if (token && role) {
-      // ทำสิ่งที่ต้องการเช่นการเช็คสิทธิ์ของผู้ใช้ตาม role
       console.log("Token:", token);
       console.log("Role:", role);
     } else {
-      // หากไม่มี token หรือ role ก็อาจจะทำการรีไดเรกต์ไปยังหน้า login
       router.push("/login");
     }
   }, []);
@@ -89,6 +90,13 @@ const TopBar_Owner = (props) => {
         <Link href="/owner/history" style={getLinkStyle("/owner/history")}>
           History
         </Link>
+
+        {/* กล่องจดหมาย */}
+        <IconButton sx={{ padding: "0 10px" }} onClick={handleInboxClick}>
+          <Badge badgeContent={mailCount} color="error">
+            <MailIcon sx={{ color: props.textColor }} />
+          </Badge>
+        </IconButton>
 
         {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>

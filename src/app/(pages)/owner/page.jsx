@@ -59,14 +59,20 @@ export default function OwnerHome() {
           sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
         >
           {/* Category Buttons */}
-          {[
+          {[ 
             {
               title: "Management",
               buttons: [
                 { text: "Office Management", path: "/owner/management" },
                 { text: "Dashboard", path: "/owner/dashboard" },
-                { text: "New Field", path: "/owner/management.area" }, 
-                { text: "Field Management", path: "/owner/areafield" } // ✅ เพิ่มปุ่ม Field Management
+                { text: "New Field", path: "/owner/management.area" },
+                { text: "Field Management", path: "/owner/areafield" }, // ✅ เพิ่มปุ่ม Field Management
+              ],
+            },
+            {
+              title: "Messages",
+              buttons: [
+                { text: "Send Messages", path: "/owner/sendmessages" }, // New button for sending messages
               ],
             }
           ].map((category, categoryIndex) => (

@@ -87,19 +87,18 @@ const CourtManagement = () => {
     });
 
     const handleModalOpen = (court) => {
+        if (!court) return;
+        setSelectedCourt(court);
         setFormData({
             building: court.building || "",
             courtsCount: court.courtsCount || "",
             courtType: court.type || "",
             price: court.price || "",
             open: court.open || "",
-            close: court.close || ""
+            close: court.close || "",
         });
-        setSelectedBuilding(court); // ต้องเซ็ตตัวที่กำลังแก้ไข
         setOpenModal(true);
-        handleMenuClose(); // ปิดเมนูก่อน
     };
-
 
     const handleModalClose = () => {
         setOpenModal(false);
@@ -217,35 +216,6 @@ const CourtManagement = () => {
                                             <Dialog open={openModal} onClose={handleModalClose}>
                                                 <DialogTitle>แก้ไขข้อมูลอาคาร</DialogTitle>
                                                 <DialogContent>
-                                                    <TextField
-                                                        label="Building"
-                                                        name="building"
-                                                        value={formData.building}
-                                                        onChange={handleChange}
-                                                        fullWidth
-                                                        margin="normal"
-                                                    />
-                                                    <TextField
-                                                        label="Courts Count"
-                                                        name="courtsCount"
-                                                        value={formData.courtsCount}
-                                                        onChange={handleChange}
-                                                        fullWidth
-                                                        margin="normal"
-                                                        type="number"
-                                                    />
-                                                    <FormControl fullWidth margin="normal">
-                                                        <InputLabel>ประเภทสนาม</InputLabel>
-                                                        <Select
-                                                            name="courtType"
-                                                            value={formData.courtType}
-                                                            onChange={handleChange}
-                                                        >
-                                                            <MenuItem value="indoor">สนามแบดมินตัน</MenuItem>
-                                                            <MenuItem value="outdoor">สนามฟุตบอล</MenuItem>
-                                                            <MenuItem value="synthetic">สนามเทนนิส</MenuItem>
-                                                        </Select>
-                                                    </FormControl>
                                                     <TextField
                                                         label="Open"
                                                         name="open"

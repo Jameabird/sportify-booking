@@ -102,7 +102,7 @@ export default function Officer() {
               Management
             </Typography>
 
-            {/* ✅ แสดงแค่ "Field Management" */}
+            {/* Field Management */}
             <Box
               sx={{
                 backgroundColor: "rgba(0,123,255,0.9)",
@@ -125,6 +125,60 @@ export default function Officer() {
               onClick={() => handleNavigation("/officer/areafield")}
             >
               Field Management
+            </Box>
+          </Box>
+
+          {/* New "Messages" Section */}
+          <Box
+            sx={{
+              boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.6)",
+              borderRadius: "16px",
+              padding: "30px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 3,
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              width: "90%",
+              maxWidth: "500px",
+              transition: "0.3s ease-in-out",
+              "&:hover": { transform: "scale(1.02)" },
+            }}
+          >
+            <Typography
+              sx={{
+                color: "white",
+                fontSize: "1.8rem",
+                fontWeight: "bold",
+                textAlign: "center",
+                marginBottom: "10px",
+              }}
+            >
+              Messages
+            </Typography>
+
+            <Box
+              sx={{
+                backgroundColor: "rgba(0,123,255,0.9)",
+                padding: "16px 32px",
+                borderRadius: "12px",
+                color: "white",
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+                textAlign: "center",
+                cursor: "pointer",
+                transition: "0.3s",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
+                minWidth: "180px",
+                "&:hover": {
+                  backgroundColor: "rgba(0,123,255,1)",
+                  boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
+                  transform: "scale(1.05)",
+                },
+              }}
+              onClick={() => handleNavigation("/officer/sendmessages")}
+            >
+              Send Messages
             </Box>
           </Box>
         </Box>
