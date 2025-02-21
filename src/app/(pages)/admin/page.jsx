@@ -2,44 +2,43 @@
 import React from "react";
 import "@app/globals.css";
 import { Box, Typography } from "@mui/material";
-import { useRouter } from "next/navigation"; // ✅ นำเข้า useRouter
+import { useRouter } from "next/navigation";
 import TopBar_Admin from "@components/Topbar_Admin";
 
 // ** ข้อมูลหมวดหมู่และปุ่ม (รวม Promotion เข้า Management) **
 const adminCategories = [
   {
     title: "Financial Management",
-    buttons: ["Confirm Payment", "Refund"],
+    buttons: [
+      { text: "Confirm Payment", path: "/admin/areacomfirm" },
+      { text: "Refund", path: "/admin/arearefund" },
+    ],
   },
   {
     title: "Management",
-    buttons: ["Owner Management", "Report", "Promotion"], // ✅ เพิ่ม "Promotion" เข้า Management
+    buttons: [
+      { text: "Owner Management", path: "/admin/management" },
+      { text: "Report", path: "/admin/areareport" },
+      { text: "Promotion", path: "/admin/promotion" },
+    ],
+  },
+  {
+    title: "Messages",
+    buttons: [
+      { text: "Send Messages", path: "/admin/sendmessages" },
+    ],
   },
 ];
 
 // ** ปุ่มในแต่ละหมวด **
-const AdminButton = ({ text }) => {
-  const router = useRouter(); // ✅ ใช้ useRouter() เพื่อเปลี่ยนหน้า
+const AdminButton = ({ text, path }) => {
+  const router = useRouter();
 
-  // ✅ ฟังก์ชันกำหนดเส้นทาง
   const handleClick = () => {
-    if (text === "Owner Management") {
-      router.push("/admin/management"); // ✅ เปลี่ยนหน้าเมื่อกดปุ่ม "Owner Management"
-    }
-    if(text === "Confirm Payment"){
-      router.push("/admin/areacomfirm");
-    }
-    if(text === "Refund"){
-      router.push("/admin/arearefund");
-    }
-    if(text === "Report"){
-      router.push("/admin/areareport");
-    }
-    if(text === "Promotion"){
-      router.push("/admin/promotion");
+    if (path) {
+      router.push(path);
     }
   };
-  
 
   return (
     <Box
@@ -61,7 +60,7 @@ const AdminButton = ({ text }) => {
           transform: "scale(1.05)",
         },
       }}
-      onClick={handleClick} // ✅ กำหนด event onClick
+      onClick={handleClick}
     >
       {text}
     </Box>
@@ -72,7 +71,12 @@ export default function AdminHome() {
   return (
     <div
       className="app"
-      style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        overflow: "hidden",
+      }}
     >
       <main
         className="content"
@@ -113,11 +117,18 @@ export default function AdminHome() {
         {/* Admin Dashboard Container */}
         <Box
           display="flex"
-          flexDirection="column"
-          alignItems="center"
+          flexDirection="row"
+          flexWrap="wrap" // ทำให้หมวดหมู่แสดงในแถว
+          alignItems="flex-start"
           justifyContent="center"
-          gap={6}
-          sx={{ position: "relative", zIndex: 1, height: "100%", overflow: "hidden" }}
+          gap={4}
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            height: "100%",
+            overflow: "hidden",
+            padding: { xs: "20px", sm: "40px" }, // Responsive padding for smaller screens
+          }}
         >
           {adminCategories.map((category, categoryIndex) => (
             <Box
@@ -131,7 +142,7 @@ export default function AdminHome() {
                 alignItems: "center",
                 gap: 3,
                 backgroundColor: "rgba(0, 0, 0, 0.6)",
-                width: "90%",
+                width: { xs: "100%", sm: "45%", md: "30%" }, // ปรับความกว้างตามขนาดหน้าจอ
                 maxWidth: "550px",
                 transition: "0.3s ease-in-out",
                 "&:hover": { transform: "scale(1.02)" },
@@ -148,9 +159,17 @@ export default function AdminHome() {
               >
                 {category.title}
               </Typography>
-              <Box display="flex" flexWrap="wrap" gap={2} justifyContent="center">
-                {category.buttons.map((text, index) => (
-                  <AdminButton key={index} text={text} />
+              <Box
+                display="flex"
+                flexWrap="wrap"
+                gap={2}
+                justifyContent="center"
+                sx={{
+                  padding: { xs: "0 10px", sm: "0 20px" }, // Responsive padding for button container
+                }}
+              >
+                {category.buttons.map((button, index) => (
+                  <AdminButton key={index} text={button.text} path={button.path} />
                 ))}
               </Box>
             </Box>

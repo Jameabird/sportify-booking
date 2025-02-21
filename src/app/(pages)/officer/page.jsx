@@ -62,15 +62,16 @@ export default function Officer() {
         {/* Admin Dashboard Container */}
         <Box
           display="flex"
-          flexDirection="column"
-          alignItems="center"
           justifyContent="center"
+          alignItems="center"
           gap={6}
           sx={{
             position: "relative",
             zIndex: 1,
             height: "100%",
             overflow: "hidden",
+            flexDirection: "row", // Change to row for horizontal layout
+            padding: "20px", // Optional padding for spacing between sections
           }}
         >
           {/* Management Section */}
