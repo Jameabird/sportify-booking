@@ -2,7 +2,7 @@
 import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Admin = (props) => {
@@ -37,6 +37,26 @@ const TopBar_Admin = (props) => {
       color: "#1e40af", // เปลี่ยนสีตอน hover ให้เป็นสีน้ำเงิน
     },
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      // ทำสิ่งที่ต้องการเช่นการเช็คสิทธิ์ของผู้ใช้ตาม role
+      console.log("Token:", token);
+      console.log("Role:", role);
+    } else {
+      // หากไม่มี token หรือ role ก็อาจจะทำการรีไดเรกต์ไปยังหน้า login
+      router.push("/login");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    router.push("/login");
+  };
 
   return (
     <Box
@@ -94,7 +114,7 @@ const TopBar_Admin = (props) => {
         <MenuItem onClick={() => navigateTo("/admin/setting")}>
           <Typography variant="body1">Settings</Typography>
         </MenuItem>
-        <MenuItem onClick={() => navigateTo("/login")}>
+        <MenuItem onClick={handleLogout}>
           <Typography variant="body1">Sign Out</Typography>
         </MenuItem>
       </Menu>
