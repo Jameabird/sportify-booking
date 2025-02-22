@@ -5,7 +5,7 @@ import "@app/(pages)/admin/promotion/CssPromotion.css";
 
 import { usePromotion } from "@/app/(pages)/admin/promotion/Promotion";
 import PromotionTable from "@/app/(pages)/admin/promotion/PromotionTable";
-import PromotionForm from "@/app/(pages)/admin/promotion/PromotionForm"; // เพิ่มการนำเข้าไฟล์ PromotionForm
+import PromotionForm from "@/app/(pages)/admin/promotion/PromotionForm"; 
 
 const TopBar_Admin = dynamic(() => import("@components/Topbar_Admin"), {
   ssr: false,
@@ -30,9 +30,7 @@ const PromotionPageAdmin = () => {
     <>
       <TopBar_Admin textColor="black" />
       <button className="flex-row-button" onClick={() => setShowModal(true)}>+ Add Promotion</button>
-      <PromotionTable promotions={promotionsData} handleEdit={handleEdit} handleDelete={handleDelete} />
-      
-      {/* ใช้ PromotionForm แทน PromotionModal */}
+      <PromotionTable promotions={promotionsData} handleEdit={handleEdit} handleDelete={handleDelete} />  
       {showModal && (
         <PromotionForm
           newPromotions={newPromotions}
