@@ -49,17 +49,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: 10,
   },
-  profileImage: {
-    type: String,
-  },
-  bankImage: {
-    type: String,
-    default: "",
-  },
   phoneNumber: {
     type: String,
     match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'],
-    minlength: 10,
     maxlength: 10,
     required: false,
   },
