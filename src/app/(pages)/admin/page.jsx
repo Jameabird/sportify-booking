@@ -118,18 +118,19 @@ export default function AdminHome() {
         <Box
           display="flex"
           flexDirection="row"
-          flexWrap="wrap" // ทำให้หมวดหมู่แสดงในแถว
-          alignItems="flex-start"
-          justifyContent="center"
+          flexWrap="wrap"
+          alignItems="center" // จัดให้อยู่กึ่งกลางในแนวตั้ง
+          justifyContent="center" // จัดให้อยู่กึ่งกลางในแนวนอน
           gap={4}
           sx={{
             position: "relative",
             zIndex: 1,
             height: "100%",
             overflow: "hidden",
-            padding: { xs: "20px", sm: "40px" }, // Responsive padding for smaller screens
+            padding: { xs: "20px", sm: "40px" }, // Responsive padding
           }}
         >
+
           {adminCategories.map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
