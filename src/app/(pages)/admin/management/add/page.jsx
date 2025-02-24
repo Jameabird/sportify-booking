@@ -63,8 +63,8 @@ export default function AddAccountPage() {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/owners", // เพิ่ม /api เพื่อให้เชื่อมต่อกับ backend ได้ถูกต้อง
-        formData, // ตรวจสอบให้แน่ใจว่า formData รวมถึง phoneNumber
+        "http://localhost:5000/api/owners", 
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -89,7 +89,7 @@ export default function AddAccountPage() {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -101,86 +101,84 @@ export default function AddAccountPage() {
 
   return (
     <>
-      <Box display="flex" flexDirection="column" height="100vh" width="100vw" sx={{ backgroundColor: "#f7fafc", position: "relative", overflow: "hidden" }}>
+      <Box sx={{ backgroundColor: "#f7fafc", minHeight: "100vh" }}>
         <TopBar_Admin />
 
-        <div className="flex flex-col items-center justify-between min-h-screen bg-gray-100 p-6">
-          <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md overflow-hidden flex-grow">
-            <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">Add New Account</h2>
+        <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-xl mt-12">
+          <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">Add New Account</h2>
 
-            <div className="space-y-5">
-              <div>
-                <label className="block text-lg font-medium text-gray-600">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-600">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-600">Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-600">Phone Number</label>
-                <input
-                  type="text"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-lg font-medium text-gray-600">Role</label>
-                <input
-                  type="text"
-                  name="role"
-                  value={formData.role}
-                  readOnly
-                  className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 focus:outline-none"
-                />
-              </div>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={handleSave}
-                className="bg-blue-600 text-white px-5 py-3 rounded-lg w-1/2 mr-2 hover:bg-blue-700 transition ease-in-out"
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save"}
-              </button>
-
-              <button
-                onClick={() => router.push("/admin/management")}
-                className="bg-red-600 text-white px-5 py-3 rounded-lg w-1/2 hover:bg-red-700 transition ease-in-out"
-              >
-                Cancel
-              </button>
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Phone Number</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Role</label>
+              <input
+                type="text"
+                name="role"
+                value={formData.role}
+                readOnly
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-between mt-8">
+            <button
+              onClick={handleSave}
+              className="bg-blue-600 text-white px-5 py-3 rounded-lg w-1/2 mr-2 hover:bg-blue-700 transition ease-in-out"
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
+            </button>
+
+            <button
+              onClick={() => router.push("/admin/management")}
+              className="bg-red-600 text-white px-5 py-3 rounded-lg w-1/2 hover:bg-red-700 transition ease-in-out"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </Box>

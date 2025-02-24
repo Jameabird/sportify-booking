@@ -24,8 +24,6 @@ const RegisterPage = () => {
   const [bank, setBank] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [image, setImage] = useState(null);
-  const [bankImage, setBankImage] = useState(null); // State for the bank image
   const [username, setUsername] = useState(""); // เพิ่ม state สำหรับ username
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,13 +47,6 @@ const RegisterPage = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleBankImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setBankImage(file); // Set the selected bank image
-    }
-  };
-
   // ฟังก์ชันตรวจสอบรหัสผ่าน
   const validatePassword = (password) => {
     const passwordPattern =
@@ -73,53 +64,41 @@ const RegisterPage = () => {
     return true;
   };
 
-  // ฟังก์ชันเมื่อกด Register
   const handleRegister = async () => {
     if (!validateForm()) return;
-
+  
     if (!validatePassword(password)) {
       setSnackbarMessage("รหัสผ่านต้องมีตัวอักษรใหญ่, ตัวเลข, และตัวอักษรพิเศษ");
       setOpenSnackbar(true);
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setSnackbarMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
       setOpenSnackbar(true);
       return;
     }
-
+  
     try {
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("firstName", firstName);
-      formData.append("lastName", lastName);
-      formData.append("bank", bank);
-      formData.append("accountNumber", accountNumber);
-
-      if (image) {
-        formData.append("profileImage", image);
-      } else {
-        console.warn("⚠️ ไม่มีไฟล์ profileImage ถูกส่งไป");
-      }
-
-      if (bankImage) {
-        formData.append("bankImage", bankImage);
-      } else {
-        console.warn("⚠️ ไม่มีไฟล์ bankImage ถูกส่งไป");
-      }
-
-      // Log FormData ก่อนส่ง
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
-      const response = await axios.post("http://localhost:5000/api/register", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const userData = {
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        bank,
+        accountNumber,
+      };
+  
+      // Log user data before sending
+      console.log(userData);
+  
+      const response = await axios.post("http://localhost:5000/api/register", userData, {
+        headers: {
+          "Content-Type": "application/json", // Use JSON instead of FormData
+        },
       });
-
+  
       if (response.status === 201) {
         setSnackbarMessage("ลงทะเบียนสำเร็จ!");
         setOpenSnackbar(true);
@@ -132,15 +111,10 @@ const RegisterPage = () => {
       if (error.response) {
         console.error("❌ Error Response Data:", error.response.data);
         console.error("❌ Error Status Code:", error.response.status);
-
+  
+        // Check error message based on the status code
         if (error.response.status === 400) {
-          if (error.response.data.message === "Email already exists") {
-            setSnackbarMessage("อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น");
-          } else if (error.response.data.message) {
-            setSnackbarMessage(error.response.data.message);
-          } else {
-            setSnackbarMessage("เกิดข้อผิดพลาดในการลงทะเบียน");
-          }
+          setSnackbarMessage(error.response.data.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
         } else if (error.response.status === 500) {
           setSnackbarMessage("เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง");
         } else {
@@ -153,10 +127,10 @@ const RegisterPage = () => {
         console.error("❌ Unexpected Error:", error.message);
         setSnackbarMessage("เกิดข้อผิดพลาดที่ไม่รู้จัก");
       }
-
+  
       setOpenSnackbar(true);
     }
-  };
+  };  
 
   return (
     <div className="app">
@@ -295,28 +269,6 @@ const RegisterPage = () => {
                   value={accountNumber}
                   onChange={(e) => setAccountNumber(e.target.value)}
                 />
-                <Box sx={{ marginBottom: "16px" }}>
-                  <h3 className="register-title">Bank Image</h3>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBankImageChange} // Handle file change for bank image
-                    style={{ width: "100%" }}
-                  />
-                  {bankImage && typeof bankImage === "string" ? (
-                    <img
-                      src={`http://localhost:5000/${bankImage}`} // Load from the server
-                      alt="Bank Image"
-                      style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
-                    />
-                  ) : bankImage ? (
-                    <img
-                      src={URL.createObjectURL(bankImage)} // Preview image locally
-                      alt="Bank Image Preview"
-                      style={{ marginTop: "16px", maxWidth: "100%", height: "auto" }}
-                    />
-                  ) : null}
-                </Box>
                 <h3 style={{
                   color: "#d32f2f",
                   fontWeight: "bold",

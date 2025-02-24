@@ -112,12 +112,6 @@ export default function CourtList() {
       <Dialog open={openEdit} onClose={handleCloseEdit}>
         <DialogTitle>แก้ไขข้อมูลสนาม</DialogTitle>
         <DialogContent>
-          <TextField fullWidth margin="dense" label="Court Name" name="name" value={editCourt.name} onChange={handleChange} />
-          <TextField fullWidth select margin="dense" label="ประเภทสนาม" name="type" value={editCourt.type} onChange={handleChange}>
-            <MenuItem value="สนามแบดมินตัน">สนามแบดมินตัน</MenuItem>
-            <MenuItem value="สนามฟุตบอล">สนามฟุตบอล</MenuItem>
-            <MenuItem value="สนามเทนนิส">สนามเทนนิส</MenuItem>
-          </TextField>
           <TextField fullWidth margin="dense" label="Open Time" name="open" type="time" value={editCourt.open} onChange={handleChange} />
           <TextField fullWidth margin="dense" label="Close Time" name="close" type="time" value={editCourt.close} onChange={handleChange} />
         </DialogContent>
