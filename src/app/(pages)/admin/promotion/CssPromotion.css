@@ -42,11 +42,11 @@
 
 .flex-container {
  
-  gap: 4px; /* ระยะห่างระหว่าง elements */
+  gap: 4px; 
 }
 
 .flex-container label {
-  min-width: 30px; /* กำหนดความกว้างขั้นต่ำของ label */
+  min-width: 30px;
   text-align: right;
 }
 
@@ -54,13 +54,13 @@
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  flex: 1; /* ขยาย input ให้เต็มพื้นที่ที่เหลือ */
+  flex: 1; 
 }
 
 p {
   color:#666;
   margin: 0;
-  white-space: nowrap; /* ป้องกันข้อความขึ้นบรรทัดใหม่ */
+  white-space: nowrap;
 }
 
 .inputnumber {
@@ -72,12 +72,12 @@ p {
 }
 .container {
   display: flex;
-  align-items: center;  /* จัดให้อยู่ตรงกลางแนวแกนตั้ง */
+  align-items: center;  
 }
 
 .container label {
-  min-width: 80px; /* กำหนดความกว้างขั้นต่ำของ label */
-  text-align: left; /* จัดให้ข้อความอยู่ชิดซ้าย */
+  min-width: 80px;
+  text-align: left; 
 }
 
 .counter-button {
@@ -103,23 +103,23 @@ h3{
 
 input {
   min-width: 40px;
-  flex: 1; /* ให้ input กว้างเต็มที่ */
+  flex: 1; 
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   margin-bottom: 10px;
 }
 
-/* ปรับแต่ง input ของ DatePicker */
+
 .datepicker-input {
   width: 100px;
   padding: 10px;
-  border: 2px solid #a4a4a4; /* สีกรอบ */
+  border: 2px solid #a4a4a4; 
   border-radius: 8px;
   font-size: 12px;
   text-align: center;
-  background-color: #ffffff; /* สีพื้นหลัง */
-  color: #007bff; /* สีตัวอักษร */
+  background-color: #ffffff; 
+  color: #007bff; 
   outline: none;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -127,26 +127,25 @@ input {
 
 
 .datepicker-input::placeholder {
-  color: #007bff; /* สี placeholder */
+  color: #007bff;
 }
 
 .datepicker-input:focus {
-  border-color: #ffffff; /* สีกรอบเมื่อ focus */
+  border-color: #ffffff;
   box-shadow: 0 0 5px #007bff;
 }
 
-/* ปรับแต่งตัวปฏิทิน */
 .custom-calendar {
   font-family: "Arial", sans-serif;
-  background-color: #0956a8; /* สีพื้นหลัง */
-  color: #007bff; /* สีตัวอักษร */
+  background-color: #0956a8; 
+  color: #007bff;
   border-radius: 8px;
   border: 1px solid #007bff;
   overflow: hidden;
 }
 
 .react-datepicker__header {
-  background-color: #ffffff; /* สีหัวปฏิทิน */
+  background-color: #ffffff;
   border-bottom: 1px solid #444;
   padding: 10px 0;
   color: #007bff;
@@ -184,7 +183,7 @@ input {
 }
 
 .react-datepicker__day--today {
-  border: 1px solid #fff; /* วงกลมรอบวันที่ปัจจุบัน */
+  border: 1px solid #fff;
 }
 
 .react-datepicker__navigation {
@@ -195,7 +194,7 @@ input {
   font-size: 18px;
   color: #fff;
 }
-/* ปรับแต่ง header ของปฏิทิน */
+
 .custom-header {
   display: flex;
   justify-content: space-between;
@@ -207,7 +206,6 @@ input {
   font-weight: bold;
 }
 
-/* ปุ่มนำทาง */
 .navigation-button {
   background: none;
   border: none;
@@ -218,7 +216,7 @@ input {
 }
 
 .navigation-button:disabled {
-  color: #666; /* สีปุ่มที่ไม่สามารถกดได้ */
+  color: #666; 
   cursor: not-allowed;
 }
 
@@ -227,13 +225,13 @@ input {
 }
 
 .react-datepicker__current-month {
-  display: none; /* ซ่อนข้อความเดือนและปี */
+  display: none;
 }
 
 .checkbox-container {
 
   gap: 8px;
-  cursor: pointer; /* ✅ ทำให้คลิกง่ายขึ้น */
+  cursor: pointer; 
 }
 
 .checkbox-container input {
@@ -315,7 +313,6 @@ tbody tr:nth-child(even) {
   background-color: #dcedff;
 }
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 6px;
 } 
@@ -328,10 +325,10 @@ tbody tr:nth-child(even) {
 
 /* --------------- Search and Button Styles ---------------*/
 
-/* Search Box Layout */
+
 .search-box-wrapper {
   display: flex;
-  justify-content: flex-end;  /* ทำให้ช่องค้นหาอยู่ขวามือ */
+  justify-content: flex-end;  
   align-items: center;
 }
 
@@ -344,7 +341,12 @@ tbody tr:nth-child(even) {
   width: 200px;
   max-width: 300px;
 }
-
+.today-day {
+  border: 2px solid #007bff;
+  color: white; 
+  border-radius: 20%; 
+  font-weight: bold; 
+}
 
 .filter-and-search {
   display: flex;

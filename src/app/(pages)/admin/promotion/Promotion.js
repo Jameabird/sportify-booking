@@ -19,8 +19,7 @@ export const usePromotion = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    // ดึงข้อมูล promotions (สมมติเป็นค่าเริ่มต้น)
+  useEffect(() => {    
     setPromotionsData([
       { id: 1, name: "New Year Sale", description: "50% off", status: "Active", startdate: "2024-01-01", enddate: "2024-01-31", sale: "10", free: "5" },
     ]);
