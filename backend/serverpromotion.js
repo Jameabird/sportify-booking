@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const Promotion = require("./models/promotion.js");
+const Promotion = require("./models/Promotion.js");
 
 dotenv.config();
 
@@ -101,7 +101,7 @@ app.get("/api/promotions", async (req, res) => {
   
   
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT1 || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -33,7 +33,7 @@ const PromotionForm = ({ newPromotions, setNewPromotions, handleCancel }) => {
   const handleSubmit = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/promotions",
+        "http://localhost:5001/api/promotions",
         {
           name: newPromotions.name,
           description: newPromotions.description,

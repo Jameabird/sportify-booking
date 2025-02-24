@@ -11,7 +11,7 @@ const PromotionTable = () => {
 
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/promotions")
+    fetch("http://localhost:5001/api/promotions")
       .then((res) => res.json())
       .then((data) => setPromotions(data))
       .catch((err) => console.error("Error fetching promotions:", err));
