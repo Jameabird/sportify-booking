@@ -1,18 +1,23 @@
 "use client";
 import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import MailIcon from "@mui/icons-material/Mail";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const TopBar_Officer = (props) => {
   const [anchorEl, setAnchorEl] = useState(null); // สำหรับเปิด/ปิดเมนู Avatar
+  const [mailCount, setMailCount] = useState(0); // กำหนดค่าเริ่มต้นให้ mailCount
   const currentPath = usePathname();
   const router = useRouter();
 
   // เปิดเมนูเมื่อคลิก Avatar
   const handleAvatarClick = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleInboxClick = () => {
+    router.push("/officer/inbox");
   };
 
   // ปิดเมนู
@@ -50,6 +55,10 @@ const TopBar_Officer = (props) => {
       // หากไม่มี token หรือ role ก็อาจจะทำการรีไดเรกต์ไปยังหน้า login
       router.push("/login");
     }
+
+    // ตัวอย่างการดึงข้อมูล mailCount จาก API หรือ backend
+    // ตัวอย่างจำลองการตั้งค่า mailCount
+    setMailCount(5); // เช่นจำนวนอีเมลหรือการแจ้งเตือนที่ยังไม่ได้อ่าน
   }, []);
 
   const handleLogout = () => {
@@ -89,6 +98,13 @@ const TopBar_Officer = (props) => {
         <Link href="/officer/history" style={getLinkStyle("/officer/history")}>
           History
         </Link>
+
+        {/* กล่องจดหมาย */}
+        <IconButton sx={{ padding: "0 10px" }} onClick={handleInboxClick}>
+          <Badge badgeContent={mailCount} color="error">
+            <MailIcon sx={{ color: props.textColor }} />
+          </Badge>
+        </IconButton>
 
         {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>
