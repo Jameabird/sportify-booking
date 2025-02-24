@@ -18,9 +18,6 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log("MongoDB Connected to SE"))
 .catch(err => console.error(err));
 
-
-
-
 app.get("/api/promotions", async (req, res) => {
   try {
     const promotions = await Promotion.find();

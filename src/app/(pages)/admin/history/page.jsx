@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-// import styled from "styled-components"; /* npm install styled-components */
 import { users } from "@app/(pages)/admin/history/Users";
 import "@app/(pages)/admin/history/CssHistory.css";
 
