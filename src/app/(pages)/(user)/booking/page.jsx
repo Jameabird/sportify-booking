@@ -14,7 +14,7 @@ import {
   TextField,
   TablePagination,
   TableSortLabel,
-  Checkbox
+  Checkbox,
 } from "@mui/material";
 import { mockBuilding, mockDataCourt, mockCourt } from "./mockdata";
 import Header from "@components/Header";
@@ -27,7 +27,7 @@ import dayjs from "dayjs";
 import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
-import { Tab } from "bootstrap";
+import axios from "axios";
 
 const Booking = () => {
   const [buildingNames, setBuildingNames] = useState([]);
@@ -44,15 +44,51 @@ const Booking = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
 
-  const Table_BoxStyles = props => ({
+  const fetchdata = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/users`);
+      // setCourtData(response.data);
+      if (response.status === 200) {
+        console.table(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetchdata_updateuser = async () => {
+    try {
+      const data = {
+        user_id: "user1",
+        user_name: "new_name2",
+        user_email: "new_email",
+        user_password: "new_password",
+      };
+      const response = await axios.put(`http://localhost:3000/update/${data.user_id}`, data);
+      // setCourtData(response.data);
+      if (response.status === 200) {
+        console.table(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  
+  useEffect(() => {
+    fetchdata();
+    fetchdata_updateuser();
+  }, []);
+
+  const Table_BoxStyles = (props) => ({
     styletablehead: {
       // border: "1px solid #F2F0F0",
-      backgroundColor: "#C0E0FF"
+      backgroundColor: "#C0E0FF",
     },
     styletablebody: {
       // border: "1px solid #F2F0F0",
-      backgroundColor: props.rowIndex % 2 === 1 ? "#E6EFFA" : "#FFF"
-    }
+      backgroundColor: props.rowIndex % 2 === 1 ? "#E6EFFA" : "#FFF",
+    },
   });
 
   const sortedData = CourtData.sort((a, b) => {
@@ -85,7 +121,7 @@ const Booking = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  const handleSortRequest = column => {
+  const handleSortRequest = (column) => {
     const isAsc = orderBy === column && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(column);
@@ -97,67 +133,61 @@ const Booking = () => {
     }
   }, []);
 
-  useEffect(
-    () => {
-      if (getSearch) {
-        setCourtData([]);
-        setCourtNames([]);
-        const current = mockBuilding.find(
-          building => building.name === currentBuilding
-        );
+  useEffect(() => {
+    if (getSearch) {
+      setCourtData([]);
+      setCourtNames([]);
+      const current = mockBuilding.find(
+        (building) => building.name === currentBuilding
+      );
 
-        if (current && !current.booking) {
-          const nextAvailable = mockBuilding.find(building => building.booking);
+      if (current && !current.booking) {
+        const nextAvailable = mockBuilding.find((building) => building.booking);
 
-          if (nextAvailable) {
-            setCurrentBuilding(nextAvailable.name);
-          }
-        }
-
-        // Filter ข้อมูลจาก currentBuilding
-        if (currentCourt === "ALL") {
-          const filteredCoortData = mockDataCourt.filter(
-            item => item.building === currentBuilding
-          );
-          setCourtData(filteredCoortData);
-        } else {
-          const filteredCoortData = mockDataCourt.filter(
-            item =>
-              item.building === currentBuilding && item.name === currentCourt
-          );
-          setCourtData(filteredCoortData);
-        }
-
-        const filteredCoortName = mockCourt.filter(
-          item => item.building === currentBuilding
-        );
-
-        setCourtNames(filteredCoortName);
-        // console.log(filteredCoortName);
-        setSearch(false);
-      }
-    },
-    [currentBuilding, getSearch]
-  );
-
-  useEffect(
-    () => {
-      if (courtNames.length > 0) {
-        const current = courtNames.find(court => court.name === currentCourt);
-
-        if (current && !current.booking) {
-          const nextAvailable = courtNames.find(court => court.booking);
-
-          if (nextAvailable) {
-            setCurrentCourt(nextAvailable.name);
-          }
+        if (nextAvailable) {
+          setCurrentBuilding(nextAvailable.name);
         }
       }
-    },
-    [courtNames]
-  );
 
-  const changeDate = date => {
+      // Filter ข้อมูลจาก currentBuilding
+      if (currentCourt === "ALL") {
+        const filteredCoortData = mockDataCourt.filter(
+          (item) => item.building === currentBuilding
+        );
+        setCourtData(filteredCoortData);
+      } else {
+        const filteredCoortData = mockDataCourt.filter(
+          (item) =>
+            item.building === currentBuilding && item.name === currentCourt
+        );
+        setCourtData(filteredCoortData);
+      }
+
+      const filteredCoortName = mockCourt.filter(
+        (item) => item.building === currentBuilding
+      );
+
+      setCourtNames(filteredCoortName);
+      // console.log(filteredCoortName);
+      setSearch(false);
+    }
+  }, [currentBuilding, getSearch]);
+
+  useEffect(() => {
+    if (courtNames.length > 0) {
+      const current = courtNames.find((court) => court.name === currentCourt);
+
+      if (current && !current.booking) {
+        const nextAvailable = courtNames.find((court) => court.booking);
+
+        if (nextAvailable) {
+          setCurrentCourt(nextAvailable.name);
+        }
+      }
+    }
+  }, [courtNames]);
+
+  const changeDate = (date) => {
     // console.log(date);
     setSelectedDate(dayjs(date).format("DD-MM-YYYY"));
   };
@@ -167,7 +197,7 @@ const Booking = () => {
     onClick: () => setCurrentBuilding(val.name),
     label: val.name,
     icon: <MapsHomeWorkIcon />,
-    disabled: !val.booking
+    disabled: !val.booking,
   }));
 
   const itemsCourt = courtNames.map((val, index) => ({
@@ -175,7 +205,7 @@ const Booking = () => {
     onClick: () => setCurrentCourt(val.name),
     label: val.name,
     icon: <SportsTennisIcon />,
-    disabled: !val.booking
+    disabled: !val.booking,
   }));
 
   // console.log(CourtData);
@@ -188,7 +218,7 @@ const Booking = () => {
       <TopBar textColor={"black"} />
       <Box
         sx={{
-          height: "550px"
+          height: "550px",
         }}
       >
         <div
@@ -200,7 +230,7 @@ const Booking = () => {
             backgroundBlendMode: "multiply",
             opacity: 0.9,
             height: "550px",
-            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)"
+            boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
           }}
         >
           <main className="container">
@@ -219,7 +249,7 @@ const Booking = () => {
                       style={{
                         // textShadow: "2px 2px 4px #000000"
                         textShadow:
-                          "0 0 5px rgb(244, 216, 3),0 0 7px rgb(244, 216, 3)"
+                          "0 0 5px rgb(244, 216, 3),0 0 7px rgb(244, 216, 3)",
                       }}
                     >
                       {`${placeName} `}
@@ -228,7 +258,7 @@ const Booking = () => {
                       className="font-bold text-white text-2xl"
                       style={{
                         // textShadow: "2px 2px 4px #000000"
-                        textShadow: "0 0 5px #03e9f4,0 0 7px #03e9f4"
+                        textShadow: "0 0 5px #03e9f4,0 0 7px #03e9f4",
                       }}
                     >
                       {`${SportType} Booking`}
@@ -253,7 +283,7 @@ const Booking = () => {
                 padding: "5px",
                 backgroundColor: "white",
                 display: "flex",
-                boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)"
+                boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
               }}
             >
               <div className="pl-2 py-1">
@@ -297,9 +327,9 @@ const Booking = () => {
                 boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
                 color: "white",
                 "&:hover": {
-                  backgroundColor: "#2f6380"
+                  backgroundColor: "#2f6380",
                 },
-                textTransform: "none"
+                textTransform: "none",
               }}
               onClick={() => setSearch(true)}
             >
@@ -313,14 +343,14 @@ const Booking = () => {
             <Box
               sx={{
                 boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
-                borderRadius: "8px"
+                borderRadius: "8px",
               }}
             >
               <TableContainer
                 className="pt-1"
                 sx={{
                   boxShadow: "0px 8px 15px rgba(0, 0, 0, 0.2)",
-                  borderRadius: "8px"
+                  borderRadius: "8px",
                 }}
               >
                 <Table
@@ -330,7 +360,7 @@ const Booking = () => {
                 >
                   <TableHead>
                     <TableRow>
-                      {columns.map((column, index) =>
+                      {columns.map((column, index) => (
                         <TableCell
                           key={index}
                           align="center"
@@ -348,7 +378,7 @@ const Booking = () => {
                             fontWeight: "bold",
                             fontSize: "16px",
                             paddingLeft: "40px",
-                            backgroundColor: "#C0E0FF"
+                            backgroundColor: "#C0E0FF",
                           }}
                         >
                           <TableSortLabel
@@ -359,7 +389,7 @@ const Booking = () => {
                             {column}
                           </TableSortLabel>
                         </TableCell>
-                      )}
+                      ))}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -370,110 +400,111 @@ const Booking = () => {
                       )
                       .map((row, rowIndex) => {
                         const Table_Styles = Table_BoxStyles({
-                          rowIndex: rowIndex // Pass rowIndex here
+                          rowIndex: rowIndex, // Pass rowIndex here
                         });
 
                         const lastIndex = columns.length;
 
                         return (
                           <TableRow key={rowIndex}>
-                            {columns.map(
-                              (column, colIndex) =>
-                                column === "Select"
-                                  ? <TableCell
-                                      key={colIndex}
-                                      align="center"
-                                      // colSpan={2}
-                                      sx={{
-                                        ...Table_Styles.styletablebody,
-                                        "&.MuiTableCell-root": {
-                                          padding: 0.65,
-                                          margin: 0
-                                        }
-                                        // borderLeft: "1px solid #000",
-                                        // borderBottom:
-                                        //   rowIndex === lastIndex &&
-                                        //   "1px solid #000"
-                                      }}
-                                    >
-                                      <div className="text-base font-bold">
-                                        <Checkbox
-                                          disabled={!row.booking}
-                                          // checked={selectedDataBaking.includes(
-                                          //   rowIndex
-                                          // )}
-                                          // onChange={() =>
-                                          //   handleRowSelectBaking(
-                                          //     rowIndex,
-                                          //     row
-                                          //   )} // Handle row selection
-                                          // sx={{
-                                          //   color: selectedDataBaking.includes(
-                                          //     rowIndex
-                                          //   )
-                                          //     ? "#1FAB89"
-                                          //     : "grey",
-                                          //   "&.Mui-checked": {
-                                          //     color: "#1FAB89"
-                                          //   }
-                                          // }}
-                                        />
-                                      </div>
-                                    </TableCell>
-                                  : column === "Court"
-                                    ? <TableCell
-                                        key={colIndex}
-                                        align="center"
-                                        colSpan={2}
-                                        sx={{
-                                          ...Table_Styles.styletablebody,
-                                          "&.MuiTableCell-root": {
-                                            padding: 0.65,
-                                            margin: 0
-                                          }
-                                          // borderBottom:
-                                          //   rowIndex === lastIndex &&
-                                          //   "1px solid #000"
-                                        }}
-                                      >
-                                        {row.name}
-                                      </TableCell>
-                                    : column === "Price"
-                                      ? <TableCell
-                                          key={colIndex}
-                                          align="center"
-                                          colSpan={2}
-                                          sx={{
-                                            ...Table_Styles.styletablebody,
-                                            "&.MuiTableCell-root": {
-                                              padding: 0.65,
-                                              margin: 0
-                                            }
-                                            // borderBottom:
-                                            //   rowIndex === lastIndex &&
-                                            //   "1px solid #000"
-                                          }}
-                                        >
-                                          {row.price}
-                                        </TableCell>
-                                      : <TableCell
-                                          key={colIndex}
-                                          align="center"
-                                          colSpan={2}
-                                          sx={{
-                                            ...Table_Styles.styletablebody,
-                                            "&.MuiTableCell-root": {
-                                              padding: 0.65,
-                                              margin: 0
-                                            }
-                                            // borderRight: "1px solid #000",
-                                            // borderBottom:
-                                            //   rowIndex === lastIndex &&
-                                            //   "1px solid #000"
-                                          }}
-                                        >
-                                          {row.time}
-                                        </TableCell>
+                            {columns.map((column, colIndex) =>
+                              column === "Select" ? (
+                                <TableCell
+                                  key={colIndex}
+                                  align="center"
+                                  // colSpan={2}
+                                  sx={{
+                                    ...Table_Styles.styletablebody,
+                                    "&.MuiTableCell-root": {
+                                      padding: 0.65,
+                                      margin: 0,
+                                    },
+                                    // borderLeft: "1px solid #000",
+                                    // borderBottom:
+                                    //   rowIndex === lastIndex &&
+                                    //   "1px solid #000"
+                                  }}
+                                >
+                                  <div className="text-base font-bold">
+                                    <Checkbox
+                                      disabled={!row.booking}
+                                      // checked={selectedDataBaking.includes(
+                                      //   rowIndex
+                                      // )}
+                                      // onChange={() =>
+                                      //   handleRowSelectBaking(
+                                      //     rowIndex,
+                                      //     row
+                                      //   )} // Handle row selection
+                                      // sx={{
+                                      //   color: selectedDataBaking.includes(
+                                      //     rowIndex
+                                      //   )
+                                      //     ? "#1FAB89"
+                                      //     : "grey",
+                                      //   "&.Mui-checked": {
+                                      //     color: "#1FAB89"
+                                      //   }
+                                      // }}
+                                    />
+                                  </div>
+                                </TableCell>
+                              ) : column === "Court" ? (
+                                <TableCell
+                                  key={colIndex}
+                                  align="center"
+                                  colSpan={2}
+                                  sx={{
+                                    ...Table_Styles.styletablebody,
+                                    "&.MuiTableCell-root": {
+                                      padding: 0.65,
+                                      margin: 0,
+                                    },
+                                    // borderBottom:
+                                    //   rowIndex === lastIndex &&
+                                    //   "1px solid #000"
+                                  }}
+                                >
+                                  {row.name}
+                                </TableCell>
+                              ) : column === "Price" ? (
+                                <TableCell
+                                  key={colIndex}
+                                  align="center"
+                                  colSpan={2}
+                                  sx={{
+                                    ...Table_Styles.styletablebody,
+                                    "&.MuiTableCell-root": {
+                                      padding: 0.65,
+                                      margin: 0,
+                                    },
+                                    // borderBottom:
+                                    //   rowIndex === lastIndex &&
+                                    //   "1px solid #000"
+                                  }}
+                                >
+                                  {row.price}
+                                </TableCell>
+                              ) : (
+                                <TableCell
+                                  key={colIndex}
+                                  align="center"
+                                  colSpan={2}
+                                  sx={{
+                                    ...Table_Styles.styletablebody,
+                                    "&.MuiTableCell-root": {
+                                      padding: 0.65,
+                                      margin: 0,
+                                    },
+                                    // borderRight: "1px solid #000",
+                                    // borderBottom:
+                                    //   rowIndex === lastIndex &&
+                                    //   "1px solid #000"
+                                  }}
+                                >
+                                  {row.time}
+                                </TableCell>
+                              )
                             )}
                           </TableRow>
                         );
