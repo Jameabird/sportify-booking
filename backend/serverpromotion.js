@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const Promotion = require("./models/Promotion.js");
+const Promotion = require("./models/promotion.js");
 
 dotenv.config();
 

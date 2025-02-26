@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import axios from "axios";
 import "./CssHistory.css";
-import { usershistory } from "@app/(pages)/(user)/history/history";
 
 const TopBar_User = dynamic(() => import("@components/Topbar_User"), {
   ssr: false,
@@ -10,14 +10,46 @@ const TopBar_User = dynamic(() => import("@components/Topbar_User"), {
 
 const HistoryPage = () => {
   const [showDetails, setShowDetails] = useState(false);
+  const [usershistory, setUsersHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // นับจำนวนประเภทที่จอง
+  useEffect(() => {
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("❌ Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    console.log("✅ Token is valid:", token);
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get("http://localhost:4000/api/history", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("✅ User data received:", res.data);
+        setUsersHistory(res.data);
+      } catch (error) {
+        console.error("🚨 Error fetching user data:", error.response?.data || error.message);
+        setError(error.response?.data?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const bookingCounts = usershistory.reduce((acc, item) => {
     acc[item.type] = (acc[item.type] || 0) + 1;
     return acc;
   }, {});
 
-  // หาจำนวนครั้งที่จองทั้งหมด
   const totalBookings = usershistory.length;
 
   return (
@@ -27,10 +59,7 @@ const HistoryPage = () => {
         <div className="booking-header">
           <div></div>
           <div className="button-container">
-            <button 
-              className="booked-button" 
-              onClick={() => setShowDetails(!showDetails)}
-            >
+            <button className="booked-button" onClick={() => setShowDetails(!showDetails)}>
               จองแล้ว {totalBookings} ครั้ง
             </button>
             {showDetails && (
@@ -45,23 +74,25 @@ const HistoryPage = () => {
           </div>
         </div>
         <div className="booking-container">
-          {usershistory.map((item) => (
-            <div key={item.id} className="booking-card">
-              <img
-                src={item.imag}               
-                className="booking-image"
-              />
-              <div className="booking-info">
-                <p><strong>Location:</strong> {item.location}</p>
-                <p><strong>Date:</strong> {item.day}</p>
-                <p><strong>Time:</strong> {item.time}</p>
-                <p><strong>Price:</strong> {item.price}</p>
+          {loading ? (
+            <p>Loading...</p>
+          ) : error ? (
+            <p className="error">{error}</p>
+          ) : (
+            usershistory.map((item) => (
+              <div key={item._id} className="booking-card">
+                <img src={item.image} className="booking-image" />
+                <div className="booking-info">
+                  <p><strong>Location:</strong> {item.location}</p>
+                  <p><strong>Date:</strong> {item.day}</p>
+                  <p><strong>Time:</strong> {item.time}</p>
+                  <p><strong>Price:</strong> {item.price}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
-
     </>
   );
 };
