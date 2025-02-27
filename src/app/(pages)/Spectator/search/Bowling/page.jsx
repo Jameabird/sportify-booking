@@ -4,9 +4,12 @@ import "./Search.css";
 import places from "./places";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
+import { Snackbar } from "@mui/material"; // นำเข้า Snackbar
+import { Alert } from "@mui/material"; // นำเข้า Alert
 
 function SearchPages() {
   const [search, setSearch] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const router = useRouter();
 
   const filteredPlaces = places.filter(place =>
@@ -14,10 +17,17 @@ function SearchPages() {
   );
 
   const handleBook = (placeName) => {
-    // console.log(placeName);
+    // แสดง snackbar ก่อนที่จะไปที่หน้า login
+    setOpenSnackbar(true);
     sessionStorage.setItem("booking_place", placeName);
-    router.push("/login");
-  }
+    setTimeout(() => {
+      router.push("/login"); // ไปที่หน้า login หลังจากแสดง snackbar
+    }, 2000); // รอ 2 วินาที
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   return (
     <div>
@@ -62,6 +72,17 @@ function SearchPages() {
           </div>
         </div>
       </div>
+      {/* Snackbar for message */}
+            <Snackbar
+              open={openSnackbar}
+              autoHideDuration={2000} // จะหายไปหลังจาก 2 วินาที
+              onClose={handleCloseSnackbar}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+              <Alert onClose={handleCloseSnackbar} severity="info">
+                โปรคสมัครเข้าใช้งาน/เข้าสู่ระบบการจองสนามกีฬา
+              </Alert>
+            </Snackbar>
     </div>
   );
 }
