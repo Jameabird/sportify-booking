@@ -22,12 +22,6 @@ const adminCategories = [
       { text: "Promotion", path: "/admin/promotion" },
     ],
   },
-  {
-    title: "Messages",
-    buttons: [
-      { text: "Send Messages", path: "/admin/sendmessages" },
-    ],
-  },
 ];
 
 // ** ปุ่มในแต่ละหมวด **

@@ -76,12 +76,6 @@ export default function OwnerHome() {
                 { text: "Field Management", path: "/owner/areafield" }, // ✅ เพิ่มปุ่ม Field Management
               ],
             },
-            {
-              title: "Messages",
-              buttons: [
-                { text: "Send Messages", path: "/owner/sendmessages" }, // New button for sending messages
-              ],
-            }
           ].map((category, categoryIndex) => (
             <Box
               key={categoryIndex}
