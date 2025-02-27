@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { users } from "@app/(pages)/owner/history/Users";
 import "@app/(pages)/owner/history/CssHistory.css";
+import axios from "axios"; // ✅ Import axios
 
 import { Search } from "lucide-react";
 const TopBar_Owner = dynamic(() => import("@components/Topbar_Owner"), {
@@ -14,15 +14,48 @@ const HistoryPageOwner = () => {
   const [statusFilter, setStatusFilter] = useState("reserve");
   const [searchQuery, setSearchQuery] = useState("");
   const [usersData, setUsersData] = useState([]);
+  const [loading, setLoading] = useState(false); // ✅ เพิ่ม state สำหรับ loading
+  const [error, setError] = useState(null); // ✅ เพิ่ม state สำหรับ error
 
   useEffect(() => {
-    setUsersData(users);
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("❌ Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    console.log("✅ Token is valid:", token);
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get("http://localhost:4000/api/history", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("✅ User data received:", res.data);
+        setUsersData(res.data); // ✅ ใช้ setUsersData แทน setUsersHistory
+      } catch (error) {
+        console.error(
+          "🚨 Error fetching user data:",
+          error.response?.data || error.message
+        );
+        setError(error.response?.data?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
+  // ✅ ฟิลเตอร์ข้อมูลตาม statusFilter และ searchQuery
   const filteredByStatus =
     statusFilter === "all"
-      ? usersData.filter((user) => user.status !== "refund")
-      : usersData.filter((user) => user.status === statusFilter && user.status !== "refund");
+      ? usersData.filter((user) => user.status !== "refund") // ✅ กรอง refund ออก
+      : usersData.filter((user) => user.status === statusFilter);
 
   const filteredUsers = filteredByStatus.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,14 +89,13 @@ const HistoryPageOwner = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="flex-row-button"
             >
-              <option value="all">All</option>              
+              <option value="all">All</option>
               <option value="reserve">Reserve</option>
               <option value="cancel">Cancel</option>
             </select>
           </div>
           <div className="SearchBox flex items-center gap-2">
             <label htmlFor="search">Search name: </label>
-            
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
               <input
@@ -77,7 +109,12 @@ const HistoryPageOwner = () => {
             </div>
           </div>
         </div>
-        <section>      
+
+        {/* ✅ แสดง loading หรือ error */}
+        {loading && <p>Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+
+        <section>
           <div className="tbl-header">
             <table cellPadding="0" cellSpacing="0" border="0">
               <thead>
@@ -96,12 +133,12 @@ const HistoryPageOwner = () => {
           <div className="tbl-content">
             <table cellPadding="0" cellSpacing="0" border="0">
               <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-blue-300">
+                {filteredUsers.map((user, index) => (
+                  <tr key={user._id || index} className="hover:bg-blue-300">
                     <td>{user.name}</td>
                     <td>{user.day}</td>
                     <td>{user.time}</td>
-                    <td>{user.email}</td>
+                    <td>{user.user?.email || user.owner?.email || "N/A"}</td>
                     <td>{user.location}</td>
                     <td>{user.price}</td>
                     <td>{user.status}</td>
