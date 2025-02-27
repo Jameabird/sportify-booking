@@ -59,129 +59,93 @@ export default function Officer() {
         {/* Top Navigation Bar */}
         <TopBar_Officer textColor="white" />
 
-        {/* Admin Dashboard Container */}
+        {/* Officer Dashboard Container */}
         <Box
           display="flex"
-          justifyContent="center"
+          flexDirection="row"
+          flexWrap="wrap"
           alignItems="center"
-          gap={6}
+          justifyContent="center"
+          gap={4}
           sx={{
             position: "relative",
             zIndex: 1,
             height: "100%",
             overflow: "hidden",
-            flexDirection: "row", // Change to row for horizontal layout
-            padding: "20px", // Optional padding for spacing between sections
+            padding: { xs: "20px", sm: "40px" },
           }}
         >
-          {/* Management Section */}
-          <Box
-            sx={{
-              boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.6)",
-              borderRadius: "16px",
-              padding: "30px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 3,
-              backgroundColor: "rgba(0, 0, 0, 0.6)",
-              width: "90%",
-              maxWidth: "500px",
-              transition: "0.3s ease-in-out",
-              "&:hover": { transform: "scale(1.02)" },
-            }}
-          >
-            <Typography
-              sx={{
-                color: "white",
-                fontSize: "1.8rem",
-                fontWeight: "bold",
-                textAlign: "center",
-                marginBottom: "10px",
-              }}
-            >
-              Management
-            </Typography>
-
-            {/* Field Management */}
+          {/* Sections (Management and Messages) */}
+          {[
+            {
+              title: "Management",
+              button: {
+                text: "Field Management",
+                path: "/officer/areafield",
+              },
+            },
+            {
+              title: "Messages",
+              button: {
+                text: "Send Messages",
+                path: "/officer/sendmessages",
+              },
+            },
+          ].map((section, index) => (
             <Box
+              key={index}
               sx={{
-                backgroundColor: "rgba(0,123,255,0.9)",
-                padding: "16px 32px",
-                borderRadius: "12px",
-                color: "white",
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "0.3s",
-                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-                minWidth: "180px",
-                "&:hover": {
-                  backgroundColor: "rgba(0,123,255,1)",
-                  boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
-                  transform: "scale(1.05)",
-                },
+                boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.6)",
+                borderRadius: "16px",
+                padding: "30px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 3,
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                width: { xs: "100%", sm: "45%", md: "30%" },
+                maxWidth: "500px",
+                transition: "0.3s ease-in-out",
+                "&:hover": { transform: "scale(1.02)" },
               }}
-              onClick={() => handleNavigation("/officer/areafield")}
             >
-              Field Management
-            </Box>
-          </Box>
+              <Typography
+                sx={{
+                  color: "white",
+                  fontSize: "1.8rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginBottom: "10px",
+                }}
+              >
+                {section.title}
+              </Typography>
 
-          {/* New "Messages" Section */}
-          <Box
-            sx={{
-              boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.6)",
-              borderRadius: "16px",
-              padding: "30px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 3,
-              backgroundColor: "rgba(0, 0, 0, 0.6)",
-              width: "90%",
-              maxWidth: "500px",
-              transition: "0.3s ease-in-out",
-              "&:hover": { transform: "scale(1.02)" },
-            }}
-          >
-            <Typography
-              sx={{
-                color: "white",
-                fontSize: "1.8rem",
-                fontWeight: "bold",
-                textAlign: "center",
-                marginBottom: "10px",
-              }}
-            >
-              Messages
-            </Typography>
-
-            <Box
-              sx={{
-                backgroundColor: "rgba(0,123,255,0.9)",
-                padding: "16px 32px",
-                borderRadius: "12px",
-                color: "white",
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "0.3s",
-                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
-                minWidth: "180px",
-                "&:hover": {
-                  backgroundColor: "rgba(0,123,255,1)",
-                  boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
-                  transform: "scale(1.05)",
-                },
-              }}
-              onClick={() => handleNavigation("/officer/sendmessages")}
-            >
-              Send Messages
+              <Box
+                sx={{
+                  backgroundColor: "rgba(0,123,255,0.9)",
+                  padding: "16px 32px",
+                  borderRadius: "12px",
+                  color: "white",
+                  fontSize: "1.2rem",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  transition: "0.3s",
+                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.5)",
+                  minWidth: "180px",
+                  "&:hover": {
+                    backgroundColor: "rgba(0,123,255,1)",
+                    boxShadow: "0px 6px 14px rgba(0, 0, 0, 0.6)",
+                    transform: "scale(1.05)",
+                  },
+                }}
+                onClick={() => handleNavigation(section.button.path)}
+              >
+                {section.button.text}
+              </Box>
             </Box>
-          </Box>
+          ))}
         </Box>
       </main>
     </div>
