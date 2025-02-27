@@ -84,13 +84,6 @@ export default function Officer() {
                 path: "/officer/areafield",
               },
             },
-            {
-              title: "Messages",
-              button: {
-                text: "Send Messages",
-                path: "/officer/sendmessages",
-              },
-            },
           ].map((section, index) => (
             <Box
               key={index}
