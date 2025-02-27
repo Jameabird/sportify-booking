@@ -1,7 +1,5 @@
 "use client";
 import { Box, Avatar, Menu, MenuItem, Typography, IconButton, Badge } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import MailIcon from "@mui/icons-material/Mail";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -90,13 +88,6 @@ const TopBar_Owner = (props) => {
         <Link href="/owner/history" style={getLinkStyle("/owner/history")}>
           History
         </Link>
-
-        {/* กล่องจดหมาย */}
-        <IconButton sx={{ padding: "0 10px" }} onClick={handleInboxClick}>
-          <Badge badgeContent={mailCount} color="error">
-            <MailIcon sx={{ color: props.textColor }} />
-          </Badge>
-        </IconButton>
 
         {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>
