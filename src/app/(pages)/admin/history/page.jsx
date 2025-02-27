@@ -2,28 +2,59 @@
 
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-// import styled from "styled-components"; /* npm install styled-components */
-import { users } from "@app/(pages)/admin/history/Users";
+import axios from "axios"; // ✅ Import axios
 import "@app/(pages)/admin/history/CssHistory.css";
-
 import { Search } from "lucide-react";
+
 const TopBar_Admin = dynamic(() => import("@components/Topbar_Admin"), {
   ssr: false,
 });
 
 const HistoryPageAdmin = () => {
-  const [statusFilter, setStatusFilter] = useState("refund");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [usersData, setUsersData] = useState([]);
+  const [usersHistory, setUsersHistory] = useState([]); // ✅ แก้จาก usersData เป็น usersHistory
+  const [loading, setLoading] = useState(true); // ✅ เพิ่ม state loading
+  const [error, setError] = useState(""); // ✅ เพิ่ม state error
 
   useEffect(() => {
-    setUsersData(users);
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
+
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("❌ Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    console.log("✅ Token is valid:", token);
+    const fetchUserData = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get("http://localhost:4000/api/history", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("✅ User data received:", res.data);
+        setUsersHistory(res.data);
+      } catch (error) {
+        console.error(
+          "🚨 Error fetching user data:",
+          error.response?.data || error.message
+        );
+        setError(error.response?.data?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   const filteredByStatus =
     statusFilter === "all"
-      ? usersData
-      : usersData.filter((user) => user.status === statusFilter);
+      ? usersHistory
+      : usersHistory.filter((user) => user.status === statusFilter);
 
   const filteredUsers = filteredByStatus.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -78,40 +109,47 @@ const HistoryPageAdmin = () => {
             </div>
           </div>
         </div>
-        <section>
-          <div className="tbl-header">
-            <table cellPadding="0" cellSpacing="0" border="0">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Day</th>
-                  <th>Time</th>
-                  <th>Email</th>
-                  <th>Location</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          <div className="tbl-content">
-            <table cellPadding="0" cellSpacing="0" border="0">
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-blue-300">
-                    <td>{user.name}</td>
-                    <td>{user.day}</td>
-                    <td>{user.time}</td>
-                    <td>{user.email}</td>
-                    <td>{user.location}</td>
-                    <td>{user.price}</td>
-                    <td>{user.status}</td>
+
+        {loading ? (
+          <p className="text-center text-gray-500">Loading...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : (
+          <section>
+            <div className="tbl-header">
+              <table cellPadding="0" cellSpacing="0" border="0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Email</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                </thead>
+              </table>
+            </div>
+            <div className="tbl-content">
+              <table cellPadding="0" cellSpacing="0" border="0">
+                <tbody>
+                  {filteredUsers.map((user, index) => (
+                    <tr key={user._id || index} className="hover:bg-blue-300">
+                      <td>{user.name}</td>
+                      <td>{user.day}</td>
+                      <td>{user.time}</td>
+                      <td>{user.user?.email || user.owner?.email || "N/A"}</td>
+                      <td>{user.location}</td>
+                      <td>{user.price}</td>
+                      <td>{user.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </div>
     </>
   );

@@ -2,7 +2,7 @@ export const usershistory = [
     {
       id: 1,
       name: "Tony Reichert",
-      imag: "/images/badminton.jpg",
+      imag: "badminton.jpg",
       day:"12/08/2024",
       time: "13.00-15.00",      
       location: "Building3 สนาม 1",
@@ -13,7 +13,7 @@ export const usershistory = [
     {
         id: 2,
         name: "Tony Reichert",
-        imag: "/images/swimming.jpg",
+        imag: "swimming.jpg",
         day:"12/08/2024",
         time: "13.00-15.00",      
         location: "Building2 สระ 1",
@@ -24,7 +24,7 @@ export const usershistory = [
       {
         id: 3,
         name: "Tony Reichert",
-        imag: "/images/golf.jpg",
+        imag: "golf.jpg",
         day:"12/08/2024",
         time: "13.00-15.00",      
         location: "Building4 1 คน",
