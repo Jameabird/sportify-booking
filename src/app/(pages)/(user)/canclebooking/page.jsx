@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import TopBar_User from "@components/Topbar_User";
 
@@ -10,12 +11,10 @@ const BookingList = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await fetch("/api/booking");
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const data = await response.json();
-        const formattedData = data.map((booking) => ({
+        const response = await axios.get("http://localhost:5002/api/bookings");
+        const formattedData = response.data.map((booking) => ({
           _id: booking._id,
-          image: `${booking.type}.jpg`,
+          image: `/images/${booking.type}.jpg`,
           location: `${booking.building} ${booking.location}`,
           day: booking.day,
           time: booking.time,
@@ -31,11 +30,12 @@ const BookingList = () => {
 
   const handleCancel = async (id) => {
     try {
-      const response = await fetch(`/api/bookings${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to cancel booking");
-      setBookings((prevBookings) => prevBookings.filter((booking) => booking._id !== id));
+      const response = await axios.delete(`http://localhost:5002/api/bookings/${id}`);
+      if (response.status === 200) {
+        setBookings((prevBookings) => prevBookings.filter((booking) => booking._id !== id));
+      } else {
+        console.error("Failed to cancel booking");
+      }
     } catch (error) {
       console.error("Error cancelling booking:", error);
     }
