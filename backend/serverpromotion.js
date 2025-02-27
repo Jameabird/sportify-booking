@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const Promotion = require("./models/Promotion.js");
+const Promotion = require("./models/promotion.js");
 
 dotenv.config();
 
@@ -17,9 +17,6 @@ mongoose.connect(process.env.MONGO_URI, {
 })
 .then(() => console.log("MongoDB Connected to SE"))
 .catch(err => console.error(err));
-
-
-
 
 app.get("/api/promotions", async (req, res) => {
   try {
