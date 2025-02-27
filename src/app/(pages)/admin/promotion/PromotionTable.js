@@ -30,7 +30,7 @@ const PromotionTable = () => {
   const handleSave = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/promotions/${editingId}`,
+        `http://localhost:5001/api/promotions/${editingId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -59,7 +59,7 @@ const PromotionTable = () => {
   const handleDelete = async (id) => {
     if (window.confirm("คุณต้องการลบโปรโมชั่นนี้ใช่หรือไม่?")) {
       try {
-        const res = await fetch(`http://localhost:5000/api/promotions/${id}`, {
+        const res = await fetch(`http://localhost:5001/api/promotions/${id}`, {
           method: "DELETE",
         });
 
