@@ -78,6 +78,12 @@ export default function AccountPage() {
       alert(err.response?.data?.error || err.message);
     }
   };
+  const [sortOrder, setSortOrder] = useState("A-Z"); // ✅ เพิ่ม state สำหรับเรียงลำดับ
+
+  // ✅ เรียงลำดับข้อมูลตามตัวอักษร A-Z หรือ Z-A
+  const sortedAccounts = [...accounts]
+    .filter((acc) => acc.username.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => (sortOrder === "A-Z" ? a.username.localeCompare(b.username) : b.username.localeCompare(a.username)));
 
   return (
     <>
@@ -89,19 +95,33 @@ export default function AccountPage() {
             <span className="font-bold text-xl text-gray-900">Add Account :</span>
             <button
               className="bg-blue-600 text-white p-2 rounded-full shadow-lg hover:shadow-xl transition duration-200"
-              onClick={() => router.push("/owner/management/add")} // ✅ นำทางเมื่อกดปุ่ม
+              onClick={() => router.push("/owner/management/add")}
             >
               <Plus size={20} />
             </button>
           </div>
-          <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-md">
-            <input
-              type="text"
-              placeholder="Search by Name..."
-              className="outline-none w-full"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+
+          {/* ค้นหา + ตัวเลือกเรียงลำดับ */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-md">
+              <input
+                type="text"
+                placeholder="Search by Name..."
+                className="outline-none w-full"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {/* Dropdown เรียงลำดับ A-Z & Z-A */}
+            <select
+              className="border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-md cursor-pointer"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="A-Z">A-Z</option>
+              <option value="Z-A">Z-A</option>
+            </select>
           </div>
         </div>
 
@@ -123,24 +143,22 @@ export default function AccountPage() {
                 </tr>
               </thead>
               <tbody>
-                {accounts
-                  .filter((acc) => acc.username.toLowerCase().includes(search.toLowerCase()))
-                  .map((acc) => (
-                    <tr key={acc._id} className="text-center hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.username}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.email}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phoneNumber || "N/A"}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.role}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm">
-                        <button
-                          onClick={() => handleDelete(acc._id)}
-                          className="text-red-500 hover:text-red-700 transition duration-150"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                {sortedAccounts.map((acc) => (
+                  <tr key={acc._id} className="text-center hover:bg-gray-50">
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.username}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.email}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phoneNumber || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.role}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm">
+                      <button
+                        onClick={() => handleDelete(acc._id)}
+                        className="text-red-500 hover:text-red-700 transition duration-150"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

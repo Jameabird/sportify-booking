@@ -1,47 +1,38 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios"; // ✅ ใช้ axios
+import axios from "axios";
 import { Trash2, Plus } from "lucide-react";
 import TopBar_Admin from "../../components/Topbar_Admin";
 
 export default function AccountPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState("A-Z"); // ✅ เพิ่ม state สำหรับเรียงลำดับ
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ✅ ดึงข้อมูล owners จาก API
   useEffect(() => {
     const fetchOwners = async () => {
       try {
-        // ตรวจสอบว่า token มีหรือไม่
         const tokenData = JSON.parse(localStorage.getItem("token"));
         const token = tokenData ? tokenData.token : null;
 
         if (!token || Date.now() > tokenData?.expirationTime) {
-          console.log("❌ Token is missing or expired.");
           setError("Token is missing or expired. Please log in again.");
           setLoading(false);
           return;
-        } else {
-          console.log("✅ Token is valid:", token);
-
-          // ส่งคำขอ GET ไปยัง API
-          const { data } = await axios.get("http://localhost:5000/api/owners", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          // ตั้งค่าข้อมูลที่ได้จาก API ไปที่ state
-          setAccounts(data);
         }
+
+        const { data } = await axios.get("http://localhost:5000/api/owners", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setAccounts(data);
       } catch (err) {
-        // จัดการข้อผิดพลาดจากการส่งคำขอ (axios) หรือการตรวจสอบ token
-        const errorMessage = err.response?.data?.error || err.message || "An unexpected error occurred.";
-        setError(errorMessage);
+        setError(err.response?.data?.error || err.message || "An unexpected error occurred.");
       } finally {
-        // เมื่อเสร็จสิ้นการทำงานทั้งหมด ปิดการโหลด
         setLoading(false);
       }
     };
@@ -54,30 +45,35 @@ export default function AccountPage() {
     if (!confirm("Are you sure you want to delete this owner?")) return;
 
     try {
-      // ตรวจสอบว่า token มีหรือไม่
       const tokenData = JSON.parse(localStorage.getItem("token"));
       const token = tokenData ? tokenData.token : null;
 
       if (!token || Date.now() > tokenData?.expirationTime) {
-        console.log("❌ Token is missing or expired.");
         setError("Token is missing or expired. Please log in again.");
         setLoading(false);
         return;
-      } else {
-        console.log("✅ Token is valid:", token);
-
-        // ส่งคำขอ DELETE ไปยัง API
-        await axios.delete(`http://localhost:5000/api/owners/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        // อัปเดต state โดยการกรอง owner ที่ถูกลบออก
-        setAccounts(accounts.filter((acc) => acc._id !== id));
       }
+
+      await axios.delete(`http://localhost:5000/api/owners/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setAccounts(accounts.filter((acc) => acc._id !== id));
     } catch (err) {
       alert(err.response?.data?.error || err.message);
     }
   };
+
+  // ✅ เรียงลำดับข้อมูลตามตัวอักษร A-Z หรือ Z-A
+  const sortedAccounts = [...accounts]
+    .filter((acc) => acc.username.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (sortOrder === "A-Z") {
+        return a.username.localeCompare(b.username);
+      } else {
+        return b.username.localeCompare(a.username);
+      }
+    });
 
   return (
     <>
@@ -94,14 +90,28 @@ export default function AccountPage() {
               <Plus size={20} />
             </button>
           </div>
-          <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-md">
-            <input
-              type="text"
-              placeholder="Search by Name..."
-              className="outline-none w-full"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+
+          {/* ค้นหา + ตัวเลือกเรียงลำดับ */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-md">
+              <input
+                type="text"
+                placeholder="Search by Name..."
+                className="outline-none w-full"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            {/* Dropdown เรียงลำดับ A-Z & Z-A */}
+            <select
+              className="border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-md cursor-pointer"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="A-Z">A-Z</option>
+              <option value="Z-A">Z-A</option>
+            </select>
           </div>
         </div>
 
@@ -123,24 +133,22 @@ export default function AccountPage() {
                 </tr>
               </thead>
               <tbody>
-                {accounts
-                  .filter((acc) => acc.username.toLowerCase().includes(search.toLowerCase()))
-                  .map((acc) => (
-                    <tr key={acc._id} className="text-center hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.username}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.email}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phoneNumber || "N/A"}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.role}</td>
-                      <td className="border border-gray-300 px-4 py-3 text-sm">
-                        <button
-                          onClick={() => handleDelete(acc._id)}
-                          className="text-red-500 hover:text-red-700 transition duration-150"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                {sortedAccounts.map((acc) => (
+                  <tr key={acc._id} className="text-center hover:bg-gray-50">
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.username}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.email}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phoneNumber || "N/A"}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.role}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm">
+                      <button
+                        onClick={() => handleDelete(acc._id)}
+                        className="text-red-500 hover:text-red-700 transition duration-150"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
