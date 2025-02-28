@@ -244,12 +244,6 @@ const CourtManagement = () => {
                                                     </Button>
                                                 </DialogActions>
                                             </Dialog>
-                                            <MenuItem onClick={() => {
-                                                router.push(`/officer/areafield/field.management/manage.chords?building=${selectedCourt?.id}`);
-                                                handleMenuClose();
-                                            }}>
-                                                จัดการคอร์ด
-                                            </MenuItem>
                                         </Menu>
                                     </TableRow>
                                 ))}
