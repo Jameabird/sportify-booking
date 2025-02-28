@@ -115,10 +115,10 @@ export default function AccountPage() {
             <table className="min-w-full border-collapse">
               <thead>
                 <tr className="bg-blue-100">
-                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-sm text-gray-600">Name</th>
-                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-sm text-gray-600">Email</th>
-                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-sm text-gray-600">Phone</th>
-                  <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-sm text-gray-600">Role</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Name</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Email</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Phone</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Role</th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Action</th>
                 </tr>
               </thead>
