@@ -11,11 +11,18 @@ const PromotionTable = () => {
 
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/promotions")
-      .then((res) => res.json())
-      .then((data) => setPromotions(data))
-      .catch((err) => console.error("Error fetching promotions:", err));
+    const fetchPromotions = () => {
+      fetch("http://localhost:5001/api/promotions")
+        .then((res) => res.json())
+        .then((data) => setPromotions(data))
+        .catch((err) => console.error("Error fetching promotions:", err));
+    };
+  
+    fetchPromotions();
+    const interval = setInterval(fetchPromotions, 60000); // อัปเดตทุก 60 วินาที
+    return () => clearInterval(interval);
   }, []);
+  
 
   const handleEdit = (promo) => {
     setEditingId(promo._id);
