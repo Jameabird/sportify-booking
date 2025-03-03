@@ -1,0 +1,62 @@
+.payment-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .payment-form label {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .voucher-input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+  }
+  
+  .submit-btn {
+    padding: 12px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .submit-btn:disabled {
+    background-color: #ccc;
+  }
+  
+  .submit-btn:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  
+  .voucher-info {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: green;
+  }
+  
