@@ -95,7 +95,7 @@ const HistoryPage = () => {
                 className="coupon-button"
                 onClick={() => setShowCouponDetails(!showCouponDetails)}
               >
-                คงเหลือที่ใช้คูปองได้
+                คงเหลือที่ใช้ส่วนลดได้
               </button>
               {showCouponDetails && (
                 <div className="coupon-details">
