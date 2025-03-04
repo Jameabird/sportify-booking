@@ -38,11 +38,10 @@ import { jwtDecode } from "jwt-decode";
 
 
 
-
 const Booking = () => {
   const [buildingNames, setBuildingNames] = useState([]);
   const [currentBuilding, setCurrentBuilding] = useState("Building1");
-  const [currentCourt, setCurrentCourt] = useState("Field1");
+  const [currentCourt, setCurrentCourt] = useState("Court1");
   const [courtNames, setCourtNames] = useState([]);
   const [CourtData, setCourtData] = useState([]);
   const placeName = sessionStorage.getItem("booking_place");
@@ -255,6 +254,7 @@ const Booking = () => {
   }, [selectedCourts]);
 
 
+
   const Table_BoxStyles = props => ({
     styletablehead: {
       // border: "1px solid #F2F0F0",
@@ -395,7 +395,6 @@ const Booking = () => {
   const columns = ["Select", "Court", "Price", "Time"];
 
   const router = useRouter();
-
   return (
     <div className="absolute top-0 left-0 h-full w-full bg-cover bg-center">
 
@@ -678,7 +677,6 @@ const Booking = () => {
             </Box>
           </div>
           <div className="col-span-1 col-start-6 ">
-
             <div className="popup-container">
               <button
                 className="trigger-button"
@@ -739,53 +737,11 @@ const Booking = () => {
                         <div>ชำระเงินภายใน</div>
                         <span>{formatTime(timeLeft)}</span>
                       </div>
+                    
                     </div>
-                    <div className="actions">
-                      <button
-                        className="confirm-button"
-                        onClick={handleImagePopup} // เปิด Popup สำหรับอัปโหลดรูปภาพ
-                      >
-                        ยืนยัน
-                      </button>
-                      <button
-                        className="cancel-button"
-                        onClick={() => setShowQRPopup(false)}
-                      >
-                        ยกเลิก
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Popup>
-
-              {/* Popup สำหรับอัปโหลดรูปภาพ */}
-              <Popup open={showImagePopup} modal nested onClose={() => setShowImagePopup(false)}>
-                <div className="modal">
-                  <div className="header">แนบหลักฐานการชำระเงิน</div>
-                  <div className="content">
-                    <input type="file" accept="image/*" onChange={handleFileUpload} />
-                    {uploadedImage && (
-                      <div className="uploaded-image-container">
-                        <img
-                          src={uploadedImage}
-                          alt="Uploaded"
-                          style={{
-                            maxWidth: "200px",
-                            maxHeight: "200px",
-                            borderRadius: "10px",
-                          }}
-                        />
-                        <p className="image-caption">กรุณาเลือก วัน/เวลา ที่ชำระ</p>
-                        {/* Container สำหรับ วัน เดือน ปี */}
-                        <div
-                          className="date-picker-container"
-                          style={{
-                            display: "flex",
-                            gap: "10px", // ระยะห่างระหว่าง dropdown
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginTop: "10px",
-                          }}
+                    <div className="col-span-1 col-end-8">
+                        <Button
+                          sx={{ backgroundColor: "red", color: "white", width: "100%" ,height : "100%"}}
                         >
                           <div className="pl-2 py-1">
                             <DatePicker style={{ border: "none" }} onChange={changeDatepaid} />

@@ -7,7 +7,7 @@ export const mockBuilding = [
 ];
 export const mockCourt = [
   { building: "Building1", name: "Field1", booking: true },
-  { building: "Building1", name: "Field2", booking: false },
+  { building: "Building1", name: "Field2", booking: true },
   { building: "Building1", name: "Field3", booking: true },
   { building: "Building1", name: "Field4", booking: true },
   { building: "Building1", name: "Field5", booking: true },

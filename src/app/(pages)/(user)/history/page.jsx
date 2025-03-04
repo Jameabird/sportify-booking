@@ -10,6 +10,7 @@ const TopBar_User = dynamic(() => import("@components/Topbar_User"), {
 
 const HistoryPage = () => {
   const [showDetails, setShowDetails] = useState(false);
+  const [showCouponDetails, setShowCouponDetails] = useState(false);
   const [usershistory, setUsersHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,7 +36,10 @@ const HistoryPage = () => {
         console.log("✅ User data received:", res.data);
         setUsersHistory(res.data);
       } catch (error) {
-        console.error("🚨 Error fetching user data:", error.response?.data || error.message);
+        console.error(
+          "🚨 Error fetching user data:",
+          error.response?.data || error.message
+        );
         setError(error.response?.data?.message || "Failed to load profile");
       } finally {
         setLoading(false);
@@ -50,6 +54,14 @@ const HistoryPage = () => {
     return acc;
   }, {});
 
+  const couponCounts = usershistory.reduce((acc, item) => {
+    if (!item.coupons || item.coupons === "false") {
+      // ตรวจสอบทั้ง boolean และ string
+      acc[item.type] = (acc[item.type] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
   const totalBookings = usershistory.length;
 
   return (
@@ -57,22 +69,47 @@ const HistoryPage = () => {
       <TopBar_User textColor={"black"} />
       <div className="background-page">
         <div className="booking-header">
-          <div></div>
-          <div className="button-container">
-            <button className="booked-button" onClick={() => setShowDetails(!showDetails)}>
-              จองแล้ว {totalBookings} ครั้ง
-            </button>
-            {showDetails && (
-              <div className="booking-details">
-                {Object.entries(bookingCounts).map(([type, count]) => (
-                  <div key={type} className="detail-item">
-                    {type} {count} ครั้ง
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="button-group">
+            {/* ปุ่มจอง */}
+            <div className="booked-button-container">
+              <button
+                className="booked-button"
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                จองแล้ว {totalBookings} ครั้ง
+              </button>
+              {showDetails && (
+                <div className="booking-details">
+                  {Object.entries(bookingCounts).map(([type, count]) => (
+                    <div key={type} className="detail-item">
+                      {type} {count} ครั้ง
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ปุ่มคูปอง */}
+            <div className="coupon-button-container">
+              <button
+                className="coupon-button"
+                onClick={() => setShowCouponDetails(!showCouponDetails)}
+              >
+                คงเหลือที่ใช้ส่วนลดได้
+              </button>
+              {showCouponDetails && (
+                <div className="coupon-details">
+                  {Object.entries(couponCounts).map(([type, count]) => (
+                    <div key={type} className="detail-item">
+                      {type} {count} ครั้ง
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
+
         <div className="booking-container">
           {loading ? (
             <p>Loading...</p>
@@ -81,12 +118,24 @@ const HistoryPage = () => {
           ) : (
             usershistory.map((item) => (
               <div key={item._id} className="booking-card">
-                <img src={item.image} className="booking-image" />
+                <img
+                  src={item.image}
+                  className="booking-image"
+                  alt={item.type}
+                />
                 <div className="booking-info">
-                  <p><strong>Location:</strong> {item.location}</p>
-                  <p><strong>Date:</strong> {item.day}</p>
-                  <p><strong>Time:</strong> {item.time}</p>
-                  <p><strong>Price:</strong> {item.price}</p>
+                  <p>
+                    <strong>Location:</strong> {item.location}
+                  </p>
+                  <p>
+                    <strong>Date:</strong> {item.day}
+                  </p>
+                  <p>
+                    <strong>Time:</strong> {item.time}
+                  </p>
+                  <p>
+                    <strong>Price:</strong> {item.price}
+                  </p>
                 </div>
               </div>
             ))

@@ -2,12 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const Bookings = require("./models/Bookings.js"); // Use correct model name
 
 dotenv.config();
 
 const app = express();
-app.use(express.json());
+
+// ✅ Increase payload size limit (to 10MB)
+app.use(express.json({ limit: "50mb" })); // Increase limit to 50MB
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors());
 
 mongoose
@@ -19,6 +21,7 @@ mongoose
   .then(() => console.log("MongoDB Connected to SE"))
   .catch((err) => console.error(err));
 
+const Bookings = require("./models/Bookings.js");
 // GET bookings
 app.get("/api/bookings", async (req, res) => {
   try {
@@ -29,7 +32,6 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
-// POST new booking
 app.post("/api/bookings", async (req, res) => {
   try {
     
@@ -63,7 +65,9 @@ app.post("/api/bookings", async (req, res) => {
   }
 });
 
+
 // UPDATE booking by ID
+// UPDATE booking by ID (รวม image)
 app.put("/api/bookings/:id", async (req, res) => {
   try {
     console.log("📌 datepaid ที่ได้รับจาก client:", req.body.datepaid);
@@ -76,14 +80,10 @@ app.put("/api/bookings/:id", async (req, res) => {
 
     if (!updatedBooking) {
       return res.status(404).json({ message: "ไม่พบการจองที่ต้องการอัปเดต" });
-    }
 
-    res.status(200).json(updatedBooking);
-  } catch (err) {
-    console.error("Error updating booking:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
+    }
+  });
+  
 
 // DELETE booking by ID
 app.delete("/api/bookings/:id", async (req, res) => {
