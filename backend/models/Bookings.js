@@ -10,6 +10,7 @@ const BookingsSchema = new mongoose.Schema({
   type: { type: String, required: true },
   building: { type: String, required: true },
   role: { type: String, required: true },
+  image: { type: String,},
 });
 
 module.exports = mongoose.models.Bookings || mongoose.model("Bookings", BookingsSchema);

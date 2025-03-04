@@ -50,20 +50,31 @@ app.post("/api/buildings", async (req, res) => {
 });
 
 // ✅ UPDATE a building by ID
-app.put("/api/buildings/:id", async (req, res) => {
+app.put("/api/update-buildings", async (req, res) => {
   try {
-    const { id } = req.params;
-    const updatedBuilding = await Building.findByIdAndUpdate(id, req.body, { new: true });
+    const { type, building, fieldId, booking } = req.body;
 
-    if (!updatedBuilding) {
-      return res.status(404).json({ message: "ไม่พบข้อมูล" });
+    if (!type || !building || !fieldId || typeof booking !== "boolean") {
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
 
-    res.status(200).json(updatedBuilding);
+    // ค้นหาเอกสารที่ตรงกับ `type` และ `building`
+    const existingBuilding = await Building.findOne({ Type: type, [`Building.${building}`]: { $exists: true } });
+
+    if (!existingBuilding) {
+      return res.status(404).json({ message: "ไม่พบอาคารนี้" });
+    }
+
+    // อัปเดตค่า `booking` ในฟิลด์ที่เลือก
+    existingBuilding.Building[building][fieldId].Booking = booking;
+
+    await existingBuilding.save();
+    res.status(200).json({ message: "อัปเดตสถานะ booking สำเร็จ", updatedBuilding: existingBuilding });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ✅ DELETE a building by ID
 app.delete("/api/buildings/:id", async (req, res) => {
