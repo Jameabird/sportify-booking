@@ -11,11 +11,18 @@ const PromotionTable = () => {
 
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/promotions")
-      .then((res) => res.json())
-      .then((data) => setPromotions(data))
-      .catch((err) => console.error("Error fetching promotions:", err));
+    const fetchPromotions = () => {
+      fetch("http://localhost:5001/api/promotions")
+        .then((res) => res.json())
+        .then((data) => setPromotions(data))
+        .catch((err) => console.error("Error fetching promotions:", err));
+    };
+  
+    fetchPromotions();
+    const interval = setInterval(fetchPromotions, 60000); // อัปเดตทุก 60 วินาที
+    return () => clearInterval(interval);
   }, []);
+  
 
   const handleEdit = (promo) => {
     setEditingId(promo._id);
@@ -30,7 +37,7 @@ const PromotionTable = () => {
   const handleSave = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/promotions/${editingId}`,
+        `http://localhost:5001/api/promotions/${editingId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -59,7 +66,7 @@ const PromotionTable = () => {
   const handleDelete = async (id) => {
     if (window.confirm("คุณต้องการลบโปรโมชั่นนี้ใช่หรือไม่?")) {
       try {
-        const res = await fetch(`http://localhost:5000/api/promotions/${id}`, {
+        const res = await fetch(`http://localhost:5001/api/promotions/${id}`, {
           method: "DELETE",
         });
 
