@@ -12,6 +12,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AddAccountPage() {
   const router = useRouter();
@@ -25,11 +28,10 @@ export default function AddAccountPage() {
 
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(null);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [dialogSeverity, setDialogSeverity] = useState("success");
@@ -59,11 +61,11 @@ export default function AddAccountPage() {
       setOpenSnackbar(true);
       return;
     }
-  
+
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/owners", 
+        "http://localhost:5000/api/owners",
         formData,
         {
           headers: {
@@ -71,13 +73,13 @@ export default function AddAccountPage() {
           },
         }
       );
-  
+
       console.log("✅ Owner created:", res.data);
-  
+
       setSnackbarMessage("Account saved successfully!");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
-  
+
       setDialogMessage("The account has been added successfully.");
       setDialogSeverity("success");
       setOpenDialog(true);
@@ -130,15 +132,22 @@ export default function AddAccountPage() {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <label className="block text-lg font-medium text-gray-600">Password</label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
               />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <Visibility /> : <VisibilityOff />}
+              </button>
             </div>
 
             <div>

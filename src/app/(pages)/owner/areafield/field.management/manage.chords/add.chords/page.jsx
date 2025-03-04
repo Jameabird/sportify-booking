@@ -134,7 +134,7 @@ function AddBuildingForm() {
 
           <div className="button-group">
             <button type="submit" className="save-btn">save</button>
-            <button type="button" className="cancel-btn" onClick={() => router.push('/owner/areafield/field.management')}>
+            <button type="button" className="cancel-btn" onClick={() => router.push('/owner/areafield/field.management/manage.chords')}>
               cancel
             </button>
           </div>
