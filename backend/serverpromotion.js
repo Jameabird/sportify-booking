@@ -22,27 +22,36 @@ app.get("/api/promotions", async (req, res) => {
   try {
     const promotions = await Promotion.find();
 
-    const updatedPromotions = promotions.map((promo) => {
-      const today = new Date();
-      const endDate = promo.enddate ? new Date(promo.enddate) : null;
+    const updatedPromotions = await Promise.all(
+      promotions.map(async (promo) => {
+        const today = new Date();
+        const endDate = promo.enddate ? new Date(promo.enddate) : null;
 
-      let status;
-      if (!endDate) {
-        status = "online"; 
-      } else if (today.toDateString() === endDate.toDateString()) {
-        status = "online"; 
-      } else {
-        status = today > endDate ? "offline" : "online"; 
-      }
+        let status;
+        if (!endDate) {
+          status = "online";
+        } else if (today.toDateString() === endDate.toDateString()) {
+          status = "online";
+        } else {
+          status = today > endDate ? "offline" : "online";
+        }
 
-      return { ...promo.toObject(), status };
-    });
+        // อัปเดตฐานข้อมูลหากสถานะเปลี่ยนแปลง
+        if (promo.status !== status) {
+          promo.status = status;
+          await promo.save(); // บันทึกลง MongoDB
+        }
+
+        return { ...promo.toObject(), status };
+      })
+    );
 
     res.json(updatedPromotions);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
   app.post("/api/promotions", async (req, res) => {
     try {
       const { name, description, status, startdate, enddate, sale, free } = req.body;

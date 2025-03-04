@@ -10,8 +10,8 @@ const adminCategories = [
   {
     title: "Financial Management",
     buttons: [
-      { text: "Confirm Payment", path: "/admin/areacomfirm" },
-      { text: "Refund", path: "/admin/arearefund" },
+      { text: "Confirm Payment", path: "/admin/areacomfirm/confirmpayment" },
+      { text: "Refund", path: "/admin/arearefund/refundmanagement" },
     ],
   },
   {
