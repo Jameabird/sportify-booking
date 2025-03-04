@@ -5,6 +5,7 @@ import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import TopBar_User from "@components/Topbar_User";
 import './popup.css';
+import axios from "axios";
 import {
   Box,
   Button,
@@ -32,6 +33,10 @@ import { DownOutlined, SmileOutlined } from "@ant-design/icons";
 import SportsTennisIcon from "@mui/icons-material/SportsTennis";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import { Tab } from "bootstrap";
+import { jwtDecode } from "jwt-decode";
+
+
+
 
 const Booking = () => {
   const [buildingNames, setBuildingNames] = useState([]);
@@ -41,58 +46,214 @@ const Booking = () => {
   const [CourtData, setCourtData] = useState([]);
   const placeName = sessionStorage.getItem("booking_place");
   const SportType = sessionStorage.getItem("SportType");
-  const [selectedDate, setSelectedDate] = useState(null);
   const [getSearch, setSearch] = useState(true);
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
+  const [selectedBookings, setSelectedBookings] = useState([]); // ⬅️ เก็บข้อมูล row ที่ถูกเลือก
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
-   const [isClient, setIsClient] = useState(false);
-    const [showQRPopup, setShowQRPopup] = useState(false);
-    const [showImagePopup, setShowImagePopup] = useState(false);  // เพิ่มการประกาศ showImagePopup
-    const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที (เวลาเป็นวินาที)
-    const [uploadedImage, setUploadedImage] = useState(null); // สำหรับจัดการการอัปโหลดรูปภาพ
+  const [isClient, setIsClient] = useState(false);
+  const [showQRPopup, setShowQRPopup] = useState(false);
+  const [showImagePopup, setShowImagePopup] = useState(false);  // เพิ่มการประกาศ showImagePopup
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที (เวลาเป็นวินาที)
+  const [uploadedImage, setUploadedImage] = useState(null); // สำหรับจัดการการอัปโหลดรูปภาพ
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [selectedCourts, setSelectedCourts] = useState([]);
+  const token = localStorage.getItem("token");
 
-    useEffect(() => {
-            setIsClient(true);
-        }, []);
-    
-        useEffect(() => {
-            if (timeLeft <= 0) return;
-    
-            const timer = setInterval(() => {
-                setTimeLeft(prevTime => prevTime - 1);
-            }, 1000); // ลดเวลาทุก 1 วินาที
-    
-            return () => clearInterval(timer); // คอยลบ interval เมื่อ component หยุดทำงาน
-        }, [timeLeft]);
-    
-        const formatTime = (seconds) => {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-        };
-    
-        const handleConfirm = () => {
-            setShowQRPopup(true); // เปิด Popup แสดง QR Code
-        };
-    
-        const handleImagePopup = () => {
-            setShowQRPopup(false);
-            setShowImagePopup(true);
-        };
-    
-        const handleFileUpload = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setUploadedImage(reader.result); // ตั้งค่าภาพที่อัปโหลด
-                };
-                reader.readAsDataURL(file); // อ่านไฟล์เป็น URL
-            }
-        };
+
+
+  const handleCheckboxChange = (court) => {
+    setSelectedCourts(prevSelected => {
+      const isSelected = prevSelected.some(item => item.name === court.name && item.time === court.time);
+      if (isSelected) {
+        console.log("Removing:", court);
+        return prevSelected.filter(item => !(item.name === court.name && item.time === court.time));
+      } else {
+        console.log("Adding:", court);
+        const updatedSelection = [...prevSelected, court];
+        console.log("New Selection:", updatedSelection); // ดูค่าที่อัปเดตแล้ว
+        return updatedSelection;
+      }
+    });
+  };
+
+
+  const handleClear = () => {
+    setSelectedCourts([]);
+    setTotalPrice(0);
+  };
+
+
+  const handleSelectBooking = (row) => {
+    setSelectedBookings((prev) => {
+      const isSelected = prev.some((item) => item.id === row.id);
+      if (isSelected) {
+        return prev.filter((item) => item.id !== row.id);
+      }
+      return [...prev, row];
+    });
+  };
+
+  // คำนวณราคารวม
+  const totalPrice = selectedCourts.reduce((sum, court) => sum + court.price, 0);
+
+  // รวมช่วงเวลาที่เลือกเป็น "15:00-16:00,16:00-17:00"
+  const selectedTimes = selectedCourts.map(court => court.time).join(", ");
+
+
+  // อัปเดตวันที่
+  const changeDate = (date) => {
+    setSelectedDate(dayjs(date).format("DD-MM-YYYY"));
+  };
+
+  const [selectedDatepaid, setSelectedDatepaid] = useState();
+
+  const changeDatepaid = (datepaid) => {
+    setSelectedDatepaid(dayjs(datepaid, "DD-MM-YYYY").toDate()); // แปลงเป็น Date Object
+  };
+
+
+
+
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prevTime => prevTime - 1);
+    }, 1000); // ลดเวลาทุก 1 วินาที
+
+    return () => clearInterval(timer); // คอยลบ interval เมื่อ component หยุดทำงาน
+  }, [timeLeft]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  };
+
+  const handleConfirm = async () => {
+    console.log("handleConfirm ถูกเรียกแล้ว ✅");
+    console.log("selectedCourts:", selectedCourts); // ตรวจสอบค่าที่เลือก
+
+    if (selectedCourts.length === 0) {
+      alert("กรุณาเลือกการจองก่อน");
+      return;
+    }
+
+    try {
+      setShowQRPopup(true);
+      console.log("Popup ควรเปิดตอนนี้: ", showPopup);
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
+    }
+  };
+
+
+  const showfirstPopup = () => {
+    setShowPopup(true);
+  }
+  const handleImagePopup = () => {
+    setShowPopup(false);
+    setShowQRPopup(false);
+    setShowImagePopup(true);
+  };
+  const [sportType, setSportType] = useState("");
+  const [username, setUsername] = useState(null);
+  const [role, setUserrole] = useState(null);
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token"); // ดึง Token จาก LocalStorage
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode(storedToken); // ✅ ถอดรหัส JWT เพื่อดึงค่า username
+        setUsername(decoded.username || "Guest");
+        setUserrole(decoded.role);
+        console.log("✅ Username จาก Token:", decoded.username);
+        console.log("✅ Username จาก Token:", decoded.role);
+      } catch (error) {
+        console.error("❌ Token ไม่ถูกต้อง:", error);
+      }
+    } else {
+      console.warn("⚠️ No token found, using Guest");
+      setUsername("Guest");
+    }
+  }, []);
+
+  const handleConfirmBooking = () => {
+    setShowImagePopup(false);
+    setShowPopup(false);
+    const bookingData = {
+      name: username || "Guest",
+      day: selectedDate || "ไม่ระบุ",
+      time: selectedTimes || "ไม่ระบุ",
+      location: placeName || "ไม่ระบุ", // ใช้ placeName แทน currentCourt
+      field: currentCourt,
+      status: "reserve",
+      price: totalPrice || 0,
+      type: "archer",
+      building: currentBuilding,
+      role: role,
+      datepaid: selectedDatepaid ? new Date(selectedDatepaid).toISOString() : new Date().toISOString(),
+      timepaid: typeof selectedTimePaid === "string" ? selectedTimePaid : ""
+
+
+    };
+
+    console.log("📝 ข้อมูลที่ส่งไป API:", bookingData); // ✅ ตรวจสอบค่าทั้งหมด
+
+    // ตรวจสอบว่ามีค่าที่เป็น null หรือ undefined หรือไม่
+    if (Object.values(bookingData).some(value => value === null || value === undefined || value === "")) {
+      console.error("❌ ข้อมูลไม่ครบ:", bookingData);
+      alert("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน!");
+      return;
+    }
+
+    saveBooking(bookingData);
+  };
+
+  const saveBooking = async (bookingData) => {
+    try {
+      const token = localStorage.getItem("token"); // ✅ ดึง Token จาก LocalStorage
+      const response = await axios.post("http://localhost:5002/api/bookings", bookingData, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // ✅ ส่ง Token ถ้าจำเป็น
+        }
+      });
+
+      console.log("✅ การจองสำเร็จ:", response.data);
+      alert("จองสำเร็จ!");
+    } catch (error) {
+      if (error.response) {
+        console.error("❌ API Error:", error.response.data); // ข้อผิดพลาดจาก Server
+      } else if (error.request) {
+        console.error("❌ No Response from Server:", error.request);
+      } else {
+        console.error("❌ Request Error:", error.message);
+      }
+    }
+  };
+
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result); // ตั้งค่าภาพที่อัปโหลด
+      };
+      reader.readAsDataURL(file); // อ่านไฟล์เป็น URL
+    }
+  };
+  useEffect(() => {
+    console.log("Updated Selected Courts:", selectedCourts);
+  }, [selectedCourts]);
+
+
 
   const Table_BoxStyles = props => ({
     styletablehead: {
@@ -107,14 +268,7 @@ const Booking = () => {
 
   const sortedData = CourtData.sort((a, b) => {
     if (orderBy) {
-      // Handle CHECK_STATUS sorting
-      // if (orderBy === "CHECK_STATUS") {
-      //   const statusA = a.Last_Checked === null ? "No Check" : "Checked";
-      //   const statusB = b.Last_Checked === null ? "No Check" : "Checked";
-      //   return order === "asc"
-      //     ? (statusA < statusB ? -1 : 1)
-      //     : (statusA > statusB ? -1 : 1);
-      // }
+
 
       // Handle other column sorting
       if (a[orderBy] < b[orderBy]) {
@@ -146,6 +300,18 @@ const Booking = () => {
       setBuildingNames(mockBuilding);
     }
   }, []);
+  useEffect(() => {
+    console.log("Popup state:", showQRPopup);
+  }, [showQRPopup]);
+
+
+  const [selectedTimePaid, setSelectedTimePaid] = useState("");
+  const handleTimeChange = (event) => {
+    setSelectedTimePaid(event.target.value);
+  };
+
+
+
 
   useEffect(
     () => {
@@ -207,10 +373,7 @@ const Booking = () => {
     [courtNames]
   );
 
-  const changeDate = date => {
-    // console.log(date);
-    setSelectedDate(dayjs(date).format("DD-MM-YYYY"));
-  };
+
 
   const itemsBuilding = buildingNames.map((val, index) => ({
     key: (index + 1).toString(),
@@ -220,6 +383,7 @@ const Booking = () => {
     disabled: !val.booking
   }));
 
+
   const itemsCourt = courtNames.map((val, index) => ({
     key: (index + 1).toString(),
     onClick: () => setCurrentCourt(val.name),
@@ -228,19 +392,12 @@ const Booking = () => {
     disabled: !val.booking
   }));
 
-  // console.log(CourtData);
-  // console.log(courtNames);
-
   const columns = ["Select", "Court", "Price", "Time"];
 
   const router = useRouter();
-
-  const handleBookingClick = () => {
-    router.push("/Payment"); // เปลี่ยนเส้นทางไปที่ http://localhost:3000/Payment
-  };
-
   return (
     <div className="absolute top-0 left-0 h-full w-full bg-cover bg-center">
+
       <TopBar_User textColor={"black"} />
       <Box
         sx={{
@@ -261,9 +418,7 @@ const Booking = () => {
         >
           <main className="container">
             <div className="pt-3 pl-5 h-40">
-              {/* <div className="font-medium text-white">
-              {`Home > ${SportType} > ${placeName} > Booking`}
-            </div> */}
+
               <div
                 className="grid grid-rows-auto gap-2 align-center justify-center items-center"
                 style={{ paddingTop: "100px" }}
@@ -283,7 +438,7 @@ const Booking = () => {
                     <div
                       className="font-bold text-white text-2xl"
                       style={{
-                        // textShadow: "2px 2px 4px #000000"
+                        // textShadow: "2px 2px 4px #000000 checkbox"
                         textShadow: "0 0 5px #03e9f4,0 0 7px #03e9f4"
                       }}
                     >
@@ -313,12 +468,7 @@ const Booking = () => {
               }}
             >
               <div className="pl-2 py-1">
-                <Space direction="vertical">
-                  <DatePicker
-                    style={{ border: "none" }}
-                    onChange={changeDate}
-                  />
-                </Space>
+                <DatePicker style={{ border: "none" }} onChange={changeDate} />
               </div>
               <div className="pl-3 text-2xl font-light">|</div>
               <div className="pl-3 pt-2.5 text-sm">
@@ -362,7 +512,7 @@ const Booking = () => {
               <div className="px-4 py-1 font-semibold">Search</div>
             </Button>
           </div>
-          {/*End Search */}
+          {/*End Search checkbox*/}
         </div>
         <div className="grid grid-cols-12 gap-2">
           <div className="m-12 col-span-12">
@@ -393,14 +543,10 @@ const Booking = () => {
                           // style={{ minWidth: 20 }}
                           colSpan={column === "Select" ? 1 : 2}
                           sx={{
-                            // border: "1px solid #000",
+
                             borderTopRightRadius: column === "Time" && "10px",
                             borderTopLeftRadius: column === "Select" && "10px",
-                            // borderRight: column !== "Time" && "1px solid #000",
-                            // borderLeft:
-                            //   column === "Select" ? "1px solid #000" : "0px",
-                            // borderBottom: "1px solid #000",
-                            // backgroundColor: "#C0E0FF",
+
                             fontWeight: "bold",
                             fontSize: "16px",
                             paddingLeft: "40px",
@@ -446,34 +592,19 @@ const Booking = () => {
                                         padding: 0.65,
                                         margin: 0
                                       }
-                                      // borderLeft: "1px solid #000",
-                                      // borderBottom:
-                                      //   rowIndex === lastIndex &&
-                                      //   "1px solid #000"
+
                                     }}
                                   >
                                     <div className="text-base font-bold">
                                       <Checkbox
                                         disabled={!row.booking}
-                                      // checked={selectedDataBaking.includes(
-                                      //   rowIndex
-                                      // )}
-                                      // onChange={() =>
-                                      //   handleRowSelectBaking(
-                                      //     rowIndex,
-                                      //     row
-                                      //   )} // Handle row selection
-                                      // sx={{
-                                      //   color: selectedDataBaking.includes(
-                                      //     rowIndex
-                                      //   )
-                                      //     ? "#1FAB89"
-                                      //     : "grey",
-                                      //   "&.Mui-checked": {
-                                      //     color: "#1FAB89"
-                                      //   }
-                                      // }}
+                                        onChange={() => handleCheckboxChange(row)}
+                                        checked={selectedCourts.some(item => item.name === row.name && item.time === row.time)}
                                       />
+                                      {console.log("Row:", row.name, row.time, "Checked:", selectedCourts.some(item => item.name === row.name && item.time === row.time))}
+
+
+
                                     </div>
                                   </TableCell>
                                   : column === "Court"
@@ -487,9 +618,7 @@ const Booking = () => {
                                           padding: 0.65,
                                           margin: 0
                                         }
-                                        // borderBottom:
-                                        //   rowIndex === lastIndex &&
-                                        //   "1px solid #000"
+
                                       }}
                                     >
                                       {row.name}
@@ -505,9 +634,7 @@ const Booking = () => {
                                             padding: 0.65,
                                             margin: 0
                                           }
-                                          // borderBottom:
-                                          //   rowIndex === lastIndex &&
-                                          //   "1px solid #000"
+
                                         }}
                                       >
                                         {row.price}
@@ -522,10 +649,7 @@ const Booking = () => {
                                             padding: 0.65,
                                             margin: 0
                                           }
-                                          // borderRight: "1px solid #000",
-                                          // borderBottom:
-                                          //   rowIndex === lastIndex &&
-                                          //   "1px solid #000"
+
                                         }}
                                       >
                                         {row.time}
@@ -553,258 +677,133 @@ const Booking = () => {
             </Box>
           </div>
           <div className="col-span-1 col-start-6 ">
-          
-                      <div className="popup-container">
-                        <Popup
-                          trigger={<button className="trigger-button" style={{
-                            backgroundColor: 'blue',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 20px',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                            width: '100%',
-                            
-                          }}>Booking</button>}
-                          modal
-                          nested
-                        >
-                          {close => (
-                            <div className="modal">
-                              <div className="header">รายละเอียดการจอง</div>
-                              <div className="content">
-                                <div className="booking-details">
-                                  <p><span>สถานที่:</span><span>Arena Pattaya</span></p>
-                                  <p><span>วันที่:</span><span>xx/xx/xx</span></p>
-                                  <p><span>เวลา:</span><span>xx : xx - xx : xx</span></p>
-                                  <p><span>ราคารวม:</span><span>฿360.00</span></p>
-                                </div>
-                              </div>
-                              <div className="actions">
-                                <button
-                                  className="confirm-button"
-                                  onClick={() => {
-                                    handleConfirm();
-                                    close(); // ปิด Popup แรก
-                                  }}
-                                >
-                                  ยืนยัน
-                                </button>
-                                <button className="cancel-button" onClick={close}>
-                                  ยกเลิก
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </Popup>
-          
-                        {/* Popup สำหรับแสดง QR Code */}
-                        <Popup
-                          open={showQRPopup}
-                          modal
-                          nested
-                          onClose={() => setShowQRPopup(false)} // ปิด Popup QR Code
-                        >
-                          <div className="modal">
-                            <div className="header"></div>
-                            <div className="content">
-                              <div style={{ position: 'relative' }}>
-                                <img
-                                  src="/myqr.png"
-                                  alt="QR Code"
-                                  className="qr-image"
-                                  style={{ width: '250px', height: '250px' }}
-                                />
-                                {/* ข้อความที่แสดง */}
-                                <p className="qr-description">
-                                  Arena Pattaya co.ltd<br />฿360.00
-                                </p>
-                                <div className="qr-price">
-                                  <div>ชำระเงินภายใน</div>
-                                  <span>{formatTime(timeLeft)}</span>
-                                </div>
-                              </div>
-                              <div className="actions">
-                                <button
-                                  className="confirm-button"
-                                  onClick={handleImagePopup} // เปิด Popup สำหรับอัปโหลดรูปภาพ
-                                >
-                                  ยืนยัน
-                                </button>
-                                <button
-                                  className="cancel-button"
-                                  onClick={() => setShowQRPopup(false)}
-                                >
-                                  ยกเลิก
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </Popup>
-          
-                        {/* Popup สำหรับอัปโหลดรูปภาพ */}
-                        <Popup open={showImagePopup} modal nested onClose={() => setShowImagePopup(false)}>
-                          <div className="modal">
-                            <div className="header">แนบหลักฐานการชำระเงิน</div>
-                            <div className="content">
-                              <input type="file" accept="image/*" onChange={handleFileUpload} />
-                              {uploadedImage && (
-                                <div className="uploaded-image-container">
-                                  <img
-                                    src={uploadedImage}
-                                    alt="Uploaded"
-                                    style={{
-                                      maxWidth: "200px",
-                                      maxHeight: "200px",
-                                      borderRadius: "10px",
-                                    }}
-                                  />
-                                  <p className="image-caption">กรุณาเลือก วัน/เวลา ที่ชำระ</p>
-                                  {/* Container สำหรับ วัน เดือน ปี */}
-                                  <div
-                                    className="date-picker-container"
-                                    style={{
-                                      display: "flex",
-                                      gap: "10px", // ระยะห่างระหว่าง dropdown
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      marginTop: "10px",
-                                    }}
-                                  >
-                                    {/* Dropdown สำหรับวัน */}
-                                    <select
-                                      id="day"
-                                      className="date-select"
-                                      defaultValue=""
-                                      style={{
-                                        padding: "5px",
-                                        borderRadius: "5px",
-                                        border: "1px solid #ccc",
-                                      }}
-                                    >
-                                      <option value="" disabled>
-                                        วัน
-                                      </option>
-                                      {Array.from({ length: 31 }, (_, i) => (
-                                        <option key={i + 1} value={i + 1}>
-                                          {i + 1}
-                                        </option>
-                                      ))}
-                                    </select>
-          
-                                    {/* Dropdown สำหรับเดือน */}
-                                    <select
-                                      id="month"
-                                      className="date-select"
-                                      defaultValue=""
-                                      style={{
-                                        padding: "5px",
-                                        borderRadius: "5px",
-                                        border: "1px solid #ccc",
-                                      }}
-                                    >
-                                      <option value="" disabled>
-                                        เดือน
-                                      </option>
-                                      {[
-                                        "มกราคม",
-                                        "กุมภาพันธ์",
-                                        "มีนาคม",
-                                        "เมษายน",
-                                        "พฤษภาคม",
-                                        "มิถุนายน",
-                                        "กรกฎาคม",
-                                        "สิงหาคม",
-                                        "กันยายน",
-                                        "ตุลาคม",
-                                        "พฤศจิกายน",
-                                        "ธันวาคม",
-                                      ].map((month, i) => (
-                                        <option key={i + 1} value={i + 1}>
-                                          {month}
-                                        </option>
-                                      ))}
-                                    </select>
-          
-                                    {/* Dropdown สำหรับปี */}
-                                    <select
-                                      id="year"
-                                      className="date-select"
-                                      defaultValue=""
-                                      style={{
-                                        padding: "5px",
-                                        borderRadius: "5px",
-                                        border: "1px solid #ccc",
-                                      }}
-                                    >
-                                      <option value="" disabled>
-                                        ปี
-                                      </option>
-                                      {Array.from({ length: 10 }, (_, i) => {
-                                        const year = new Date().getFullYear() - i;
-                                        return (
-                                          <option key={year} value={year}>
-                                            {year}
-                                          </option>
-                                        );
-                                      })}
-                                    </select>
-                                  </div>
-          
-                                  {/* ส่วนของเวลา */}
-                                  <div
-                                    className="time-picker-container"
-                                    style={{
-                                      marginTop: "10px",
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      gap: "10px",
-                                    }}
-                                  >
-                                    <label htmlFor="time" style={{ marginRight: "10px" }}>
-                                      เวลา:
-                                    </label>
-                                    <input
-                                      type="time"
-                                      id="time"
-                                      style={{
-                                        padding: "5px",
-                                        borderRadius: "5px",
-                                        border: "1px solid #ccc",
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            <div className="actions">
-                              <button
-                                className="confirm-button"
-                                onClick={() => setShowImagePopup(false)}
-                              >
-                                ยืนยัน
-                              </button>
-                              <button
-                                className="cancel-button"
-                                onClick={() => setShowImagePopup(false)}
-                              >
-                                ยกเลิก
-                              </button>
-                            </div>
-                          </div>
-                        </Popup>
-          
+            <div className="popup-container">
+              <button
+                className="trigger-button"
+                onClick={showfirstPopup}
+
+              >
+                Booking
+              </button>
+
+              {/* Popup รายละเอียดการจอง */}
+              <Popup open={showPopup} modal nested onClose={() => setShowPopup(false)}>
+                <div className="modal">
+                  <div className="header">รายละเอียดการจอง</div>
+                  <div className="content">
+                    <div className="booking-details">
+                      <p><span>สถานที่:</span> <span>{placeName}</span></p>
+                      <p><span>วันที่:</span> <span>{selectedDate || "กรุณาเลือกวันที่"}</span></p>
+                      <p><span>เวลา:</span><span>{selectedTimes}</span></p>
+                      <p><span>ราคารวม:</span><span>฿{totalPrice.toFixed(2)}</span></p>
+
+
+
+                    </div>
+                  </div>
+                  <div className="actions">
+                    <button className="confirm-button" onClick={handleConfirm}>
+                      ยืนยัน
+                    </button>
+                    <button className="cancel-button" onClick={() => setShowPopup(false)}>
+                      ยกเลิก
+                    </button>
+                  </div>
+                </div>
+              </Popup>
+
+              {/* Popup สำหรับแสดง QR Code */}
+              <Popup
+                open={showQRPopup}
+                modal
+                nested
+                onClose={() => setShowQRPopup(false)} // ปิด Popup QR Code
+              >
+                <div className="modal">
+                  <div className="header"></div>
+                  <div className="content">
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src="/myqr.png"
+                        alt="QR Code"
+                        className="qr-image"
+                        style={{ width: '250px', height: '250px' }}
+                      />
+                      {/* ข้อความที่แสดง */}
+                      <p className="qr-description">
+                        Arena Pattaya co.ltd<br />฿{totalPrice.toFixed(2)}
+                      </p>
+                      <div className="qr-price">
+                        <div>ชำระเงินภายใน</div>
+                        <span>{formatTime(timeLeft)}</span>
                       </div>
-                      
+                    
                     </div>
                     <div className="col-span-1 col-end-8">
                         <Button
                           sx={{ backgroundColor: "red", color: "white", width: "100%" ,height : "100%"}}
                         >
-                          Clear
-                        </Button>
+                          <div className="pl-2 py-1">
+                            <DatePicker style={{ border: "none" }} onChange={changeDatepaid} />
+                          </div>
+                        </div>
+
+                        {/* ส่วนของเวลา */}
+                        <div
+                          className="time-picker-container"
+                          style={{
+                            marginTop: "10px",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                        >
+
+                          <input
+                            type="time"
+                            id="timepaid"
+                            value={selectedTimePaid} // ✅ ตรวจสอบว่า value เป็น string
+                            onChange={handleTimeChange} // ✅ อัปเดตค่าให้ถูกต้อง
+                            style={{
+                              padding: "5px",
+                              borderRadius: "5px",
+                              border: "1px solid #ccc",
+                            }}
+                          />
+
+
+                        </div>
                       </div>
+                    )}
+                  </div>
+                  <div className="actions">
+                    <button
+                      className="confirm-button"
+                      onClick={handleConfirmBooking}
+                    >
+                      ยืนยัน
+                    </button>
+                    <button
+                      className="cancel-button"
+                      onClick={() => setShowImagePopup(false)}
+                    >
+                      ยกเลิก
+                    </button>
+                  </div>
+                </div>
+              </Popup>
+
+            </div>
+
+          </div>
+          <div className="col-span-1 col-end-8">
+            <Button
+              sx={{ backgroundColor: "red", color: "white", width: "100%", height: "100%" }}
+            >
+              Clear
+            </Button>
+          </div>
         </div>
       </div>
     </div>
