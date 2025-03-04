@@ -34,10 +34,23 @@ app.get("/api/bookings", async (req, res) => {
 
 app.post("/api/bookings", async (req, res) => {
   try {
-    
-    const { name, day, time, location, field, status, price, type, building, role, user, datepaid,timepaid} = req.body;
+    const {
+      name,
+      day,
+      time,
+      location,
+      field,
+      status,
+      price,
+      type,
+      building,
+      role,
+      user,
+      datepaid,
+      timepaid,
+    } = req.body;
 
-    if (!name || !day || !time || !location || !field || !type || !building ) {
+    if (!name || !day || !time || !location || !field || !type || !building) {
       return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
 
@@ -55,7 +68,6 @@ app.post("/api/bookings", async (req, res) => {
       user,
       datepaid,
       timepaid: timepaid || "",
-      
     });
 
     await newBooking.save();
@@ -64,7 +76,6 @@ app.post("/api/bookings", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // UPDATE booking by ID
 // UPDATE booking by ID (รวม image)
@@ -76,14 +87,19 @@ app.put("/api/bookings/:id", async (req, res) => {
       return res.status(400).json({ message: "ไม่มีข้อมูลสำหรับอัปเดต" });
     }
 
-    const updatedBooking = await Bookings.findByIdAndUpdate(id, req.body, { new: true });
+    const updatedBooking = await Bookings.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
 
     if (!updatedBooking) {
       return res.status(404).json({ message: "ไม่พบการจองที่ต้องการอัปเดต" });
-
     }
-  });
-  
+    res.status(200).json(updatedBooking);
+  } catch (err) {
+    console.error("Error updating booking:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // DELETE booking by ID
 app.delete("/api/bookings/:id", async (req, res) => {
@@ -95,8 +111,6 @@ app.delete("/api/bookings/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 const PORT = process.env.PORT2 || 5002;
 app.listen(PORT, () => {
