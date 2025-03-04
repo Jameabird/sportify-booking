@@ -89,5 +89,5 @@ app.get("/api/promotions", authenticate, async (req, res) => {
 
 
 // ✅ รันเซิร์ฟเวอร์
-const PORT = process.env.PORT1 || 4002;
+const PORT = process.env.PORT6 || 4002;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
