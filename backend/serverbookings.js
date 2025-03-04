@@ -2,12 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const Bookings = require("./models/Bookings.js"); // Use correct model name
 
 dotenv.config();
 
 const app = express();
-app.use(express.json());
+
+// ✅ Increase payload size limit (to 10MB)
+app.use(express.json({ limit: "50mb" })); // Increase limit to 50MB
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors());
 
 mongoose
@@ -19,6 +21,7 @@ mongoose
   .then(() => console.log("MongoDB Connected to SE"))
   .catch((err) => console.error(err));
 
+const Bookings = require("./models/Bookings.js");
 // GET bookings
 app.get("/api/bookings", async (req, res) => {
   try {
@@ -29,13 +32,25 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 
-// POST new booking
 app.post("/api/bookings", async (req, res) => {
   try {
-    
-    const { name, day, time, location, field, status, price, type, building, role, user, datepaid,timepaid} = req.body;
+    const {
+      name,
+      day,
+      time,
+      location,
+      field,
+      status,
+      price,
+      type,
+      building,
+      role,
+      user,
+      datepaid,
+      timepaid,
+    } = req.body;
 
-    if (!name || !day || !time || !location || !field || !type || !building ) {
+    if (!name || !day || !time || !location || !field || !type || !building) {
       return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
 
@@ -53,7 +68,6 @@ app.post("/api/bookings", async (req, res) => {
       user,
       datepaid,
       timepaid: timepaid || "",
-      
     });
 
     await newBooking.save();
@@ -64,6 +78,7 @@ app.post("/api/bookings", async (req, res) => {
 });
 
 // UPDATE booking by ID
+// UPDATE booking by ID (รวม image)
 app.put("/api/bookings/:id", async (req, res) => {
   try {
     console.log("📌 datepaid ที่ได้รับจาก client:", req.body.datepaid);
@@ -72,12 +87,13 @@ app.put("/api/bookings/:id", async (req, res) => {
       return res.status(400).json({ message: "ไม่มีข้อมูลสำหรับอัปเดต" });
     }
 
-    const updatedBooking = await Bookings.findByIdAndUpdate(id, req.body, { new: true });
+    const updatedBooking = await Bookings.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
 
     if (!updatedBooking) {
       return res.status(404).json({ message: "ไม่พบการจองที่ต้องการอัปเดต" });
     }
-
     res.status(200).json(updatedBooking);
   } catch (err) {
     console.error("Error updating booking:", err);
