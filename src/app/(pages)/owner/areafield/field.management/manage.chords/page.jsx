@@ -107,11 +107,6 @@ export default function CourtList() {
                   <td className="p-3">{court.open}</td>
                   <td className="p-3">{court.close}</td>
                   <td className="p-3 flex justify-center space-x-2">
-                    {/* ปุ่มแก้ไข */}
-                    <IconButton color="primary" onClick={() => handleClickOpenEdit(court)}>
-                      <Edit />
-                    </IconButton>
-
                     {/* ปุ่มลบ */}
                     <IconButton color="error" onClick={() => handleClickOpenDelete(court)}>
                       <Delete />
@@ -138,24 +133,6 @@ export default function CourtList() {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ Popup แก้ไขสนาม */}
-      <Dialog open={openEdit} onClose={handleCloseEdit}>
-        <DialogTitle>แก้ไขข้อมูลสนาม</DialogTitle>
-        <DialogContent>
-          <TextField fullWidth margin="dense" label="Court Name" name="name" value={editCourt.name} onChange={handleChange} />
-          <TextField fullWidth select margin="dense" label="ประเภทสนาม" name="type" value={editCourt.type} onChange={handleChange}>
-            <MenuItem value="สนามแบดมินตัน">สนามแบดมินตัน</MenuItem>
-            <MenuItem value="สนามฟุตบอล">สนามฟุตบอล</MenuItem>
-            <MenuItem value="สนามเทนนิส">สนามเทนนิส</MenuItem>
-          </TextField>
-          <TextField fullWidth margin="dense" label="Open Time" name="open" type="time" value={editCourt.open} onChange={handleChange} />
-          <TextField fullWidth margin="dense" label="Close Time" name="close" type="time" value={editCourt.close} onChange={handleChange} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEdit} color="secondary">ยกเลิก</Button>
-          <Button onClick={handleSaveEdit} variant="contained" color="primary">บันทึก</Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }
