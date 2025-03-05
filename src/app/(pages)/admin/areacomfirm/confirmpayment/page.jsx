@@ -80,13 +80,9 @@ const AdminPaidTable = () => {
   
     console.log("📌 Data to Save:", selectedRowsData); // Debugging
   
-    // วนลูปส่งทีละรายการเพื่อบันทึก
-    const savePromises = selectedRowsData.map((data) =>
-      axios.post("http://localhost:5003/api/confirm", data)
-    );
-  
-    // รอให้บันทึกเสร็จ จากนั้นลบออกจาก database ของ bookings
-    Promise.all(savePromises)
+    // **📌 เปลี่ยนเป็นส่ง Array ทั้งหมดแทนที่จะวนลูปส่งทีละตัว**
+    axios
+      .post("http://localhost:5003/api/confirm", selectedRowsData) // <-- ส่งเป็น Array
       .then(() => {
         alert("Confirmed bookings saved successfully!");
   
@@ -106,6 +102,9 @@ const AdminPaidTable = () => {
       })
       .catch((error) => console.error("❌ Error saving or deleting:", error));
   };
+  
+  
+  
   
   
   
