@@ -230,61 +230,6 @@ export default function Profile() {
                   className="text-field"
                 />
   
-                {/* Bank Information Section */}
-                <Typography variant="h8" className="bank-info-title">
-                  Bank Information
-                </Typography>
-                <Box display="flex" gap={2}>
-                  <TextField
-                    label="First Name"
-                    name="firstName"
-                    fullWidth
-                    value={profileData.firstName}
-                    disabled={!isEditing}
-                    onChange={handleInputChange}
-                    className="text-field"
-                  />
-                  <TextField
-                    label="Last Name"
-                    name="lastName"
-                    fullWidth
-                    value={profileData.lastName}
-                    disabled={!isEditing}
-                    onChange={handleInputChange}
-                    className="text-field"
-                  />
-                </Box>
-                <TextField
-                  label="Bank Account"
-                  name="accountNumber"
-                  fullWidth
-                  value={profileData.accountNumber}
-                  disabled={!isEditing}
-                  onChange={handleInputChange}
-                  className="text-field"
-                />
-                <FormControl fullWidth variant="outlined" className="select-control">
-                  <InputLabel className="select-label">Bank Name</InputLabel>
-                  <Select
-                    name="bank"
-                    value={profileData.bank}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    label="Bank Name"
-                    className="select-field"
-                  >
-                    <MenuItem value="PromptPay"> PromptPay </MenuItem>
-                    <MenuItem value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</MenuItem>
-                    <MenuItem value="SCB">ไทยพาณิชย์ (SCB)</MenuItem>
-                    <MenuItem value="KBank">กสิกรไทย (KBank)</MenuItem>
-                    <MenuItem value="Krungthai">กรุงไทย (Krungthai)</MenuItem>
-                    <MenuItem value="TTB">ทีทีบี (TTB)</MenuItem>
-                    <MenuItem value="BBL">กรุงเทพ (BBL)</MenuItem>
-                    <MenuItem value="Krungsri">กรุงศรีอยุธยา (Krungsri)</MenuItem>
-                    <MenuItem value="Thanachart">ธนชาต (Thanachart)</MenuItem>
-                  </Select>
-                </FormControl>
-  
                 <Box display="flex" justifyContent="space-between" mt={2}>
                   {isEditing ? (
                     <>
