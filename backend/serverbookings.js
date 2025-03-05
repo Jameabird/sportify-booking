@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const Bookings = require("./models/Bookings.js"); // Use correct model name
+const Refund = require("./models/refund.js");
 
 dotenv.config();
-
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -28,6 +28,39 @@ app.get("/api/bookings", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+app.post("/api/refund", async (req, res) => {
+  console.log("Received POST request:", req.body);  // Log the request
+  try {
+    const { name, day, time, status, price, datepaid, timepaid } = req.body;
+    const newRefund = new Refund({
+      name,
+      day,
+      time,
+      status,
+      price,
+      datepaid,
+      timepaid: timepaid || "",
+    });
+    await newRefund.save();
+    res.status(201).json({ message: ">>><<<", refund: newRefund });
+  } catch (err) {
+    console.error("Error:", err.message); // Log the error
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+app.get("/api/refund", async (req, res) => {
+  try {
+    const refunds = await Refund.find(); // ใช้ Refund ที่แก้ในข้อ 1
+    console.log("success");
+    res.json(refunds);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 // POST new booking
 app.post("/api/bookings", async (req, res) => {

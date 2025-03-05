@@ -200,8 +200,6 @@ const Booking = () => {
       role: role,
       datepaid: selectedDatepaid ? new Date(selectedDatepaid).toISOString() : new Date().toISOString(),
       timepaid: typeof selectedTimePaid === "string" ? selectedTimePaid : ""
-
-
     };
 
     console.log("📝 ข้อมูลที่ส่งไป API:", bookingData); // ✅ ตรวจสอบค่าทั้งหมด
