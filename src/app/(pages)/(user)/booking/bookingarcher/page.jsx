@@ -118,9 +118,6 @@ const Booking = () => {
     setSelectedDatepaid(dayjs(datepaid, "DD-MM-YYYY").toDate()); // แปลงเป็น Date Object
   };
 
-
-
-
   useEffect(() => {
     if (timeLeft <= 0) return;
 
