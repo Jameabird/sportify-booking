@@ -14,9 +14,13 @@ const AdminPaidTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5002/api/bookings")
-      .then((response) => setRows(response.data))
-      .catch((error) => console.error("Error fetching bookings:", error));
+  .get("http://localhost:5002/api/bookings")
+  .then((response) => {
+    const filteredData = response.data.filter((row) => row.status === "reserve");
+    setRows(filteredData);
+  })
+  .catch((error) => console.error("Error fetching bookings:", error));
+
   }, []);
 
   const handleDeleteClick = (id) => {
@@ -102,12 +106,6 @@ const AdminPaidTable = () => {
       })
       .catch((error) => console.error("❌ Error saving or deleting:", error));
   };
-  
-  
-  
-  
-  
-  
   return (
     <>
       <TopBar_Admin textColor={"black"} />
