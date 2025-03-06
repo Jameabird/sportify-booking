@@ -165,6 +165,7 @@ const ArcherBooking = () => {
         >
           Clear
         </button>
+        
       </div>
     </div>
   );
