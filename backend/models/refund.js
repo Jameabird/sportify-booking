@@ -10,4 +10,4 @@ const RefundSchema = new mongoose.Schema({
   timepaid: { type: String, required: true }
 });
 
-module.exports = mongoose.models.refund || mongoose.model("refund", RefundSchema);
+module.exports = mongoose.models.refund || mongoose.model("Refund", RefundSchema);
