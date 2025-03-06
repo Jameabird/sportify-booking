@@ -32,9 +32,14 @@ app.get("/api/bookings", async (req, res) => {
   }
 });
 app.post("/api/refund", async (req, res) => {
-  console.log("Received POST request:", req.body);  // Log the request
   try {
-    const { name, day, time, status, price, datepaid, timepaid } = req.body;
+    const { name, day, time, status, price, datepaid, timepaid, userId } = req.body;
+
+    // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
+    if (!name || !day || !time || !status || !price || !timepaid) {
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+    }
+
     const newRefund = new Refund({
       name,
       day,
@@ -42,26 +47,35 @@ app.post("/api/refund", async (req, res) => {
       status,
       price,
       datepaid,
-      timepaid: timepaid || "",
+      timepaid,
+      userId,
     });
+
     await newRefund.save();
-    res.status(201).json({ message: ">>><<<", refund: newRefund });
+    res.status(201).json({ message: "สร้างการคืนเงินสำเร็จ", refund: newRefund });
   } catch (err) {
-    console.error("Error:", err.message); // Log the error
     res.status(500).json({ error: err.message });
   }
 });
 
+
+const Users = require("./models/user.js"); // ตรวจสอบให้แน่ใจว่ามีโมเดล Users
 
 app.get("/api/refund", async (req, res) => {
   try {
-    const refunds = await Refund.find(); // ใช้ Refund ที่แก้ในข้อ 1
-    console.log("success");
-    res.json(refunds);
+    const refunds = await Refund.find({ status: "cancel" }).populate("userId", "accountNumber");
+
+    const result = refunds.map(refund => ({
+      ...refund.toObject(),
+      accountNumber: refund.userId?.accountNumber || "N/A", // ถ้าไม่มี accountNumber ให้ใช้ "N/A"
+    }));
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 

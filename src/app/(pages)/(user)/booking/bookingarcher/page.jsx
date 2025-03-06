@@ -223,7 +223,7 @@ const Booking = () => {
 
       console.log("✅ การจองสำเร็จ:", response.data);
       alert("จองสำเร็จ!");
-    } catch (error) {
+    } catch (error)  { 
       if (error.response) {
         console.error("❌ API Error:", error.response.data); // ข้อผิดพลาดจาก Server
       } else if (error.request) {
@@ -683,7 +683,7 @@ const Booking = () => {
                 Booking
               </button>
 
-              {/* Popup รายละเอียดการจอง */}
+              {/* Popup รายละเอียดการจอง  */}
               <Popup open={showPopup} modal nested onClose={() => setShowPopup(false)}>
                 <div className="modal">
                   <div className="header">รายละเอียดการจอง</div>

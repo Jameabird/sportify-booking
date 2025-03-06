@@ -12,7 +12,8 @@ const BookingsSchema = new mongoose.Schema({
   building: { type: String, required: true },
   role: { type: String, required: true },
   datepaid: { type: Date, default: Date.now },
-  timepaid: { type: String, required: true }
+  timepaid: { type: String, required: true },
+  accountNumber: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, // เชื่อมกับ Users
 });
 
 module.exports = mongoose.models.Bookings || mongoose.model("Bookings", BookingsSchema);
