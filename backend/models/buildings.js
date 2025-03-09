@@ -1,17 +1,22 @@
 const mongoose = require("mongoose");
 
 const FieldSchema = new mongoose.Schema({
-  Price: { type: String, required: true },
-  Time: { type: String, required: true },
-  Booking: { type: Boolean, required: true },
+  Price: { type: String, required: false },
+  Booking: { type: Boolean, default: false },
+  open: { type: String, required: false },
+  close: { type: String, required: false }
 });
 
-const BuildingSchema = new mongoose.Schema(
-  {
-    Type: { type: String, required: true },
-    Building: { type: Map, of: new mongoose.Schema({}, { strict: false }) }, // ✅ Allow any structure
-  },
-  { strict: false } // ✅ Allow extra fields
-);
+const BuildingSchema = new mongoose.Schema({
+  Type: { type: String, required: true },
+  Building: {
+    type: Map,
+    of: new mongoose.Schema({
+      type: Map,
+      of: FieldSchema // ✅ Now includes all properties
+    })
+  }
+});
 
-module.exports = mongoose.models.Building || mongoose.model("Building", BuildingSchema);
+const Building = mongoose.model("Building", BuildingSchema);
+module.exports = Building;
