@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import TopBar_Owner from "@components/Topbar_Owner";
 import styles from "./CourtManagement.module.css";
+import { Building } from "lucide-react";
 
 const CourtManagement = () => {
     const [courtData, setCourtData] = useState([]);
@@ -27,62 +28,81 @@ const CourtManagement = () => {
                 throw new Error("Failed to fetch data");
             }
             const data = await response.json();
-
-            // แปลงข้อมูล JSON เป็นรูปแบบที่ใช้งานง่าย
-            const formattedData = data.map(item => {
-                const buildingName = Object.keys(item.Building)[0]; // เช่น "Building1"
-                const fields = Object.entries(item.Building[buildingName]).map(([fieldName, fieldData]) => ({
-                    id: fieldName, // เช่น "Field1", "Field2"
-                    building: buildingName,
-                    price: fieldData.Price,
-                    time: fieldData.Time,
-                    booking: fieldData.Booking // ค่าจริง/เท็จ
-                }));
-                return {
-                    type: item.Type, // ประเภทกีฬา เช่น "Archer"
-                    building: buildingName,
-                    fields
-                };
-            });
-
-            setCourtData(formattedData);
+    
+            console.log("✅ Raw Data from API after update:", JSON.stringify(data, null, 2));
+    
+            if (!Array.isArray(data)) {
+                throw new Error("❌ Data is not an array!");
+            }
+    
+            const formattedData = data.map(item => ({
+                type: item.Type,
+                buildings: Object.entries(item.Building || {}).map(([buildingName, fields]) => ({
+                    name: buildingName,
+                    fields: Object.entries(fields || {}).map(([fieldName, fieldData]) => ({
+                        id: fieldName,
+                        price: fieldData?.Price || "N/A",
+                        open: fieldData?.open || "00:00",
+                        close: fieldData?.close || "00:00",
+                        booking: fieldData?.Booking ?? false // ✅ Ensure state changes
+                    }))
+                }))
+            }));
+    
+            console.log("✅ Processed Data for State:", JSON.stringify(formattedData, null, 2));
+    
+            setCourtData([...formattedData]); // ✅ Forces a state update
+    
         } catch (error) {
             console.error("❌ Error fetching court data:", error);
+            setCourtData([]); // Prevent UI errors
         }
-    };
-
-    // ฟังก์ชันเปิด/ปิด Booking
-    const toggleBooking = async (type, building, fieldId, currentStatus) => {
-        const newBookingStatus = !currentStatus; // Toggle true/false
+    };    
     
-        console.log("📤 Sending data:", JSON.stringify({ type, building, fieldId, booking: newBookingStatus }));
+    // ฟังก์ชันเปิด/ปิด Booking
+    const toggleBooking = async (type, buildingName, fieldKey, currentStatus) => {
+        if (!buildingName || !fieldKey) {
+            console.error("❌ Missing Building Name or Field Key:", { buildingName, fieldKey });
+            return;
+        }
+    
+        const newStatus = !currentStatus; // Toggle the booking status
+    
+        const requestData = {
+            Type: type,
+            Building: {
+                [buildingName]: {
+                    [fieldKey]: {
+                        Booking: newStatus
+                    }
+                }
+            }
+        };
+    
+        console.log("📌 Sending data to API:", JSON.stringify(requestData, null, 2));
     
         try {
             const response = await fetch("http://localhost:5005/api/update-buildings", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type, building, fieldId, booking: newBookingStatus }),
+                body: JSON.stringify(requestData)
             });
     
-            const responseData = await response.json();
+            const data = await response.json();
+            console.log("✅ Updated Data from API:", JSON.stringify(data, null, 2));
+    
             if (!response.ok) {
-                throw new Error(`❌ Failed: ${responseData.message || "Unknown error"}`);
+                throw new Error(data.message || "❌ Failed to update booking");
             }
     
-            console.log(`✅ Booking updated: ${responseData.message}`);
+            // ✅ Fetch updated data after API request
+            await fetchCourtData();
     
-            // รีโหลดข้อมูลใหม่จาก API
-            fetchCourtData();
         } catch (error) {
             console.error("❌ Error:", error);
         }
-    };
+    };       
     
-
-    if (!isClient) {
-        return null;
-    }
-
     return (
         <Box className={styles.container}>
             <TopBar_Owner textColor={"black"} />
@@ -94,41 +114,48 @@ const CourtManagement = () => {
                         <Typography variant="h5" fontWeight="bold" color="secondary" gutterBottom>
                             ประเภทกีฬา: {courtGroup.type}
                         </Typography>
-                        <TableContainer component={Paper} className={styles.tableContainer}>
-                            <Table>
-                                <TableHead className={styles.tableHead}>
-                                    <TableRow>
-                                        {["No.", "Building", "Field", "Price", "Time", "Booking", "Actions"].map((head, index) => (
-                                            <TableCell key={index} className={styles.tableHeadCell}>{head}</TableCell>
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {courtGroup.fields.map((field, fieldIndex) => (
-                                        <TableRow key={`${courtGroup.building}-${field.id}`} className={styles.tableRow}>
-                                            <TableCell align="center">{typeIndex + 1}.{fieldIndex + 1}</TableCell>
-                                            <TableCell align="center">{courtGroup.building}</TableCell>
-                                            <TableCell align="center">{field.id}</TableCell>
-                                            <TableCell align="center">{field.price}</TableCell>
-                                            <TableCell align="center">{field.time}</TableCell>
-                                            <TableCell align="center">
-                                                <Button
-                                                    variant="contained"
-                                                    color={field.booking ? "success" : "error"}
-                                                    onClick={() => toggleBooking(courtGroup.type, courtGroup.building, field.id)}
-                                                >
-                                                    {field.booking ? "✅ เปิด" : "❌ ปิด"}
-                                                </Button>
-                                            </TableCell>
-                                            <TableCell align="center">
-                                                <IconButton color="primary"><Edit /></IconButton>
-                                                <IconButton color="error"><Delete /></IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        {courtGroup.buildings.map((building, buildingIndex) => (
+                            <Box key={buildingIndex} sx={{ mb: 4 }}>
+                                <Typography variant="h6" fontWeight="bold">
+                                    อาคาร: {building.name}
+                                </Typography>
+                                <TableContainer component={Paper} className={styles.tableContainer}>
+                                    <Table>
+                                        <TableHead className={styles.tableHead}>
+                                            <TableRow>
+                                                {["No.", "Field", "Price", "Time", "Booking", "Actions"].map((head, index) => (
+                                                    <TableCell key={index} className={styles.tableHeadCell}>{head}</TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {building.fields.map((field, fieldIndex) => (
+                                                <TableRow key={`${building.name}-${field.id}`} className={styles.tableRow}>
+                                                    <TableCell align="center">{buildingIndex + 1}.{fieldIndex + 1}</TableCell>
+                                                    <TableCell align="center">{field.id}</TableCell>
+                                                    <TableCell align="center">{field.price}</TableCell>
+                                                    <TableCell align="center">{field.open} - {field.close}</TableCell>
+                                                    <TableCell align="center">
+                                                    <Button
+                                                            variant="contained"
+                                                            color={field.booking ? "success" : "error"}
+                                                            onClick={() => toggleBooking(courtGroup.type, building.name, field.id, field.booking)}
+                                                    >
+                                                            {field.booking ? "✅ เปิด" : "❌ ปิด"}
+                                                    </Button>
+
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <IconButton color="primary"><Edit /></IconButton>
+                                                        <IconButton color="error"><Delete /></IconButton>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </Box>
+                        ))}
                     </Box>
                 ))}
             </Box>
