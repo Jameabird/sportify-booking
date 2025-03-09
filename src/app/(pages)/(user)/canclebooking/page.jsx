@@ -14,7 +14,7 @@ const BookingList = () => {
         const response = await axios.get("http://localhost:5002/api/bookings");
         const formattedData = response.data.map((booking) => ({
           _id: booking._id,
-          image: `/images/${booking.type}.jpg`,
+          image: `/assets/${booking.type}/${booking.type}.jpg`,
           location: `${booking.building} ${booking.location}`,
           day: booking.day,
           time: booking.time,
