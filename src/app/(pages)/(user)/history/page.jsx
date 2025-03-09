@@ -118,11 +118,10 @@ const HistoryPage = () => {
           ) : (
             usershistory.map((item) => (
               <div key={item._id} className="booking-card">
-                <img
-                  src={item.image}
-                  className="booking-image"
-                  alt={item.type}
-                />
+            
+
+<img src={item.image}  className="booking-image" alt={item.type} />
+
                 <div className="booking-info">
                   <p>
                     <strong>Location:</strong> {item.location}
