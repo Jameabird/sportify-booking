@@ -20,7 +20,7 @@ mongoose.connection.once("open", async () => {
   console.log("🔗 Available Collections:", collections.map(c => c.name));
 });
 
-// Booking History Schema
+
 const bookingSchema = new mongoose.Schema({
   name: String,
   image: String,
@@ -83,8 +83,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// API ดึงประวัติการจองของผู้ใช้
-// API ดึงประวัติการจองของผู้ใช้และ owner
 app.get("/api/history", authenticate, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -102,8 +100,10 @@ app.get("/api/history", authenticate, async (req, res) => {
     } else if (req.user.role === "owner") {
       history = await BookingHistory.find({ "owner._id": objectId });
     } else {
-      history = await BookingHistory.find({ "user._id": objectId });
-    }
+      history = await BookingHistory.find({
+        "user._id": objectId,
+        status: { $in: ["reserve", "cancel"] }, // ✅ ดึงเฉพาะ reserve กับ cancel
+      });    }
 
     console.log("✅ Retrieved history:", history);
     res.json(history);
