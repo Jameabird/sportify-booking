@@ -114,7 +114,7 @@ app.get("/api/history", authenticate, async (req, res) => {
 });
 
 
-const PORT = process.env.PORT1 || 4000;
+const PORT = process.env.PORT6 || 4000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
