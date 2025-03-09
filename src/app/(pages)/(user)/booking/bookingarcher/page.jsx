@@ -3,12 +3,27 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TopBar_User from "@components/Topbar_User";
+import Popup from 'reactjs-popup';
+import './popup.css';
 
 const ArcherBooking = () => {
   const [data, setData] = useState({});
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedBuilding, setSelectedBuilding] = useState("");
   const [selectedCheckboxes, setSelectedCheckboxes] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+  const [showQRPopup, setShowQRPopup] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 นาที (เวลาเป็นวินาที)
+  const [showImagePopup, setShowImagePopup] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [selectedCourts, setSelectedCourts] = useState("");
+  const [selectedDatePaid, setSelectedDatePaid] = useState("");
+  const [selectedTimePaid, setSelectedTimePaid] = useState("");
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("");
+  const showfirstPopup = () => {
+    setShowPopup(true);
+  };
 
   // ✅ Fetch Data from API and Filter Type "Archer"
   useEffect(() => {
@@ -35,46 +50,150 @@ const ArcherBooking = () => {
         console.error("❌ Error fetching data:", error);
       });
   }, []);
-
-  // Function to handle checkbox selection
-  const handleCheckboxChange = (field) => {
-    setSelectedCheckboxes((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
+  const handleConfirmBooking = async () => {
+    const selectedCourts = Object.keys(selectedCheckboxes).filter(
+      (field) => selectedCheckboxes[field]
+    );
+  
+    if (!selectedDate || !selectedBuilding || selectedCourts.length === 0) {
+      console.error("⚠️ Missing required fields:", { selectedDate, selectedBuilding, selectedCourts });
+      alert("❌ กรุณากรอกข้อมูลให้ครบถ้วน!");
+      return;
+    }
+  
+    const bookingData = {
+      name: username || "chayanin talubngirn",
+      day: selectedDate,  // ✅ Ensure selectedDate is set
+      time: selectedTimes || "ไม่ระบุ",
+      location: selectedBuilding,
+      field: Array.isArray(selectedCourts) ? selectedCourts.join(", ") : selectedCourts,
+      status: "reserve",
+      price: totalPrice || 0,
+      type: "archer",
+      building: selectedBuilding,
+      role: "user",
+      datepaid: selectedDatePaid ? new Date(selectedDatePaid).toISOString() : new Date().toISOString(),
+      timepaid: selectedTimePaid || ""
+    };
+  
+    console.log("📌 Booking Data Sent:", bookingData);
+  
+    try {
+      const response = await fetch("http://localhost:5002/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
+      });
+  
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "เกิดข้อผิดพลาด");
+  
+      console.log("✅ Booking successful:", result);
+      alert("✅ จองสำเร็จ!");
+      setShowImagePopup(false);
+    } catch (error) {
+      console.error("❌ Booking failed:", error);
+      alert("❌ เกิดข้อผิดพลาดในการจอง");
+    }
   };
+  // ✅ Function to handle checkbox selection
+  const handleCheckboxChange = (field) => {
+    setSelectedCheckboxes((prev) => {
+      const updatedCheckboxes = { ...prev, [field]: !prev[field] };
+      
+      // Update selectedCourts to reflect checked boxes
+      const updatedCourts = Object.keys(updatedCheckboxes)
+        .filter((key) => updatedCheckboxes[key]);
+  
+      setSelectedCourts(updatedCourts);
+      return updatedCheckboxes;
+    });
+  };
+  const handleTimeChange = (e) => {
+    const selectedTime = e.target.value;
+    console.log("⏰ Time Selected:", selectedTime);
+    setSelectedTimePaid(selectedTime); // Assuming selectedTimePaid holds the selected time
+  };
+  
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  };
+  const handleImagePopup = () => {
+    setShowPopup(false);
+    setShowQRPopup(false);
+    setShowImagePopup(true); selectedTimes
+  };
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result); // ตั้งค่าภาพที่อัปโหลด
+      };
+      reader.readAsDataURL(file); // อ่านไฟล์เป็น URL
+    }
+  };
+
+  // ✅ Compute selected times
+  const selectedTimes = Object.keys(selectedCheckboxes)
+    .filter((field) => selectedCheckboxes[field])
+    .map((field) => data[selectedBuilding]?.[field]?.Time || "Unknown Time")
+    .join(", ") || "No time selected";
+
+  // ✅ Compute total price
+  const totalPrice = Object.keys(selectedCheckboxes)
+    .filter((field) => selectedCheckboxes[field])
+    .reduce((total, field) => total + (parseFloat(data[selectedBuilding]?.[field]?.Price) || 0), 0);
 
   // ✅ Clear only checkboxes (keep date & building selection)
   const handleClear = () => {
     setSelectedCheckboxes({}); // Clears all checkboxes but keeps other selections
   };
+  const handleConfirm = async () => {
+    console.log("handleConfirm ถูกเรียกแล้ว ✅");
+    console.log("selectedCourts:", selectedCourts); // ตรวจสอบค่าที่เลือก
+
+    // if (selectedCourts.length === 0) {
+    //   alert("กรุณาเลือกการจองก่อน");
+    //   return;
+    // }
+
+    try {
+      setShowQRPopup(true);
+      console.log("Popup ควรเปิดตอนนี้: ", showPopup);
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
+    }
+  };
 
   // ✅ Handle Booking Button Click
-  const handleBooking = () => {
-    const selectedCourts = Object.keys(selectedCheckboxes).filter(
-      (field) => selectedCheckboxes[field]
-    );
+  // const handleBooking = () => {
+  //   const selectedCourts = Object.keys(selectedCheckboxes).filter(
+  //     (field) => selectedCheckboxes[field]
+  //   );
 
-    if (!selectedDate) {
-      alert("❌ Please select a date.");
-      return;
-    }
-    if (!selectedBuilding) {
-      alert("❌ Please select a building.");
-      return;
-    }
-    if (selectedCourts.length === 0) {
-      alert("❌ Please select at least one court.");
-      return;
-    }
+  //   if (!selectedDate) {
+  //     alert("❌ Please select a date.");
+  //     return;
+  //   }
+  //   if (!selectedBuilding) {
+  //     alert("❌ Please select a building.");
+  //     return;
+  //   }
+  //   if (selectedCourts.length === 0) {
+  //     alert("❌ Please select at least one court.");
+  //     return;
+  //   }
 
-    console.log("✅ Booking confirmed:");
-    console.log("📅 Date:", selectedDate);
-    console.log("🏢 Building:", selectedBuilding);
-    console.log("🎯 Courts:", selectedCourts);
+  //   console.log("✅ Booking confirmed:");
+  //   console.log("📅 Date:", selectedDate);
+  //   console.log("🏢 Building:", selectedBuilding);
+  //   console.log("🎯 Courts:", selectedCourts);
     
-    alert("✅ Booking successful!");
-  };
+  //   alert("✅ Booking successful!");
+  // };
 
   return (
     <div className="w-full">
@@ -100,7 +219,10 @@ const ArcherBooking = () => {
           <input
             type="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            onChange={(e) => {
+              console.log("📅 Date Selected:", e.target.value);
+              setSelectedDate(e.target.value);
+            }}
             className="border rounded-md px-3 py-2"
           />
 
@@ -135,12 +257,12 @@ const ArcherBooking = () => {
               Object.entries(data[selectedBuilding]).map(([field, details]) => (
                 <tr key={field} className="border-b text-center">
                   <td className="p-2">
-                    <input
-                      type="checkbox"
-                      checked={!!selectedCheckboxes[field]} // Bind checkbox to state
-                      onChange={() => handleCheckboxChange(field)}
-                      disabled={!details.Booking}
-                    />
+                  <input
+                    type="checkbox"
+                    checked={!!selectedCheckboxes[field]} // ✅ Syncs with state
+                    onChange={() => handleCheckboxChange(field)}
+                    disabled={!details.Booking}
+                  />
                   </td>
                   <td className="p-2">{field}</td>
                   <td className="p-2">{details.Price}</td>
@@ -151,21 +273,165 @@ const ArcherBooking = () => {
         </table>
       </div>
 
-      {/* Buttons */}
-      <div className="flex justify-center gap-4 mt-5">
-        <button
-          onClick={handleBooking} // ✅ Booking button
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md"
-        >
+      {/* Popup Button */}
+      <div className="popup-container text-center mt-5">
+        <button className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md" onClick={showfirstPopup}>
           Booking
         </button>
-        <button
-          onClick={handleClear} // ✅ Clear button
-          className="px-6 py-3 bg-red-600 text-white rounded-lg shadow-md"
-        >
+        <button onClick={handleClear} className="px-6 py-3 bg-red-600 text-white rounded-lg shadow-md">
           Clear
         </button>
-        
+      </div>
+
+      {/* Popup for Booking Details */}
+      <Popup open={showPopup} modal nested onClose={() => setShowPopup(false)}>
+                <div className="modal">
+                  <div className="header">รายละเอียดการจอง</div>
+                  <div className="content">
+                    <div className="booking-details">
+                      <p><span>สถานที่:</span> <span>{selectedBuilding || "กรุณาเลือกสถานที่"}</span></p>
+                      <p><span>วันที่:</span> <span>{selectedDatePaid || "กรุณาเลือกวันที่"}</span></p>
+                      <p><span>เวลา:</span><span>{selectedTimes}</span></p>
+                      <p><span>ราคารวม:</span><span>฿{totalPrice.toFixed(2)}</span></p>selectedTimes
+                    </div>
+                  </div>
+                  <div className="actions">
+                    <button className="confirm-button" onClick={handleConfirm}>
+                      ยืนยัน
+                    </button>
+                    <button className="cancel-button" onClick={() => setShowPopup(false)}>
+                      ยกเลิก
+                    </button>
+                  </div>
+                </div>
+              </Popup>
+
+              {/* Popup สำหรับแสดง QR Code */}
+              <Popup
+                open={showQRPopup}
+                modal
+                nested
+                onClose={() => setShowQRPopup(false)} // ปิด Popup QR Code
+              >
+                <div className="modal">
+                  <div className="header"></div>
+                  <div className="content">
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src="/myqr.png"
+                        alt="QR Code"
+                        className="qr-image"
+                        style={{ width: '250px', height: '250px' }}
+                      />
+                      {/* ข้อความที่แสดง */}
+                      <p className="qr-description">
+                        Arena Pattaya co.ltd<br />฿{totalPrice.toFixed(2)}
+                      </p>
+                      <div className="qr-price">
+                        <div>ชำระเงินภายใน</div>
+                        <span>{formatTime(timeLeft)}</span>
+                      </div>
+                    </div>
+                    <div className="actions">
+                      <button
+                        className="confirm-button"
+                        onClick={handleImagePopup} // เปิด Popup สำหรับอัปโหลดรูปภาพ
+                      >
+                        ยืนยัน
+                      </button>
+                      <button
+                        className="cancel-button"
+                        onClick={() => setShowQRPopup(false)}
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Popup>
+
+              {/* Popup สำหรับอัปโหลดรูปภาพ */}
+              <Popup open={showImagePopup} modal nested onClose={() => setShowImagePopup(false)}>
+                <div className="modal">
+                  <div className="header">แนบหลักฐานการชำระเงิน</div>
+                  <div className="content">
+                    <input type="file" accept="image/*" onChange={handleFileUpload} />
+                    {uploadedImage && (
+                      <div className="uploaded-image-container">
+                        <img
+                          src={uploadedImage}
+                          alt="Uploaded"
+                          style={{
+                            maxWidth: "200px",
+                            maxHeight: "200px",
+                            borderRadius: "10px",
+                          }}
+                        />
+                        <p className="image-caption">กรุณาเลือก วัน/เวลา ที่ชำระ</p>
+                        {/* Container สำหรับ วัน เดือน ปี */}
+                        <div
+                          className="date-picker-container"
+                          style={{
+                            display: "flex",
+                            gap: "10px", // ระยะห่างระหว่าง dropdown
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginTop: "10px",
+                          }}
+                        >
+                          {/* <div className="pl-2 py-1">
+                            <DatePicker style={{ border: "none" }} onChange={changeDatepaid} />
+                          </div> */}
+                        </div>
+
+                        {/* ส่วนของเวลา */}
+                        <div
+                          className="time-picker-container"
+                          style={{
+                            marginTop: "10px",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                        >
+
+                          <input
+                            type="time"
+                            id="timepaid"
+                            value={selectedTimePaid} // ✅ ตรวจสอบว่า value เป็น string
+                            onChange={handleTimeChange} // ✅ อัปเดตค่าให้ถูกต้อง
+                            style={{
+                              padding: "5px",
+                              borderRadius: "5px",
+                              border: "1px solid #ccc",
+                            }}
+                          />
+
+
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="actions">
+                    <button
+                      className="confirm-button"
+                      onClick={handleConfirmBooking}
+                    >
+                      ยืนยัน
+                    </button>
+                    <button
+                      className="cancel-button"
+                      onClick={() => setShowImagePopup(false)}
+                    >
+                      ยกเลิก
+                    </button>
+                  </div>
+                </div>
+              </Popup>
+
+      {/* Buttons */}
+      <div className="flex justify-center gap-4 mt-5">
       </div>
     </div>
   );

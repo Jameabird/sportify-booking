@@ -1,99 +1,69 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TopBar_Admin from '@components/Topbar_Admin';
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const AdminPaidTable = () => {
-  const router = useRouter(); // Move it inside the component
-  const [rows, setRows] = useState([
-    {
-      id: 1,
-      name: 'userA AAA',
-      date: '01/01/25',
-      time: '01/01/2525 13.00 น.',
-      status: 'Pending review',
-      price: 150,
-      paymentDetails: {
-        id: 1,
-        datePaid: 'Jul 24, 2024',
-        customer: 'John Doe',
-        paymentMethod: 'transfer money through bank account',
-        bankNumber: '123456789',
-        status: 'Pending review'
-      }
-    },
-    {
-      id: 2,
-      name: 'userB BBB',
-      date: '01/01/25',
-      time: '01/01/2525 13.30 น.',
-      status: 'Pending review',
-      price: 250,
-      paymentDetails: {
-        id: 2,
-        datePaid: 'Jul 25, 2024',
-        customer: 'Jane Doe',
-        paymentMethod: 'credit card',
-        bankNumber: '987654321',
-        status: 'Pending review'
-      }
-    }
-  ]);
+  const router = useRouter();
+  const [rows, setRows] = useState([]);
 
-  const [showReceiptPopup, setShowReceiptPopup] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5002/api/bookings");
+        const filteredData = response.data?.filter(
+          (booking) => booking && booking.status?.trim().toLowerCase() === "cancel"
+        );
+        setRows(filteredData || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const [showManagePopup, setShowManagePopup] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [paymentDetails, setPaymentDetails] = useState(null);
-  const [selectedRowId, setSelectedRowId] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleArrowClick = () => {
-    router.push("/admin/arearefund"); // Route to /admin/area
+    router.push("/admin/arearefund");
   };
 
-  const handleReceiptClick = (image) => {
-    setSelectedImage(image);
-    setShowReceiptPopup(true);
-  };
-
-  const handleManageClick = (image, details, rowId) => {
-    setSelectedImage(image);
-    setPaymentDetails(details);
-    setSelectedRowId(rowId);
+  const handleManageClick = (row) => {
+    setSelectedData(row);
     setShowManagePopup(true);
-  };
-
-  const handleCloseReceiptPopup = () => {
-    setShowReceiptPopup(false);
-    setSelectedImage(null);
   };
 
   const handleCloseManagePopup = () => {
     setShowManagePopup(false);
-    setSelectedImage(null);
-    setPaymentDetails(null);
-    setSelectedRowId(null);
+    setSelectedData(null);
+    setSelectedFile(null);
   };
 
-  const handleDeleteRow = (id) => {
-    setRows(rows.filter(row => row.id !== id));
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
   };
 
-  const handleRefund = () => {
-    setRows(rows.map(row =>
-      row.id === selectedRowId
-        ? {
-          ...row,
-          status: 'Refunded',
-          className: 'bg-green-500 rounded-full',
-          paymentDetails: {
-            ...row.paymentDetails,
-            status: 'อนุมัติแล้ว'  // เปลี่ยนสถานะของ paymentDetails
-          }
-        }
-        : row
-    ));
+  const updateBookingStatus = async (id, status) => {
+    try {
+      await axios.put(`http://localhost:5002/api/bookings/${id}`, { status });
+      setRows(rows.map(row => row._id === id ? { ...row, status } : row));
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
 
+  const handleRefundPayment = async () => {
+    if (!selectedData) return;
+    await updateBookingStatus(selectedData._id, "refunded");
     handleCloseManagePopup();
+  };
+
+  const handleDeleteRow = async (id) => {
+    await updateBookingStatus(id, "reserve");
   };
 
   return (
@@ -101,22 +71,11 @@ const AdminPaidTable = () => {
       <TopBar_Admin textColor="black" />
       <div className="p-6">
         <div className="flex items-center">
-          
-          <button
-            className="p-4  text-black font-bold rounded-full text-3xl"
-            
-          >
+          <button className="p-4 text-black font-bold rounded-full text-3xl">
             <span className="text-3xl" onClick={handleArrowClick}>&lt;</span>
           </button>
         </div>
         <h1 className="text-2xl font-semibold text-center mb-4">Refund Management</h1>
-        <div className="mt-4 flex justify-center">
-          <input
-            type="text"
-            placeholder="Search Name"
-            className="border border-black rounded justify-item-center px-3 py-2 w-1/3 shadow-sm"
-          />
-        </div>
 
         <table className="table-auto w-full border-collapse border border-gray-300 mt-4 text-center shadow-lg rounded-lg overflow-hidden">
           <thead className="bg-gray-200">
@@ -125,76 +84,63 @@ const AdminPaidTable = () => {
               <th className="p-3">Name</th>
               <th className="p-3">Time</th>
               <th className="p-3">Status</th>
-              <th className="p-3">Receipt</th>
               <th className="p-3">Amount</th>
               <th className="p-3">จัดการ</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-b border-gray-300 hover:bg-gray-100 transition">
-                <td className="p-3">{row.date}</td>
-                <td className="p-3">{row.name}</td>
-                <td className="p-3">{row.time}</td>
-                <td className="p-3">{row.status}</td>
-                <td className="p-3">
-                  <img
-                    src="/mybill.jpg"
-                    className="w-12 h-12 cursor-pointer rounded-lg shadow"
-                    onClick={() => handleReceiptClick('/mybill.jpg')}
-                  />
-                </td>
-                <td className="p-3">{row.price}</td>
-                <td className="p-3 flex justify-center gap-2">
-                  {row.paymentDetails.status === 'อนุมัติแล้ว' ? (
-                    <span className="text-green-600">อนุมัติ</span>
-                  ) : (
-                    <>
-                      <img
-                        src="/myqr.png"
-                        className="w-6 h-6 cursor-pointer"
-                        onClick={() => handleManageClick('/myqr.png', row.paymentDetails, row.id)}
-                      />
-                      <button
-                        onClick={() => handleDeleteRow(row.id)}
-                        className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-700 transition">
-                        🗑
-                      </button>
-                    </>
-                  )}
-                </td>
+            {rows?.length > 0 ? (
+              rows.map((row) => (
+                <tr key={row?._id} className="border-b border-gray-300 hover:bg-gray-100 transition">
+                  <td className="p-3">{row?.day}</td>
+                  <td className="p-3">{row?.name}</td>
+                  <td className="p-3">{row?.time}</td>
+                  <td className="p-3">{row?.status}</td>
+                  <td className="p-3">{row?.price} baht</td>
+                  <td className="p-3 flex justify-center gap-2">
+                    <img 
+                      src={row?.paymentDetails?.image || "/placeholder.png"} 
+                      className="w-6 h-6 cursor-pointer" 
+                      onClick={() => handleManageClick(row)} 
+                    />
+                    <button
+                      onClick={() => handleDeleteRow(row?._id)}
+                      className="p-2 bg-red-500 text-white rounded shadow hover:bg-red-700 transition"
+                    >
+                      🗑
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-3 text-center text-gray-500">ไม่มีข้อมูลการจองที่ถูกยกเลิก</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        <button className='bg-blue-500 text-white rounded px-6 py-3 text-xl mx-auto mt-3 block'>
-          Save
-        </button>
 
-        {showReceiptPopup && (
+        {showManagePopup && selectedData && (
           <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <img src={selectedImage} className="w-80 max-w-xs h-auto mx-auto rounded-lg shadow-lg" />
-              <button className="bg-red-600 text-white px-4 py-2 mt-4 rounded-lg shadow hover:bg-red-700" onClick={handleCloseReceiptPopup}>Close</button>
-            </div>
-          </div>
-        )}
-
-        {showManagePopup && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-lg font-semibold mb-2">Payment details</h2>
-              <img src={selectedImage} className="w-80 max-w-xs h-auto mx-auto rounded-lg shadow-lg" />
-              <div className="mt-4 text-left">
-                <p><strong>Date Paid:</strong> {paymentDetails.datePaid}</p>
-                <p><strong>Customer:</strong> {paymentDetails.customer}</p>
-                <p><strong>Payment method:</strong> {paymentDetails.paymentMethod}</p>
-                <p><strong>Bank number:</strong> {paymentDetails.bankNumber}</p>
-              </div>
-              <div className="flex justify-between mt-4">
-                <button className="bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700" onClick={handleCloseManagePopup}>Close</button>
-                <button className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700" onClick={handleRefund}>Refund Payment</button>
-              </div>
+              <h2 className="text-lg font-semibold mb-2">Payment Details</h2>
+              <input type="file" onChange={handleFileChange} className="mb-2" />
+              <p><strong>Day:</strong> {selectedData.day}</p>
+              <p><strong>Name:</strong> {selectedData.name}</p>
+              <p><strong>Payment Method:</strong> Transfer money through bank account</p>
+              <p><strong>Bank Number:</strong> {selectedData.paymentDetails?.bankNumber || "N/A"}</p>
+              <button
+                className="bg-green-600 text-white px-4 py-2 mt-4 rounded-lg shadow hover:bg-green-700"
+                onClick={handleRefundPayment}
+              >
+                Refund Payment
+              </button>
+              <button
+                className="bg-gray-600 text-white px-4 py-2 mt-4 ml-2 rounded-lg shadow hover:bg-gray-700"
+                onClick={handleCloseManagePopup}
+              >
+                Close
+              </button>
             </div>
           </div>
         )}
