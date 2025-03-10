@@ -18,7 +18,7 @@ const adminCategories = [
     title: "Management",
     buttons: [
       { text: "Owner Management", path: "/admin/management" },
-      { text: "Report", path: "/admin/areareport" },
+      { text: "Report", path: "/admin/areareport/report" },
       { text: "Promotion", path: "/admin/promotion" },
     ],
   },

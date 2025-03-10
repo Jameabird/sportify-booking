@@ -5,9 +5,8 @@ import TopBar_Admin from '@components/Topbar_Admin';
 import { useRouter } from "next/navigation";
 const FinancialReport = () => {
   const [data] = useState([
-    { id: 1, date: "01/01/25", item: "จองสนามแบด", amount: 2500, officer: "อาคารแบด 1", status: "success" },
-    { id: 2, date: "01/01/25", item: "คืนเงินลูกค้า", amount: -1200, officer: "user B", status: "refunded" },
-    { id: 3, date: "01/01/25", item: "จองสนามฟุตบอล", amount: 3000, officer: "อาคารฟุตบอล 1", status: "success" },
+    { id: 1, date: "01/01/25"},
+    
   ]);
 
   const handleDateClick = (date) => {
@@ -35,15 +34,7 @@ const FinancialReport = () => {
 
         {/* Summary Section */}
         <div className="flex flex-col items-center mb-6">
-          <div className="flex items-center mb-2">
-            <input type="date" className="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div className="text-lg text-center">
-            รายได้รวม: <span className="font-medium">27,000฿</span> |
-            หัก 5%: <span className="font-medium">3,000฿</span> |
-            Officer Payout: <span className="font-medium">25,000฿</span> |
-            Refunded: <span className="font-medium">2,000฿</span>
-          </div>
+          
         </div>
 
         {/* Table Section */}
@@ -51,11 +42,13 @@ const FinancialReport = () => {
           <table className="table-fixed w-full text-sm">
             <thead className="bg-gray-200 text-gray-700">
               <tr>
-                <th className="p-3 w-1/5 text-left">วันที่</th>
-                <th className="p-3 w-1/5 text-left">รายการ</th>
-                <th className="p-3 w-1/5 text-left">จำนวนเงิน</th>
-                <th className="p-3 w-1/5 text-left">Officer</th>
-                <th className="p-3 w-1/5 text-center">Status</th>
+                <th className="p-3 w-1/5 text-left">Day</th>
+                <th className="p-3 w-1/5 text-left">Name</th>
+                <th className="p-3 w-1/5 text-left">รายได้รวม</th>
+                <th className="p-3 w-1/5 text-left">คืนเงิน</th>
+                <th className="p-3 w-1/5 text-center">หัก 5%</th>
+                <th className="p-3 w-1/5 text-center">เงินออก</th>
+                <th className="p-3 w-1/5 text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody>

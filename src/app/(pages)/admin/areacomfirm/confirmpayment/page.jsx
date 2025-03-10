@@ -49,7 +49,7 @@ const AdminPaidTable = () => {
   };
 
   const handleArrowClick = () => {
-    router.push("/admin/areacomfirm");
+    router.push("/admin/");
   };
 
   // ฟังก์ชันเลือก / ยกเลิกเลือกแถว
@@ -118,7 +118,7 @@ const AdminPaidTable = () => {
             &lt;
           </button>
           <h1 className="text-2xl font-semibold flex-grow">
-            Better Club Pattaya
+            Confirm payment
           </h1>
         </div>
         <div className="shadow bg-white p-4 rounded">
@@ -129,7 +129,7 @@ const AdminPaidTable = () => {
                 <th className="p-2"> </th>
                 <th className="p-2">Day</th>
                 <th className="p-2">Name</th>
-                <th className="p-2">Time/Day in Transfer Receipt</th>
+                <th className="p-2">Time</th>
                 <th className="p-2">Status</th>
                 <th className="p-2">Receipt</th>
                 <th className="p-2">Price</th>
