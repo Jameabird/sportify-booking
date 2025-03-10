@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// เชื่อมต่อ MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   dbName: "SE",
 }).then(() => console.log("✅ MongoDB Connected to SE"))
@@ -20,35 +21,16 @@ mongoose.connection.once("open", async () => {
   console.log("🔗 Available Collections:", collections.map(c => c.name));
 });
 
-
-const bookingSchema = new mongoose.Schema({
+// 📌 สร้าง Mongoose Schema สำหรับ Buildings
+const buildingSchema = new mongoose.Schema({
   name: String,
   image: String,
-  day: String,
-  time: String,
-  location: String,
-  status: String,
-  price: String,
-  type: String,
-  role: String,
-  user: {
-    _id: mongoose.Schema.Types.ObjectId,
-    username: String,
-    email: String,
-    role: String,
-  },
-  owner: {
-    _id: mongoose.Schema.Types.ObjectId,
-    username: String,
-    email: String,
-    role: String,
-  },
-},
-{ strict: false });
+  location: String, // จังหวัด
+});
 
-const BookingHistory = mongoose.model("BookingHistory", bookingSchema, "history");
+const Building = mongoose.model("Building", buildingSchema);
 
-// Middleware สำหรับตรวจสอบ JWT
+// 📌 Middleware ตรวจสอบ JWT Token
 const authenticate = (req, res, next) => {
   let token = req.header("Authorization")?.replace("Bearer ", "");
 
@@ -74,47 +56,25 @@ const authenticate = (req, res, next) => {
     next();
   } catch (error) {
     console.error("🚨 JWT Authentication Error:", error.message);
-
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Token has expired, please log in again" });
     }
-
     return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
 
-app.get("/api/history", authenticate, async (req, res) => {
+// 📌 API ดึงข้อมูลอาคารจากฐานข้อมูล
+app.get("/api/buildings", authenticate, async (req, res) => {
   try {
-    const userId = req.user.userId;
-    console.log("🔹 Fetching history for userId:", userId, "Role:", req.user.role);
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid user ID format" });
-    }
-
-    const objectId = new mongoose.Types.ObjectId(userId);
-
-    let history;
-    if (req.user.role === "admin") {
-      history = await BookingHistory.find({});
-    } else if (req.user.role === "owner") {
-      history = await BookingHistory.find({ "owner._id": objectId });
-    } else {
-      history = await BookingHistory.find({
-        "user._id": objectId,
-        status: { $in: ["reserve", "cancel"] }, // ✅ ดึงเฉพาะ reserve กับ cancel
-      });    }
-
-    console.log("✅ Retrieved history:", history);
-    res.json(history);
+    const buildings = await Building.find();
+    res.json(buildings);
   } catch (error) {
-    console.error("🚨 Error retrieving booking history:", error.message);
-    res.status(500).json({ message: "Error retrieving booking history", error: error.message });
+    console.error("🚨 Error fetching buildings:", error);
+    res.status(500).json({ message: "Failed to fetch buildings" });
   }
 });
 
-
-const PORT = process.env.PORT6 || 4003;
+const PORT = process.env.PORT8 || 4005;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -30,7 +30,7 @@ const HistoryPage = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4000/api/history", {
+        const res = await axios.get("http://localhost:4003/api/history", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("✅ User data received:", res.data);
@@ -49,20 +49,20 @@ const HistoryPage = () => {
     fetchUserData();
   }, []);
 
-  const bookingCounts = usershistory.reduce((acc, item) => {
-    acc[item.type] = (acc[item.type] || 0) + 1;
-    return acc;
-  }, {});
+  const filteredHistory = usershistory.filter((item) =>
+    ["reserve", "cancel"].includes(item.status)
+  );
 
-  const couponCounts = usershistory.reduce((acc, item) => {
-    if (!item.coupons || item.coupons === "false") {
-      // ตรวจสอบทั้ง boolean และ string
+  const bookingCounts = filteredHistory.reduce((acc, item) => {
+    // ถ้า status เป็น "cancel" จะไม่ทำการนับ type
+    if (item.status !== "cancel") {
       acc[item.type] = (acc[item.type] || 0) + 1;
     }
     return acc;
   }, {});
+  
 
-  const totalBookings = usershistory.length;
+  const totalBookings = filteredHistory.filter(item => item.status !== "cancel").length;
 
   return (
     <>
@@ -90,7 +90,7 @@ const HistoryPage = () => {
             </div>
 
             {/* ปุ่มคูปอง */}
-            <div className="coupon-button-container">
+            {/* <div className="coupon-button-container">
               <button
                 className="coupon-button"
                 onClick={() => setShowCouponDetails(!showCouponDetails)}
@@ -106,7 +106,7 @@ const HistoryPage = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -123,6 +123,7 @@ const HistoryPage = () => {
                   className="booking-image"
                   alt={item.type}
                 />
+
                 <div className="booking-info">
                   <p>
                     <strong>Location:</strong> {item.location}
@@ -135,6 +136,9 @@ const HistoryPage = () => {
                   </p>
                   <p>
                     <strong>Price:</strong> {item.price}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {item.status}
                   </p>
                 </div>
               </div>
