@@ -14,15 +14,15 @@ const HistoryPageOwner = () => {
   const [statusFilter, setStatusFilter] = useState("reserve");
   const [searchQuery, setSearchQuery] = useState("");
   const [usersData, setUsersData] = useState([]);
-  const [loading, setLoading] = useState(false); // ✅ เพิ่ม state สำหรับ loading
-  const [error, setError] = useState(null); // ✅ เพิ่ม state สำหรับ error
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem("token"));
     const token = tokenData ? tokenData.token : null;
 
     if (!token || Date.now() > tokenData?.expirationTime) {
-      console.log("❌ Token is missing or expired.");
+      console.log("Token is missing or expired.");
       setError("Token is missing or expired. Please log in again.");
       setLoading(false);
       return;
@@ -32,11 +32,11 @@ const HistoryPageOwner = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4000/api/history", {
+        const res = await axios.get("http://localhost:4003/api/history", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("✅ User data received:", res.data);
-        setUsersData(res.data); // ✅ ใช้ setUsersData แทน setUsersHistory
+        setUsersData(res.data); 
       } catch (error) {
         console.error(
           "🚨 Error fetching user data:",
@@ -51,15 +51,20 @@ const HistoryPageOwner = () => {
     fetchUserData();
   }, []);
 
-  // ✅ ฟิลเตอร์ข้อมูลตาม statusFilter และ searchQuery
   const filteredByStatus =
     statusFilter === "all"
-      ? usersData.filter((user) => user.status !== "refund") // ✅ กรอง refund ออก
+      ? usersData.filter((user) => user.status !== "refund") 
       : usersData.filter((user) => user.status === statusFilter);
 
-  const filteredUsers = filteredByStatus.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      const collator = new Intl.Collator("th", { numeric: true, sensitivity: "base" });
+
+      const filteredUsers = filteredByStatus
+        .filter((user) =>
+          user.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => collator.compare(a.name, b.name)); 
+      
+    
 
   useEffect(() => {
     const adjustScrollBar = () => {
