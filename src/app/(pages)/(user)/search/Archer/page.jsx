@@ -14,7 +14,6 @@ function SearchPages() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-  // 📌 ฟังก์ชันดึงข้อมูลจากเซิร์ฟเวอร์
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem("token"));
     const token = tokenData ? tokenData.token : null;
@@ -35,9 +34,10 @@ function SearchPages() {
         });
         console.log("✅ Buildings data received:", res.data);
 
-        // 🔹 กรองข้อมูลให้เหลือเฉพาะ Type "Archer"
-        const archerBuildings = res.data.filter((item) => item.Type === "Archer");
-        
+        const archerBuildings = res.data.filter(
+          (item) => item.Type === "Archer"
+        );
+
         setBuildings(archerBuildings);
       } catch (error) {
         console.error(
@@ -53,12 +53,13 @@ function SearchPages() {
     fetchBuildings();
   }, []);
 
-  // 📌 ฟิลเตอร์ตามจังหวัดและคำค้นหา
   const filteredBuildings = buildings.filter(
     (building) =>
       (selectedProvince === "" || building.location === selectedProvince) &&
       building.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   return (
     <div>
@@ -72,7 +73,7 @@ function SearchPages() {
                 alt="Map Preview"
               />
             </div>
-           
+
             <select
               className="province-dropdown"
               value={selectedProvince}
@@ -103,11 +104,15 @@ function SearchPages() {
                         className="place-image"
                       />
                       <h3 className="place-name">{building.name}</h3>
-                      
                     </div>
-                    <button className="book-button">
-                      Book
-                    </button>
+                    <div>
+                      <button
+                        className="book-button"
+                        onClick={() => router.push("/booking/bookingarcher")}
+                      >
+                        Book
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

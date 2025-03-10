@@ -36,8 +36,10 @@ function SearchPages() {
         console.log("✅ Buildings data received:", res.data);
 
         // 🔹 กรองข้อมูลให้เหลือเฉพาะ Type "Archer"
-        const archerBuildings = res.data.filter((item) => item.Type === "Badminton");
-        
+        const archerBuildings = res.data.filter(
+          (item) => item.Type === "Badminton"
+        );
+
         setBuildings(archerBuildings);
       } catch (error) {
         console.error(
@@ -72,7 +74,7 @@ function SearchPages() {
                 alt="Map Preview"
               />
             </div>
-           
+
             <select
               className="province-dropdown"
               value={selectedProvince}
@@ -104,9 +106,14 @@ function SearchPages() {
                       />
                       <h3 className="place-name">{building.name}</h3>
                     </div>
-                    <button className="book-button">
-                      Book
-                    </button>
+                    <div>
+                      <button
+                        className="book-button"
+                        onClick={() => router.push("/booking/bookingbadminton")}
+                      >
+                        Book
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
