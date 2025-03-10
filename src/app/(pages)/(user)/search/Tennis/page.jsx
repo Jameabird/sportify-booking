@@ -104,9 +104,14 @@ function SearchPages() {
                       />
                       <h3 className="place-name">{building.name}</h3>
                     </div>
-                    <button className="book-button">
-                      Book
-                    </button>
+                    <div>
+                      <button
+                        className="book-button"
+                        onClick={() => router.push("/booking/bookingtennis")}
+                      >
+                        Book
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
