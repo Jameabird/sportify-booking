@@ -32,7 +32,7 @@ const HistoryPageAdmin = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4000/api/history", {
+        const res = await axios.get("http://localhost:4003/api/history", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("✅ User data received:", res.data);
@@ -56,9 +56,13 @@ const HistoryPageAdmin = () => {
       ? usersHistory
       : usersHistory.filter((user) => user.status === statusFilter);
 
-  const filteredUsers = filteredByStatus.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      const filteredUsers = filteredByStatus
+      .filter((user) =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => a.name.localeCompare(b.name, "th")); 
+    
+    
 
   useEffect(() => {
     const adjustScrollBar = () => {
