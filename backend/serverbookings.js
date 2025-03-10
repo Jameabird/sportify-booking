@@ -97,9 +97,6 @@ app.get("/api/refund", async (req, res) => {
   }
 });
 
-
-
-
 app.post("/api/bookings", async (req, res) => {
   console.log(req.body);
   try {
@@ -117,6 +114,7 @@ app.post("/api/bookings", async (req, res) => {
       user,
       datepaid,
       timepaid,
+      image,
     } = req.body;
 
     if (!name || !day || !time || !location || !field || !type || !building) {
@@ -137,6 +135,7 @@ app.post("/api/bookings", async (req, res) => {
       user,
       datepaid,
       timepaid: timepaid || "",
+      image,
     });
 
     await newBooking.save();

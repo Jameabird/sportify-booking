@@ -1,3 +1,4 @@
+const { image } = require("@nextui-org/react");
 const mongoose = require("mongoose");
 
 const BookingsSchema = new mongoose.Schema({
@@ -13,6 +14,7 @@ const BookingsSchema = new mongoose.Schema({
   role: { type: String, required: true },
   datepaid: { type: Date, default: Date.now },
   timepaid: { type: String, required: true },
+  image: { type: String, required: true },
   accountNumber: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, // เชื่อมกับ Users
 });
 
