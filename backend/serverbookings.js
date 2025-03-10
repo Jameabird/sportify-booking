@@ -80,6 +80,7 @@ app.get("/api/refund", async (req, res) => {
 
 
 app.post("/api/bookings", async (req, res) => {
+  console.log(req.body);
   try {
     const {
       name,

@@ -94,10 +94,6 @@ const TopBar_Officer = (props) => {
         <Link href="/officer" style={getLinkStyle("/officer")}>
           Home
         </Link>
-        <Link href="/officer/history" style={getLinkStyle("/officer/history")}>
-          History
-        </Link>
-
         {/* Avatar User */}
         <Box sx={{ padding: "0 15px" }}>
           <Avatar
