@@ -6,12 +6,31 @@ import TopBar_User from "@components/Topbar_User";
 
 const BookingList = () => {
   const [bookings, setBookings] = useState([]);
+  const [user, setUser] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
+    // ดึงข้อมูลผู้ใช้จาก Local Storage หรือ API (กรณีใช้ JWT หรือ Session)
+    const fetchUser = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return; // ถ้ายังไม่มีข้อมูลผู้ใช้ ให้รอ
+
     const fetchBookings = async () => {
       try {
-        const response = await axios.get("http://localhost:5002/api/bookings");
+        const response = await axios.get(`http://localhost:5002/api/bookings?userId=${user._id}`);
         const formattedData = response.data.map((booking) => ({
           _id: booking._id,
           image: `/assets/${booking.type}/${booking.type}.jpg`,
@@ -26,7 +45,7 @@ const BookingList = () => {
     };
 
     fetchBookings();
-  }, []);
+  }, [user]);
 
   const handleCancel = async (id) => {
     try {
