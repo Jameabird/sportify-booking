@@ -139,7 +139,7 @@ const ArcherBooking = () => {
   // ✅ Compute selected times
   const selectedTimes = Object.keys(selectedCheckboxes)
     .filter((field) => selectedCheckboxes[field])
-    .map((field) => data[selectedBuilding]?.[field]?.Time || "Unknown Time")
+    .map((field) => data[selectedBuilding]?.[field]?.open || "Unknown Time")
     .join(", ") || "No time selected";
 
   // ✅ Compute total price
@@ -218,7 +218,7 @@ const ArcherBooking = () => {
           {/* Date Input */}
           <input
             type="date"
-            value={selectedDate}
+            value={selectedDatePaid}
             onChange={(e) => {
               console.log("📅 Date Selected:", e.target.value);
               setSelectedDate(e.target.value);
@@ -266,7 +266,7 @@ const ArcherBooking = () => {
                   </td>
                   <td className="p-2">{field}</td>
                   <td className="p-2">{details.Price}</td>
-                  <td className="p-2">{details.Time}</td>
+                  <td className="p-2">{details.open},{details.close}</td>
                 </tr>
               ))}
           </tbody>
@@ -292,7 +292,7 @@ const ArcherBooking = () => {
                       <p><span>สถานที่:</span> <span>{selectedBuilding || "กรุณาเลือกสถานที่"}</span></p>
                       <p><span>วันที่:</span> <span>{selectedDatePaid || "กรุณาเลือกวันที่"}</span></p>
                       <p><span>เวลา:</span><span>{selectedTimes}</span></p>
-                      <p><span>ราคารวม:</span><span>฿{totalPrice.toFixed(2)}</span></p>selectedTimes
+                      <p><span>ราคารวม:</span><span>฿{totalPrice.toFixed(2)}</span></p>
                     </div>
                   </div>
                   <div className="actions">
