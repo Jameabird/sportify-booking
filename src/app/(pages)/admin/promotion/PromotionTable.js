@@ -82,6 +82,13 @@ const PromotionTable = () => {
     }
   };
 
+  const collator = new Intl.Collator("th", { numeric: true, sensitivity: "base" });
+
+const sortedPromotions = [...promotions].sort((a, b) => 
+  collator.compare(a.name, b.name)
+);
+
+
   return (
     <div>
       <div className="tbl-header">
@@ -104,7 +111,7 @@ const PromotionTable = () => {
       <div className="tbl-content">
         <table>
           <tbody>
-            {promotions.map((promo, index) => (
+            {sortedPromotions.map((promo, index) => (
               <tr key={promo._id}>
                 <td>{index + 1}</td>
                 <td>

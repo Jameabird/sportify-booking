@@ -1,30 +1,69 @@
 "use client";
-import React, { useState } from "react";
-import "./Search.css";
-import places from "./places";
-// import TopBar from "../../../components/Topbar";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../Search.css";
 import TopBar_User from "@components/Topbar_User";
 import { useRouter } from "next/navigation";
+import provinces from "../provinces";
 
 function SearchPages() {
   const [search, setSearch] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [buildings, setBuildings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
-  const filteredPlaces = places.filter(place =>
-    place.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // 📌 ฟังก์ชันดึงข้อมูลจากเซิร์ฟเวอร์
+  useEffect(() => {
+    const tokenData = JSON.parse(localStorage.getItem("token"));
+    const token = tokenData ? tokenData.token : null;
 
-  const handleBook = (placeName) => {
-    // console.log(placeName);
-    sessionStorage.setItem("booking_place", placeName);
-    router.push("/booking/bookingtabletennis");
-  }
+    if (!token || Date.now() > tokenData?.expirationTime) {
+      console.log("❌ Token is missing or expired.");
+      setError("Token is missing or expired. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
+    console.log("✅ Token is valid:", token);
+    const fetchBuildings = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get("http://localhost:4005/api/buildings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("✅ Buildings data received:", res.data);
+
+        // 🔹 กรองข้อมูลให้เหลือเฉพาะ Type "Archer"
+        const archerBuildings = res.data.filter((item) => item.Type === "Tabletennis");
+        
+        setBuildings(archerBuildings);
+      } catch (error) {
+        console.error(
+          "🚨 Error fetching buildings:",
+          error.response?.data || error.message
+        );
+        setError(error.response?.data?.message || "Failed to load buildings");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBuildings();
+  }, []);
+
+  // 📌 ฟิลเตอร์ตามจังหวัดและคำค้นหา
+  const filteredBuildings = buildings.filter(
+    (building) =>
+      (selectedProvince === "" || building.location === selectedProvince) &&
+      building.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div>
       <TopBar_User />
       <div className="container">
-        <h2 className="header">Your location: Sriracha</h2>
         <div className="main-content">
           <div className="left-column">
             <div className="map-container">
@@ -33,33 +72,45 @@ function SearchPages() {
                 alt="Map Preview"
               />
             </div>
-            <input
-              type="text"
-              className="search-bar"
-              placeholder="Text search"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
+           
+            <select
+              className="province-dropdown"
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(e.target.value)}
+            >
+              <option value="">All Provinces</option>
+              {provinces.map((province, index) => (
+                <option key={index} value={province}>
+                  {province}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="right-column">
-            <div className="place-list">
-              {filteredPlaces.map((place, index) =>
-                <div className="place-card" key={index}>
-                  <div className="place-details">
-                    <img
-                      src={place.image}
-                      alt={place.name}
-                      className="place-image"
-                    />
-                    <h3 className="place-name">
-                      {place.name}
-                    </h3>
+            {loading ? (
+              <p>Loading...</p>
+            ) : error ? (
+              <p className="error">{error}</p>
+            ) : (
+              <div className="place-list">
+                {filteredBuildings.map((building, index) => (
+                  <div className="place-card" key={index}>
+                    <div className="place-details">
+                      <img
+                        src={building.image}
+                        alt={building.name}
+                        className="place-image"
+                      />
+                      <h3 className="place-name">{building.name}</h3>
+                    </div>
+                    <button className="book-button">
+                      Book
+                    </button>
                   </div>
-                  <button className="book-button" onClick={() => handleBook(place.name)}>Book</button>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
