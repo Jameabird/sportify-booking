@@ -129,6 +129,10 @@ export default function AccountPage() {
                   <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Email</th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Phone</th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Role</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Account</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Bank</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Fisrtname</th>
+                  <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Lastname</th>
                   <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-sm text-gray-600">Action</th>
                 </tr>
               </thead>
@@ -139,6 +143,10 @@ export default function AccountPage() {
                     <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.email}</td>
                     <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.phoneNumber || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.role}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.accountNumber}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.bank}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.firstName}</td>
+                    <td className="border border-gray-300 px-4 py-3 text-sm text-gray-700">{acc.lastName}</td>
                     <td className="border border-gray-300 px-4 py-3 text-sm">
                       <button
                         onClick={() => handleDelete(acc._id)}
