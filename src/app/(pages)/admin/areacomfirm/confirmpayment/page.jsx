@@ -7,30 +7,30 @@ import Checkbox from "@mui/material/Checkbox";
 
 const AdminPaidTable = () => {
   const [rows, setRows] = useState([]);
-  const [checkedRows, setCheckedRows] = useState(new Set()); // เก็บ ID ของแถวที่ถูกเลือก
+  const [checkedRows, setCheckedRows] = useState(new Set());
   const [showConfirm, setShowConfirm] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null); // Store selected image for popup
   const router = useRouter();
 
   useEffect(() => {
     axios
-  .get("http://localhost:5002/api/bookings")
-  .then((response) => {
-    const filteredData = response.data.filter((row) => row.status === "reserve");
-    setRows(filteredData);
-  })
-  .catch((error) => console.error("Error fetching bookings:", error));
-
+      .get("http://localhost:5002/api/bookings")
+      .then((response) => {
+        const filteredData = response.data.filter((row) => row.status === "reserve");
+        setRows(filteredData);
+      })
+      .catch((error) => console.error("Error fetching bookings:", error));
   }, []);
 
   const handleDeleteClick = (id) => {
     setRowToDelete(id);
     setShowConfirm(true);
   };
+
   useEffect(() => {
     setCheckedRows(new Set());
   }, [rows]);
-  
 
   const handleConfirmDelete = () => {
     axios
@@ -52,7 +52,6 @@ const AdminPaidTable = () => {
     router.push("/admin/");
   };
 
-  // ฟังก์ชันเลือก / ยกเลิกเลือกแถว
   const handleCheckboxChange = (id) => {
     setCheckedRows((prev) => {
       const newChecked = new Set(prev);
@@ -70,42 +69,39 @@ const AdminPaidTable = () => {
       alert("Please select at least one booking to confirm.");
       return;
     }
-  
+
     const selectedRowsData = rows
       .filter((row) => checkedRows.has(row._id))
       .map(({ _id, name, price, timepaid, day }) => ({
-        name: name,
-        day: day || "", // ป้องกันค่า null
-        timepaid: timepaid || "", // ป้องกันค่า null
+        name,
+        day: day || "",
+        timepaid: timepaid || "",
         status: "Confirmed",
-        price: Number(price), // แปลงให้แน่ใจว่าเป็น Number
-        id: _id, // เก็บ `_id` ไว้เพื่อลบหลังจากบันทึก
+        image: "",
+        price: Number(price),
+        id: _id,
       }));
-  
-    console.log("📌 Data to Save:", selectedRowsData); // Debugging
-  
-    // **📌 เปลี่ยนเป็นส่ง Array ทั้งหมดแทนที่จะวนลูปส่งทีละตัว**
+
+    console.log("📌 Data to Save:", selectedRowsData);
+
     axios
-      .post("http://localhost:5003/api/confirm", selectedRowsData) // <-- ส่งเป็น Array
+      .post("http://localhost:5003/api/confirm", selectedRowsData)
       .then(() => {
         alert("Confirmed bookings saved successfully!");
-  
-        // ลบรายการออกจาก bookings database
+
         const deletePromises = Array.from(checkedRows).map((id) =>
           axios.delete(`http://localhost:5002/api/bookings/${id}`)
         );
-  
+
         return Promise.all(deletePromises);
       })
       .then(() => {
-        // ลบออกจาก state เพื่ออัปเดต UI
         setRows((prevRows) => prevRows.filter((row) => !checkedRows.has(row._id)));
-  
-        // รีเซ็ต checkbox
         setCheckedRows(new Set());
       })
       .catch((error) => console.error("❌ Error saving or deleting:", error));
   };
+
   return (
     <>
       <TopBar_Admin textColor={"black"} />
@@ -155,7 +151,18 @@ const AdminPaidTable = () => {
                   >
                     {row.status}
                   </td>
-                  <td className="p-2">img</td>
+                  <td className="p-2">
+                    {row.image ? (
+                      <img
+                        src={row.image.startsWith("data:image") ? row.image : `data:image/png;base64,${row.image}`}
+                        alt="Receipt"
+                        className="w-16 h-16 object-cover cursor-pointer"
+                        onClick={() => setSelectedImage(row.image.startsWith("data:image") ? row.image : `data:image/png;base64,${row.image}`)}
+                      />
+                    ) : (
+                      <span className="text-gray-400">No image</span>
+                    )}
+                  </td>
                   <td className="p-2">{row.price} Baht</td>
                   <td className="p-2">
                     <button
@@ -179,6 +186,7 @@ const AdminPaidTable = () => {
           </div>
         </div>
 
+        {/* Delete Confirmation Modal */}
         {showConfirm && (
           <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96">
@@ -199,6 +207,21 @@ const AdminPaidTable = () => {
                   No
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Image Popup Modal */}
+        {selectedImage && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="relative">
+              <img src={selectedImage} alt="Full Receipt" className="max-w-full max-h-screen" />
+              <button
+                className="absolute top-2 right-2 bg-white p-2 rounded-full"
+                onClick={() => setSelectedImage(null)}
+              >
+                ❌
+              </button>
             </div>
           </div>
         )}
