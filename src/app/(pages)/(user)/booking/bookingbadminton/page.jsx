@@ -47,6 +47,7 @@ const Booking = () => {
   const [orderBy, setOrderBy] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
 
    const [isClient, setIsClient] = useState(false);
     const [showQRPopup, setShowQRPopup] = useState(false);
@@ -261,9 +262,9 @@ const Booking = () => {
         >
           <main className="container">
             <div className="pt-3 pl-5 h-40">
-              {/* <div className="font-medium text-white">
+              <div className="font-medium text-white">
               {`Home > ${SportType} > ${placeName} > Booking`}
-            </div> */}
+            </div>
               <div
                 className="grid grid-rows-auto gap-2 align-center justify-center items-center"
                 style={{ paddingTop: "100px" }}
