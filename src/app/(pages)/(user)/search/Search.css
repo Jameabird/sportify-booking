@@ -128,6 +128,26 @@ h2 {
   transition: all 0.3s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+.place-details {
+  display: flex;
+  flex-direction: column; /* ให้ลูกๆ อยู่ในแนวตั้ง */
+  gap: 10px; /* ระยะห่างระหว่างแต่ละองค์ประกอบ */
+}
+
+.place-details p {
+  margin: 0; /* ลบระยะห่างจากด้านบนและด้านล่างของ p */
+  font-size: 16px; /* ขนาดฟอนต์ */
+}
+
+.place-details .place-link {
+  color: #1e90ff; /* สีของลิงก์ */
+  text-decoration: underline; /* ขีดเส้นใต้ */
+  cursor: pointer; /* แสดงเป็น cursor แบบ pointer เมื่อ hover */
+}
+
+.place-details .place-link:hover {
+  color: #ff6347; /* เปลี่ยนสีเมื่อ hover */
+}
 
 .province-dropdown:hover {
   border-color: #03478fcf;
