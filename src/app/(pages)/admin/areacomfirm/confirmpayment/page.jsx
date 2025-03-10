@@ -10,18 +10,28 @@ const AdminPaidTable = () => {
   const [checkedRows, setCheckedRows] = useState(new Set());
   const [showConfirm, setShowConfirm] = useState(false);
   const [rowToDelete, setRowToDelete] = useState(null);
+
+  const [selectedBuilding, setSelectedBuilding] = useState("");
+  const [name,setName] = useState("");
+
   const [selectedImage, setSelectedImage] = useState(null); // Store selected image for popup
   const router = useRouter();
 
   useEffect(() => {
     axios
-      .get("http://localhost:5002/api/bookings")
+      .get("http://localhost:5005/api/buildings")
       .then((response) => {
-        const filteredData = response.data.filter((row) => row.status === "reserve");
+        const filteredData = response.data
+          .filter((row) => row.status === "reserve")
+          .map((row) => ({
+            ...row,
+            location: row.name || "N/A", // กำหนดค่าเริ่มต้นเป็น "N/A" ถ้าไม่มีข้อมูล
+          }));
         setRows(filteredData);
       })
       .catch((error) => console.error("Error fetching bookings:", error));
   }, []);
+  
 
   const handleDeleteClick = (id) => {
     setRowToDelete(id);
@@ -71,19 +81,18 @@ const AdminPaidTable = () => {
     }
 
     const selectedRowsData = rows
-      .filter((row) => checkedRows.has(row._id))
-      .map(({ _id, name, price, timepaid, day }) => ({
-        name,
-        day: day || "",
-        timepaid: timepaid || "",
-        status: "Confirmed",
-        image: "",
-        price: Number(price),
-        id: _id,
-      }));
-
+  .filter((row) => checkedRows.has(row._id))
+  .map(({ _id, name, price, timepaid, day, location }) => ({
+    name,
+    day: day || "",
+    timepaid: timepaid || "",
+    status: "Confirmed",
+    image: "",
+    price: Number(price),
+    location: location || "N/A", // ส่งค่า location ไปด้วย
+    id: _id,
+  }));
     console.log("📌 Data to Save:", selectedRowsData);
-
     axios
       .post("http://localhost:5003/api/confirm", selectedRowsData)
       .then(() => {
@@ -125,6 +134,7 @@ const AdminPaidTable = () => {
                 <th className="p-2"> </th>
                 <th className="p-2">Day</th>
                 <th className="p-2">Name</th>
+                <th className="p-2">Location</th>
                 <th className="p-2">Time</th>
                 <th className="p-2">Status</th>
                 <th className="p-2">Receipt</th>
@@ -143,6 +153,7 @@ const AdminPaidTable = () => {
                   </td>
                   <td className="p-2">{row.day}</td>
                   <td className="p-2">{row.name}</td>
+                  <td className="p-2">{row.location}</td>
                   <td className="p-2">{row.timepaid}</td>
                   <td
                     className={`p-2 font-medium ${
