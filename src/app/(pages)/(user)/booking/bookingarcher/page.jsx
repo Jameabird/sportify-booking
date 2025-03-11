@@ -242,33 +242,6 @@ const ArcherBooking = () => {
     }
   };
   
-  const [preview, setPreview] = useState(null);
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-  
-    if (file) {
-      const options = {
-        maxSizeMB: 5, // Limit file size to 1MB
-        maxWidthOrHeight: 800, // Resize if needed
-        initialQuality: 0.8,
-        useWebWorker: true, // Improve performance
-      };
-  
-      try {
-        const compressedFile = await imageCompression(file, options);
-        const reader = new FileReader();
-        
-        reader.readAsDataURL(compressedFile);
-        reader.onloadend = () => {
-          setUploadedImage(reader.result); // ✅ Store compressed base64 image
-          setPreview(reader.result); // ✅ Show preview
-        };
-      } catch (error) {
-        console.error("❌ Error compressing image:", error);
-      }
-    }
-  };
-
   return (
     <div className="w-full">
       {/* Top Navigation */}
