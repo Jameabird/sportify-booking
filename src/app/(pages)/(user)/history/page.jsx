@@ -125,6 +125,9 @@ const HistoryPage = () => {
                 />
 
                 <div className="booking-info">
+                <p>
+                    <strong>Type:</strong> {item.type}
+                  </p>
                   <p>
                     <strong>Location:</strong> {item.location}
                   </p>

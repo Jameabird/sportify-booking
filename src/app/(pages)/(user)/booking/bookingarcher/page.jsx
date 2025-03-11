@@ -54,6 +54,22 @@ const ArcherBooking = () => {
         console.error("❌ Error fetching data:", error);
       });
   }, []);
+  useEffect(() => {
+    axios
+        .get("http://localhost:5000/api/users/current", {
+          withCredentials: true, // 🔥 Ensures cookies or tokens are sent
+        })
+        .then((response) => {
+          console.log("✅ Current User:", response.data);
+          setUsername(response.data.id); // Use `id` for userId
+          setRole(response.data.role);
+        })
+        .catch((error) => {
+          console.error("❌ Error fetching current user:", error.response?.data || error);
+        });
+  }, []);
+  
+  
   const handleConfirmBooking = async () => {
     const selectedCourts = Object.keys(selectedCheckboxes).filter(
       (field) => selectedCheckboxes[field]
@@ -75,7 +91,6 @@ const ArcherBooking = () => {
       price: totalPrice || 0,
       type: "archer",
       building: selectedBuilding,
-      role: "user",
       datepaid: selectedDatePaid ? new Date(selectedDatePaid).toISOString() : new Date().toISOString(),
       timepaid: selectedTimePaid || "",
       image: uploadedImage || "", // ✅ Include uploaded image

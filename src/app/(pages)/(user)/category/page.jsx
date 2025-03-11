@@ -1,33 +1,46 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import "./ChooseField.css";
 import TopBar_User from "@components/Topbar_User";
+import {
+  FaBowlingBall,
+  FaBaseballBall,
+  FaBasketballBall,
+  FaFutbol,
+  FaGolfBall,
+  FaHockeyPuck,
+  FaTableTennis,
+  FaVolleyballBall,
+  FaRunning,
+} from "react-icons/fa";
+import { MdSportsTennis, MdSportsMotorsports } from "react-icons/md";
+import { GiBoxingGlove, GiWaterPolo, GiIceSkate } from "react-icons/gi";
+
+const sports = [
+  { name: "Archer", icon: FaRunning },
+  { name: "Badminton", icon: MdSportsTennis },
+  { name: "Baseball", icon: FaBaseballBall },
+  { name: "Basketball", icon: FaBasketballBall },
+  { name: "Bowling", icon: FaBowlingBall },
+  { name: "Car racing", icon: MdSportsMotorsports },
+  { name: "Football", icon: FaFutbol },
+  { name: "Futsal", icon: FaFutbol },
+  { name: "Golf", icon: FaGolfBall },
+  { name: "Hockey", icon: FaHockeyPuck },
+  { name: "Ice skating", icon: GiIceSkate },
+  { name: "Ice Hockey", icon: FaHockeyPuck },
+  { name: "Rugby", icon: FaFutbol },
+  { name: "Table tennis", icon: FaTableTennis },
+  { name: "Tennis", icon: MdSportsTennis },
+  { name: "Thai Boxing", icon: GiBoxingGlove },
+  { name: "Waterpool", icon: GiWaterPolo },
+  { name: "Volleyball", icon: FaVolleyballBall },
+];
 
 const ChooseField = () => {
   const [selectedField, setSelectedField] = useState(null);
   const router = useRouter();
-
-  const fields = [
-    "Archer",
-    "Badminton",
-    "Baseball",
-    "Basketball",
-    "Bowling",
-    "Car racing",
-    "Football",
-    "Futsal",
-    "Golf",
-    "Hockey",
-    "Ice skating",
-    "Ice Hockey",
-    "Rugby",
-    "Table tennis",
-    "Tennis",
-    "Thai Boxing",
-    "Waterpool",
-    "Volleyball",
-  ];
 
   const handleFieldSelection = (field) => {
     setSelectedField(field);
@@ -36,27 +49,19 @@ const ChooseField = () => {
   };
 
   return (
-    <div
-      className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/gym_bg2.jpg')",
-        backgroundColor: "rgba(70, 80, 100, 0.7)",
-        backgroundBlendMode: "multiply",
-        opacity: 0.9,
-        zIndex: -1,
-      }}
-    >
+    <div className="background">
       <TopBar_User textColor={"white"} />
       <div className="choose-field-container">
         <h1 className="title">CHOOSE FIELD</h1>
         <div className="fields">
-          {fields.map((field, index) => (
+          {sports.map((sport, index) => (
             <button
               key={index}
               className="field-button"
-              onClick={() => handleFieldSelection(field)}
+              onClick={() => handleFieldSelection(sport.name)}
             >
-              {field}
+              <sport.icon className="icon" />
+              {sport.name}
             </button>
           ))}
         </div>
