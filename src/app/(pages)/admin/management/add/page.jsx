@@ -23,6 +23,10 @@ export default function AddAccountPage() {
     email: "",
     password: "",
     phoneNumber: "",
+    firstName: "",
+    lastName: "",
+    bank: "",
+    accountNumber: "",
     role: "Owner",
   });
 
@@ -156,6 +160,59 @@ export default function AddAccountPage() {
                 type="text"
                 name="phoneNumber"
                 value={formData.phoneNumber}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Account</label>
+              <input
+                type="text"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Bank</label>
+              <select
+                name="bank"
+                value={formData.bank}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">เลือกธนาคาร</option>
+                <option value="PromptPay">PromptPay</option>
+                <option value="BAAC">เพื่อการเกษตรและสหกรณ์การเกษตร (BAAC)</option>
+                <option value="SCB">ไทยพาณิชย์ (SCB)</option>
+                <option value="KBank">กสิกรไทย (KBank)</option>
+                <option value="Krungthai">กรุงไทย (Krungthai)</option>
+                <option value="TTB">ทีทีบี (TTB)</option>
+                <option value="BBL">กรุงเทพ (BBL)</option>
+                <option value="Krungsri">กรุงศรีอยุธยา (Krungsri)</option>
+                <option value="Thanachart">ธนชาต (Thanachart)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-lg font-medium text-gray-600">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium text-gray-600">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
                 onChange={handleChange}
                 className="w-full border-2 border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />

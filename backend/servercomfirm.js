@@ -20,47 +20,33 @@ mongoose
 
   app.get("/api/confirm", async (req, res) => {
     try {
-      const confirm = await Confirm.find();
+      const confirm = await Confirm.find({}, "date item amount officer status"); // ดึงเฉพาะฟิลด์ที่ต้องการ
       res.json(confirm);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   });
+  
 
   app.post("/api/confirm", async (req, res) => {
     try {
-      console.log("📌 Data received:", req.body);
+      console.log("📌 Data received:", req.body);  // ดูข้อมูลที่ส่งมา
   
-      if (!Array.isArray(req.body)) {
-        return res.status(400).json({ error: "Invalid data format. Expected an array." });
-      }
-  
-      const newConfirms = await Confirm.insertMany(req.body); // รองรับการบันทึกหลายรายการ
-  
+      const newConfirms = await Confirm.insertMany(req.body);
       console.log("New Confirms Created:", newConfirms);
-      res.status(201).json({ message: "Confirmed bookings saved successfully!", data: newConfirms });
+  
+      // ตรวจสอบการตอบกลับจาก MongoDB
+      if (newConfirms && newConfirms.length > 0) {
+        res.status(201).json({ message: "Confirmed bookings saved successfully!", data: newConfirms });
+      } else {
+        res.status(400).json({ error: "No data was saved to the database." });
+      }
     } catch (err) {
       console.error("Error confirming booking:", err);
       res.status(500).json({ error: err.message });
     }
   });
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
+ 
 // UPDATE booking by ID
 app.put("/api/bookings/:id", async (req, res) => {
   try {

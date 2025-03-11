@@ -99,7 +99,22 @@ app.get("/api/refund", async (req, res) => {
 
 app.post("/api/bookings", async (req, res) => {
   try {
-    const { name, day, time, location, field, status, price, type, building, role, userId, datepaid, timepaid } = req.body;
+    const {
+      name,
+      day,
+      time,
+      location,
+      field,
+      status,
+      price,
+      type,
+      building,
+      role,
+      user,
+      datepaid,
+      timepaid,
+      image,
+    } = req.body;
 
     if (!userId || !role) {
       return res.status(400).json({ message: "User ID and role are required" });
@@ -118,7 +133,8 @@ app.post("/api/bookings", async (req, res) => {
       role,
       userId, // Store user ID
       datepaid,
-      timepaid,
+      timepaid: timepaid || "",
+      image,
     });
 
     await newBooking.save();
