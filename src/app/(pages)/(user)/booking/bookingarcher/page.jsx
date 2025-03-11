@@ -24,10 +24,12 @@ const ArcherBooking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const showfirstPopup = () => {
     setShowPopup(true);
   };
+  const [preview, setPreview] = useState(null);
 
   // ✅ Fetch Data from API and Filter Type "Archer"
   useEffect(() => {
@@ -45,7 +47,8 @@ const ArcherBooking = () => {
 
         if (archerData && archerData.Type === "Archer") {
           setData(archerData.Building);
-          setSelectedBuilding(Object.keys(archerData.Building)[0]); // Auto-select first building
+          setSelectedBuilding(Object.keys(archerData.Building)[0]);
+          setName(archerData.name) // Auto-select first building
         } else {
           console.error("⚠️ No Archer data found.");
         }
@@ -98,6 +101,7 @@ const ArcherBooking = () => {
     );
   
     if (!selectedDate || !selectedBuilding || selectedCourts.length === 0) {
+      console.log(selectedDate,selectedBuilding,selectedCourts.length);
       alert("❌ กรุณากรอกข้อมูลให้ครบถ้วน!");
       return;
     }
@@ -108,7 +112,7 @@ const ArcherBooking = () => {
       role: role || "user",
       day: selectedDate,
       time: selectedTimes || "ไม่ระบุ",
-      location: selectedBuilding,
+      location: name,
       field: selectedCourts.join(", "),
       status: "reserve",
       price: totalPrice || 0,
@@ -118,8 +122,6 @@ const ArcherBooking = () => {
       timepaid: selectedTimePaid || "",
       image: uploadedImage,
     };
-  
-    console.log("📌 Booking Data Sent:", bookingData);
   
     try {
       const response = await fetch("http://localhost:5002/api/bookings", {
@@ -138,7 +140,6 @@ const ArcherBooking = () => {
     }
   };
   
-  
   // ✅ Function to handle checkbox selection
   const handleCheckboxChange = (field) => {
     setSelectedCheckboxes((prev) => {
@@ -156,6 +157,32 @@ const ArcherBooking = () => {
     const selectedTime = e.target.value;
     console.log("⏰ Time Selected:", selectedTime);
     setSelectedTimePaid(selectedTime); // Assuming selectedTimePaid holds the selected time
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+  
+    if (file) {
+      const options = {
+        maxSizeMB: 5, // Limit file size to 1MB
+        maxWidthOrHeight: 800, // Resize if needed
+        initialQuality: 0.8,
+        useWebWorker: true, // Improve performance
+      };
+  
+      try {
+        const compressedFile = await imageCompression(file, options);
+        const reader = new FileReader();
+        
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          setUploadedImage(reader.result); // ✅ Store compressed base64 image
+          setPreview(reader.result); // ✅ Show preview
+        };
+      } catch (error) {
+        console.error("❌ Error compressing image:", error);
+      }
+    }
   };
   
   const formatTime = (seconds) => {
@@ -181,9 +208,13 @@ const ArcherBooking = () => {
 
   // ✅ Compute selected times
   const selectedTimes = Object.keys(selectedCheckboxes)
-    .filter((field) => selectedCheckboxes[field])
-    .map((field) => data[selectedBuilding]?.[field]?.open || "Unknown Time")
-    .join(", ") || "No time selected";
+  .filter((field) => selectedCheckboxes[field])
+  .map((field) => {
+    const openTime = data[selectedBuilding]?.[field]?.open || "Unknown Open Time";
+    const closeTime = data[selectedBuilding]?.[field]?.close || "Unknown Close Time";
+    return `${openTime} - ${closeTime}`; // Format as "Open - Close"
+  })
+  .join(", ") || "No time selected";
 
   // ✅ Compute total price
   const totalPrice = Object.keys(selectedCheckboxes)
@@ -247,7 +278,7 @@ const ArcherBooking = () => {
       <div
         className="relative w-full bg-cover bg-center h-[300px] flex items-center justify-center text-white"
         style={{
-          backgroundImage: "url('/assets/Archer/Archer1.png')",
+          backgroundImage: "url('/assets/archer/archer.png')",
           backgroundBlendMode: "multiply",
           opacity: 0.9,
         }}
