@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import "./Search.css";
 import places from "./places";
-import TopBar from "@components/Topbar";
+import TopBar from "../../components/Topbar";
+import TopBar_User from "@components/Topbar_User";
 import { useRouter } from "next/navigation";
 
 function SearchPages() {
@@ -16,12 +17,12 @@ function SearchPages() {
   const handleBook = (placeName) => {
     // console.log(placeName);
     sessionStorage.setItem("booking_place", placeName);
-    router.push("/login");
+    router.push("/booking");
   }
 
   return (
     <div>
-      <TopBar />
+      <TopBar_User />
       <div className="container">
         <h2 className="header">Your location: Pattaya</h2>
         <div className="main-content">
