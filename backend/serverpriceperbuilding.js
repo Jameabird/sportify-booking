@@ -26,6 +26,7 @@ app.get("/api/buildings", async (req, res) => {
   try {
     const buildings = await Building.find();
     if (!buildings || buildings.length === 0) {
+      console.log(buildings);
       return res.status(404).json({ message: "No data found" });
     }
     res.json(buildings.map((building) => building.toJSON()));
