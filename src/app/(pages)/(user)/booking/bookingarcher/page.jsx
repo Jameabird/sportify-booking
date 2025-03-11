@@ -128,16 +128,14 @@ const ArcherBooking = () => {
     const selectedCourts = Object.keys(selectedCheckboxes).filter(
       (field) => selectedCheckboxes[field]
     );
-    
-  
+
     if (!selectedDate || !selectedBuilding || selectedCourts.length === 0) {
       alert("❌ กรุณากรอกข้อมูลให้ครบถ้วน!");
       return;
     }
-  
+
     const finalPrice = discountedPrice !== null ? discountedPrice : totalPrice;
-    
-  
+
     const bookingData = {
       name: username || "testmint",
       day: selectedDate,
@@ -154,26 +152,24 @@ const ArcherBooking = () => {
       timepaid: selectedTimePaid || "",
       image: uploadedImage || "",
     };
-  
+
     try {
       const response = await fetch("http://localhost:5002/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
-  
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "เกิดข้อผิดพลาด");
-  
+
       alert("✅ จองสำเร็จ!");
       setShowImagePopup(false);
     } catch (error) {
       alert(`❌ เกิดข้อผิดพลาด: ${error.message}`);
-console.error("📌 รายละเอียดข้อผิดพลาด:", error);
-
+      console.error("📌 รายละเอียดข้อผิดพลาด:", error);
     }
   };
-  
 
   // ✅ Function to handle checkbox selection
   const handleCheckboxChange = (field) => {
@@ -274,14 +270,14 @@ console.error("📌 รายละเอียดข้อผิดพลาด
   const handleConfirm = async () => {
     console.log("handleConfirm ถูกเรียกแล้ว ✅");
     console.log("selectedCourts:", selectedCourts); // ตรวจสอบค่าที่เลือก
-// ทำสิ่งที่ต้องการ เช่น บันทึกข้อมูลการจอง
-console.log("ยืนยันการจองสำเร็จ");
+    // ทำสิ่งที่ต้องการ เช่น บันทึกข้อมูลการจอง
+    console.log("ยืนยันการจองสำเร็จ");
 
-// ปิด Popup
-setShowPopup(false);
+    // ปิด Popup
+    setShowPopup(false);
 
-// เปิด Popup QR Code (ถ้าต้องการ)
-setShowQRPopup(true);
+    // เปิด Popup QR Code (ถ้าต้องการ)
+    setShowQRPopup(true);
     try {
       setShowQRPopup(true);
       console.log("Popup ควรเปิดตอนนี้: ", showPopup);
@@ -388,8 +384,10 @@ setShowQRPopup(true);
       </div>
 
       {/* Popup for Booking Details */}
-       {/* แก้ตรงนี้ เพิ่มคูปอง*/}
-      {(showPopup || showQRPopup || showImagePopup) && <div className="modal-overlay"></div>}
+      {/* แก้ตรงนี้ เพิ่มคูปอง*/}
+      {(showPopup || showQRPopup || showImagePopup) && (
+        <div className="modal-overlay"></div>
+      )}
       <Popup open={showPopup} modal nested onClose={() => setShowPopup(false)}>
         <div className="modal">
           <div className="header">รายละเอียดการจอง</div>
@@ -410,8 +408,8 @@ setShowQRPopup(true);
                 <span>ราคารวม:</span>
                 <span>฿{totalPrice.toFixed(2)}</span>
               </p>
-              
-              <div className="container">    
+
+              <div className="container">
                 <h1>คูปอง</h1>
                 <div className="coupon-select-box">
                   <button
@@ -457,18 +455,18 @@ setShowQRPopup(true);
                 )}
                 {selectedCoupon && (
                   <CouponDetail
-                  selectedCoupon={selectedCoupon}
-                  onClose={() => {
-                    setSelectedCoupon(null);
-                    setShowCoupons(true);
-                  }}
-                  price={totalPrice.toFixed(2)}
-                  onApply={(newPrice) => {
-                    setDiscountedPrice(newPrice); // ✅ อัปเดตราคาใหม่หลังใช้คูปอง
-                    setSelectedCoupon(null);
-                    setShowCoupons(false);
-                  }}
-                />                
+                    selectedCoupon={selectedCoupon}
+                    onClose={() => {
+                      setSelectedCoupon(null);
+                      setShowCoupons(true);
+                    }}
+                    price={totalPrice.toFixed(2)}
+                    onApply={(newPrice) => {
+                      setDiscountedPrice(newPrice); // ✅ อัปเดตราคาใหม่หลังใช้คูปอง
+                      setSelectedCoupon(null);
+                      setShowCoupons(false);
+                    }}
+                  />
                 )}
               </div>
             </div>
@@ -486,7 +484,7 @@ setShowQRPopup(true);
           </div>
         </div>
       </Popup>
-       {/* ถึงตรงนี้ */}
+      {/* ถึงตรงนี้ */}
 
       {/* Popup สำหรับแสดง QR Code */}
       <Popup
@@ -507,9 +505,14 @@ setShowQRPopup(true);
               />
               {/* ข้อความที่แสดง */}
               <p className="qr-description">
-  Arena Pattaya co.ltd
-  <span>฿{discountedPrice !== null ? discountedPrice.toFixed(2) : totalPrice.toFixed(2)}</span>
-</p>
+                Arena Pattaya co.ltd
+                <span>
+                  ฿
+                  {discountedPrice !== null
+                    ? discountedPrice.toFixed(2)
+                    : totalPrice.toFixed(2)}
+                </span>
+              </p>
               <div className="qr-price">
                 <div>ชำระเงินภายใน</div>
                 <span>{formatTime(timeLeft)}</span>
