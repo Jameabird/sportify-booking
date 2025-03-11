@@ -30,7 +30,7 @@ const HistoryPage = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4003/api/history", {
+        const res = await axios.get("http://localhost:4000/api/history", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("✅ User data received:", res.data);
