@@ -35,7 +35,7 @@ const ArcherBooking = () => {
   };
   const [preview, setPreview] = useState(null);
 
-  //=== coupons ===//
+  //=== แก้ตรงนี้ coupons ===//
   const [promotions, setPromotions] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
