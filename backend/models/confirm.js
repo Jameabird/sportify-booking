@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 
 const ConfirmSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  day: { type: String, required: true },
-  timepaid: { type: String, default: "" }, // ป้องกัน error ถ้าไม่มีค่า
-  status: { type: String, default: "Confirmed" },
-  price: { type: Number, required: true },
+  name: String,
+  day: String,
+  timepaid: String,
+  status: String,
+  image: String,
+  price: Number,
+  location: String,  // เพิ่ม location
 });
 
-
-module.exports = mongoose.model("Confirm", ConfirmSchema);
+const Confirm = mongoose.model("Confirm", ConfirmSchema);
+module.exports = Confirm;
