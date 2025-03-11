@@ -8,15 +8,26 @@ const FieldSchema = new mongoose.Schema({
 });
 
 const BuildingSchema = new mongoose.Schema({
-  Type: { type: String, required: true },
+  Type: { type: String },
   Building: {
     type: Map,
     of: new mongoose.Schema({
       type: Map,
       of: FieldSchema // ✅ Now includes all properties
-    })
+    }),
+    required: false
   }
 });
 
-const Building = mongoose.model("Building", BuildingSchema);
+const PlaceSchema = new mongoose.Schema({
+  type: { type: String , required: false },
+  name: { type: String, required: false },
+  location: { type: String, required: false },
+  link: { type: String, required: false },
+  details: { type: String, required: false },
+  image: { type: String, required: false }
+});
+
+
+const Building = mongoose.model("Building", BuildingSchema,"Buildings", PlaceSchema);
 module.exports = Building;

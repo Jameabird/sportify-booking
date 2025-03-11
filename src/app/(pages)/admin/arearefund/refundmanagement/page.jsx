@@ -29,7 +29,7 @@ const AdminPaidTable = () => {
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleArrowClick = () => {
-    router.push("/admin/arearefund");
+    router.push("/admin/");
   };
 
   const handleManageClick = (row) => {
