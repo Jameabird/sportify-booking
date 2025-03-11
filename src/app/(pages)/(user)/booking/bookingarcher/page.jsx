@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TopBar_User from "@components/Topbar_User";
 import Popup from 'reactjs-popup';
+import imageCompression from 'browser-image-compression';
 import './popup.css';
 
 const ArcherBooking = () => {
@@ -19,6 +20,9 @@ const ArcherBooking = () => {
   const [selectedCourts, setSelectedCourts] = useState("");
   const [selectedDatePaid, setSelectedDatePaid] = useState("");
   const [selectedTimePaid, setSelectedTimePaid] = useState("");
+  const [Userid, setUserid] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
   const showfirstPopup = () => {
@@ -51,31 +55,43 @@ const ArcherBooking = () => {
       });
   }, []);
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const tokenData = JSON.parse(localStorage.getItem("token")); // Parse stored JSON
+    const token = tokenData?.token; // Extract the token string
     if (!token) {
-      console.error("❌ No token found in localStorage");
-      return;
+        console.error("❌ No valid token found");
+        return;
     }
-    console.log("Token in LocalStorage:", token);
+
+    console.log("Token being sent:", token);
     axios
-      .get("http://localhost:5000/api/users/current", {
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ Corrected
-        },
-      })
-      .then((response) => {
-        console.log("✅ Current User:", response.data);
-        setUsername(response.data.id);
-        setRole(response.data.role);
-      })
-      .catch((error) => {
-        console.error("❌ Error fetching current user:", error.response?.data || error);
-      });
-  }, []);
-  
-  
-  
-  
+        .get("http://localhost:5000/api/bookings/current", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        .then((response) => {
+            console.log("✅ Current User:", response.data);
+
+            // ✅ Access the first object in the array
+            if (response.data.length > 0) {
+                const user = response.data[0]; // Get the first user object
+
+                setUserid(user._id);
+                setUsername(user.username);
+                setRole(user.role);
+
+                console.log(user._id);
+                console.log(user.username);
+                console.log(user.role);
+            } else {
+                console.warn("⚠️ No user data received!");
+            }
+        })
+        .catch((error) => {
+            console.error("❌ Error fetching current user:", error.response?.data || error);
+        });
+}, []);
+
   const handleConfirmBooking = async () => {
     const selectedCourts = Object.keys(selectedCheckboxes).filter(
       (field) => selectedCheckboxes[field]
@@ -87,7 +103,7 @@ const ArcherBooking = () => {
     }
   
     const bookingData = {
-      userId: username, // Assuming `username` is actually the userId from API
+      userId: Userid, // Assuming `username` is actually the userId from API
       name: username || "Unknown User",
       role: role || "user",
       day: selectedDate,
@@ -100,6 +116,7 @@ const ArcherBooking = () => {
       building: selectedBuilding,
       datepaid: selectedDatePaid ? new Date(selectedDatePaid).toISOString() : new Date().toISOString(),
       timepaid: selectedTimePaid || "",
+      image: uploadedImage,
     };
   
     console.log("📌 Booking Data Sent:", bookingData);
@@ -193,6 +210,33 @@ const ArcherBooking = () => {
       console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
     }
   };
+  
+  const [preview, setPreview] = useState(null);
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+  
+    if (file) {
+      const options = {
+        maxSizeMB: 5, // Limit file size to 1MB
+        maxWidthOrHeight: 800, // Resize if needed
+        initialQuality: 0.8,
+        useWebWorker: true, // Improve performance
+      };
+  
+      try {
+        const compressedFile = await imageCompression(file, options);
+        const reader = new FileReader();
+        
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          setUploadedImage(reader.result); // ✅ Store compressed base64 image
+          setPreview(reader.result); // ✅ Show preview
+        };
+      } catch (error) {
+        console.error("❌ Error compressing image:", error);
+      }
+    }
+  };
 
   return (
     <div className="w-full">
@@ -217,9 +261,10 @@ const ArcherBooking = () => {
           {/* Date Input */}
           <input
             type="date"
-            value={selectedDatePaid}
+            value={selectedDate}
             onChange={(e) => {
               console.log("📅 Date Selected:", e.target.value);
+              setSelectedDatePaid(e.target.value);
               setSelectedDate(e.target.value);
             }}
             className="border rounded-md px-3 py-2"
@@ -288,7 +333,7 @@ const ArcherBooking = () => {
                   <div className="header">รายละเอียดการจอง</div>
                   <div className="content">
                     <div className="booking-details">
-                      <p><span>สถานที่:</span> <span>{selectedBuilding || "กรุณาเลือกสถานที่"}</span></p>
+                      <p><span>สถานที่:</span> <span>{name || "กรุณาเลือกสถานที่"}</span></p>
                       <p><span>วันที่:</span> <span>{selectedDatePaid || "กรุณาเลือกวันที่"}</span></p>
                       <p><span>เวลา:</span><span>{selectedTimes}</span></p>
                       <p><span>ราคารวม:</span><span>฿{totalPrice.toFixed(2)}</span></p>
@@ -354,18 +399,10 @@ const ArcherBooking = () => {
                 <div className="modal">
                   <div className="header">แนบหลักฐานการชำระเงิน</div>
                   <div className="content">
-                    <input type="file" accept="image/*" onChange={handleFileUpload} />
+                  <input type="file" onChange={handleFileChange} className="border p-2 m-2" />
+                  {preview && <img src={preview} alt="Preview" className="w-32 h-32 mt-2 rounded-lg" />}
                     {uploadedImage && (
                       <div className="uploaded-image-container">
-                        <img
-                          src={uploadedImage}
-                          alt="Uploaded"
-                          style={{
-                            maxWidth: "200px",
-                            maxHeight: "200px",
-                            borderRadius: "10px",
-                          }}
-                        />
                         <p className="image-caption">กรุณาเลือก วัน/เวลา ที่ชำระ</p>
                         {/* Container สำหรับ วัน เดือน ปี */}
                         <div
