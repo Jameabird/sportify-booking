@@ -770,20 +770,25 @@ app.get("/api/users", async (req, res) => {
 });
 
 const authenticateUser = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", ""); // Check cookies or Bearer token
+  const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
   }
 
+  console.log("Received Token:", token); // ✅ Debugging step
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user to request
+    console.log("Decoded Token on Server:", decoded); // ✅ Debugging step
+    req.user = decoded;
     next();
   } catch (error) {
+    console.error("JWT Verification Error:", error.message);
     return res.status(401).json({ message: "Token is invalid" });
   }
 };
+
 
 // Protect route with middleware
 app.get("/api/users/current", authenticateUser, async (req, res) => {
