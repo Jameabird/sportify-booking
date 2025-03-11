@@ -76,6 +76,21 @@ const ArcherBooking = () => {
         console.error("❌ Error fetching current user:", error.response?.data || error);
       });
   }, []);
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      setTimeLeft(15 * 60); // รีเซ็ตเป็น 15 นาที
+      setShowImagePopup(false);
+      setShowPopup(false);
+      setShowQRPopup(false);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timer); // ล้าง interval เมื่อ component ถูก unmount
+  }, [timeLeft]);
   
   
   
