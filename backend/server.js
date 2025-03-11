@@ -770,7 +770,7 @@ app.get("/api/users", async (req, res) => {
 });
 
 const authenticateUser = (req, res, next) => {
-  const token = req.cookies.token || req.header("Authorization")?.split(" ")[1]; // Check cookies or Bearer token
+  const token = req.header("Authorization")?.replace("Bearer ", ""); // Check cookies or Bearer token
 
   if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
