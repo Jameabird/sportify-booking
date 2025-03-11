@@ -4,22 +4,42 @@ import React, { useState } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import TopBar_Owner from "@components/Topbar_Owner";
 import "@app/globals.css";
+import axios from "axios";
 
 export default function AddNewPlace() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const [buildings, setBuildings] = useState("");
+  const [link, setLink] = useState("");
   const [image, setImage] = useState(null);
+  const [details, setDetails] = useState("");
+  const [type, setType] = useState("");
 
-  const handleSave = () => {
-    console.log("Name:", name);
-    console.log("Location:", location);
-    console.log("Image:", image);
-    alert("Place saved successfully!");
+  const handleSave = async () => {
+    console.log("Type ที่บันทึก:", type); // ✅ Debug ค่า Type
+
+    if (!name || !location || !link || !details || !type || !image) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+
+    const formData = { type, name, location, link, details ,image};
+
+    try {
+      const response = await axios.post("http://localhost:5005/api/Place", formData);
+      alert(response.data.message);
+    } catch (error) {
+      alert("Error: " + (error.response?.data?.error || "ไม่สามารถบันทึกข้อมูลได้"));
+    }
   };
 
   const handleCancel = () => {
     setName("");
     setLocation("");
+    setBuildings("");
+    setLink("");
+    setType("");
+    setDetails("");
     setImage(null);
   };
 
@@ -33,7 +53,6 @@ export default function AddNewPlace() {
   return (
     <div className="app" style={{ display: "flex", height: "100vh" }}>
       <main className="content" style={{ flex: 1, overflowY: "auto" }}>
-        {/* Background Layer */}
         <div
           className="absolute top-0 left-0 h-full w-full bg-cover bg-center"
           style={{
@@ -43,14 +62,12 @@ export default function AddNewPlace() {
         />
 
         <div className="relative h-full w-full">
-          {/* TopBar */}
           <div className="grid grid-cols-12">
             <div className="col-span-12">
               <TopBar_Owner textColor={"black"} />
             </div>
           </div>
 
-          {/* Add New Place Form */}
           <Box
             sx={{
               maxWidth: "600px",
@@ -113,35 +130,45 @@ export default function AddNewPlace() {
               />
 
               <TextField
-                label="Location"
+                label="Location (จังหวัด)"
                 variant="outlined"
                 fullWidth
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
 
-              <Typography
-                variant="body2"
-                color="primary"
-                textAlign="left"
-                style={{ cursor: "pointer" }}
-              >
-                Search on map
-              </Typography>
+              <TextField
+                label="Details"
+                variant="outlined"
+                fullWidth
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+              />
+
+
+              <TextField
+                label="Google Map"
+                variant="outlined"
+                fullWidth
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+              />
+
+              <TextField
+                label="Type"
+                variant="outlined"
+                fullWidth
+                value={type || ""}
+                onChange={(e) => setType(e.target.value)}
+              />
+
+
 
               <Box display="flex" justifyContent="space-between">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSave}
-                >
+                <Button variant="contained" color="primary" onClick={handleSave}>
                   SAVE
                 </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleCancel}
-                >
+                <Button variant="contained" color="error" onClick={handleCancel}>
                   CANCEL
                 </Button>
               </Box>
