@@ -15,7 +15,7 @@ const AdminPaidTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5002/api/bookings")
+      .get("http://localhost:5002/api/bookings-old")
       .then((response) => {
         const filteredData = response.data.filter((row) => row.status === "reserve");
         setRows(filteredData);

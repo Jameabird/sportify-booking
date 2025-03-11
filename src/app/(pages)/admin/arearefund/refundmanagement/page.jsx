@@ -11,7 +11,7 @@ const AdminPaidTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5002/api/bookings");
+        const response = await axios.get("http://localhost:5002/api/bookings-old");
         const filteredData = response.data?.filter(
           (booking) => booking && booking.status?.trim().toLowerCase() === "cancel"
         );

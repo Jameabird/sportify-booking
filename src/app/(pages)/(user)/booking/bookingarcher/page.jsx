@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TopBar_User from "@components/Topbar_User";
 import Popup from 'reactjs-popup';
+import imageCompression from 'browser-image-compression';
 import './popup.css';
 
 const ArcherBooking = () => {
@@ -20,10 +21,12 @@ const ArcherBooking = () => {
   const [selectedDatePaid, setSelectedDatePaid] = useState("");
   const [selectedTimePaid, setSelectedTimePaid] = useState("");
   const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const showfirstPopup = () => {
     setShowPopup(true);
   };
+  const [preview, setPreview] = useState(null);
 
   // ✅ Fetch Data from API and Filter Type "Archer"
   useEffect(() => {
@@ -41,7 +44,8 @@ const ArcherBooking = () => {
 
         if (archerData && archerData.Type === "Archer") {
           setData(archerData.Building);
-          setSelectedBuilding(Object.keys(archerData.Building)[0]); // Auto-select first building
+          setSelectedBuilding(Object.keys(archerData.Building)[0]);
+          setName(archerData.name) // Auto-select first building
         } else {
           console.error("⚠️ No Archer data found.");
         }
@@ -56,27 +60,26 @@ const ArcherBooking = () => {
     );
   
     if (!selectedDate || !selectedBuilding || selectedCourts.length === 0) {
-      console.error("⚠️ Missing required fields:", { selectedDate, selectedBuilding, selectedCourts });
+      console.log(selectedDate,selectedBuilding,selectedCourts.length);
       alert("❌ กรุณากรอกข้อมูลให้ครบถ้วน!");
       return;
     }
   
     const bookingData = {
-      name: username || "chayanin talubngirn",
-      day: selectedDate,  // ✅ Ensure selectedDate is set
+      name: username || "testmint",
+      day: selectedDate,
       time: selectedTimes || "ไม่ระบุ",
-      location: selectedBuilding,
-      field: Array.isArray(selectedCourts) ? selectedCourts.join(", ") : selectedCourts,
+      location: name,
+      field: selectedCourts.join(", "),
       status: "reserve",
       price: totalPrice || 0,
       type: "archer",
       building: selectedBuilding,
       role: "user",
       datepaid: selectedDatePaid ? new Date(selectedDatePaid).toISOString() : new Date().toISOString(),
-      timepaid: selectedTimePaid || ""
+      timepaid: selectedTimePaid || "",
+      image: uploadedImage || "", // ✅ Include uploaded image
     };
-  
-    console.log("📌 Booking Data Sent:", bookingData);
   
     try {
       const response = await fetch("http://localhost:5002/api/bookings", {
@@ -88,14 +91,13 @@ const ArcherBooking = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "เกิดข้อผิดพลาด");
   
-      console.log("✅ Booking successful:", result);
       alert("✅ จองสำเร็จ!");
       setShowImagePopup(false);
     } catch (error) {
-      console.error("❌ Booking failed:", error);
       alert("❌ เกิดข้อผิดพลาดในการจอง");
     }
   };
+  
   // ✅ Function to handle checkbox selection
   const handleCheckboxChange = (field) => {
     setSelectedCheckboxes((prev) => {
@@ -113,6 +115,32 @@ const ArcherBooking = () => {
     const selectedTime = e.target.value;
     console.log("⏰ Time Selected:", selectedTime);
     setSelectedTimePaid(selectedTime); // Assuming selectedTimePaid holds the selected time
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+  
+    if (file) {
+      const options = {
+        maxSizeMB: 5, // Limit file size to 1MB
+        maxWidthOrHeight: 800, // Resize if needed
+        initialQuality: 0.8,
+        useWebWorker: true, // Improve performance
+      };
+  
+      try {
+        const compressedFile = await imageCompression(file, options);
+        const reader = new FileReader();
+        
+        reader.readAsDataURL(compressedFile);
+        reader.onloadend = () => {
+          setUploadedImage(reader.result); // ✅ Store compressed base64 image
+          setPreview(reader.result); // ✅ Show preview
+        };
+      } catch (error) {
+        console.error("❌ Error compressing image:", error);
+      }
+    }
   };
   
   const formatTime = (seconds) => {
@@ -138,9 +166,13 @@ const ArcherBooking = () => {
 
   // ✅ Compute selected times
   const selectedTimes = Object.keys(selectedCheckboxes)
-    .filter((field) => selectedCheckboxes[field])
-    .map((field) => data[selectedBuilding]?.[field]?.open || "Unknown Time")
-    .join(", ") || "No time selected";
+  .filter((field) => selectedCheckboxes[field])
+  .map((field) => {
+    const openTime = data[selectedBuilding]?.[field]?.open || "Unknown Open Time";
+    const closeTime = data[selectedBuilding]?.[field]?.close || "Unknown Close Time";
+    return `${openTime} - ${closeTime}`; // Format as "Open - Close"
+  })
+  .join(", ") || "No time selected";
 
   // ✅ Compute total price
   const totalPrice = Object.keys(selectedCheckboxes)
@@ -168,33 +200,6 @@ const ArcherBooking = () => {
     }
   };
 
-  // ✅ Handle Booking Button Click
-  // const handleBooking = () => {
-  //   const selectedCourts = Object.keys(selectedCheckboxes).filter(
-  //     (field) => selectedCheckboxes[field]
-  //   );
-
-  //   if (!selectedDate) {
-  //     alert("❌ Please select a date.");
-  //     return;
-  //   }
-  //   if (!selectedBuilding) {
-  //     alert("❌ Please select a building.");
-  //     return;
-  //   }
-  //   if (selectedCourts.length === 0) {
-  //     alert("❌ Please select at least one court.");
-  //     return;
-  //   }
-
-  //   console.log("✅ Booking confirmed:");
-  //   console.log("📅 Date:", selectedDate);
-  //   console.log("🏢 Building:", selectedBuilding);
-  //   console.log("🎯 Courts:", selectedCourts);
-    
-  //   alert("✅ Booking successful!");
-  // };
-
   return (
     <div className="w-full">
       {/* Top Navigation */}
@@ -204,7 +209,7 @@ const ArcherBooking = () => {
       <div
         className="relative w-full bg-cover bg-center h-[300px] flex items-center justify-center text-white"
         style={{
-          backgroundImage: "url('/assets/Archer/Archer1.png')",
+          backgroundImage: "url('/assets/archer/archer.png')",
           backgroundBlendMode: "multiply",
           opacity: 0.9,
         }}
@@ -218,9 +223,10 @@ const ArcherBooking = () => {
           {/* Date Input */}
           <input
             type="date"
-            value={selectedDatePaid}
+            value={selectedDate}
             onChange={(e) => {
               console.log("📅 Date Selected:", e.target.value);
+              setSelectedDatePaid(e.target.value);
               setSelectedDate(e.target.value);
             }}
             className="border rounded-md px-3 py-2"
@@ -289,7 +295,7 @@ const ArcherBooking = () => {
                   <div className="header">รายละเอียดการจอง</div>
                   <div className="content">
                     <div className="booking-details">
-                      <p><span>สถานที่:</span> <span>{selectedBuilding || "กรุณาเลือกสถานที่"}</span></p>
+                      <p><span>สถานที่:</span> <span>{name || "กรุณาเลือกสถานที่"}</span></p>
                       <p><span>วันที่:</span> <span>{selectedDatePaid || "กรุณาเลือกวันที่"}</span></p>
                       <p><span>เวลา:</span><span>{selectedTimes}</span></p>
                       <p><span>ราคารวม:</span><span>฿{totalPrice.toFixed(2)}</span></p>
@@ -355,18 +361,10 @@ const ArcherBooking = () => {
                 <div className="modal">
                   <div className="header">แนบหลักฐานการชำระเงิน</div>
                   <div className="content">
-                    <input type="file" accept="image/*" onChange={handleFileUpload} />
+                  <input type="file" onChange={handleFileChange} className="border p-2 m-2" />
+                  {preview && <img src={preview} alt="Preview" className="w-32 h-32 mt-2 rounded-lg" />}
                     {uploadedImage && (
                       <div className="uploaded-image-container">
-                        <img
-                          src={uploadedImage}
-                          alt="Uploaded"
-                          style={{
-                            maxWidth: "200px",
-                            maxHeight: "200px",
-                            borderRadius: "10px",
-                          }}
-                        />
                         <p className="image-caption">กรุณาเลือก วัน/เวลา ที่ชำระ</p>
                         {/* Container สำหรับ วัน เดือน ปี */}
                         <div
