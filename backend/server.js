@@ -49,7 +49,7 @@ const authenticate = (req, res, next) => {
 // ✅ สร้าง Owner ใหม่ โดยต้องเป็น Admin เท่านั้น
 app.post("/api/owners", authenticate, async (req, res) => {
   try {
-    const { name, email, password, phoneNumber } = req.body; // รับ phoneNumber จาก body
+    const { name, email, password, phoneNumber, firstName, lastName, bank, accountNumber} = req.body; // รับ phoneNumber จาก body
     const adminId = req.user.userId; // ดึงจาก JWT
 
     // ตรวจสอบว่า admin มีสิทธิ์หรือไม่
@@ -80,6 +80,10 @@ app.post("/api/owners", authenticate, async (req, res) => {
       password: hashedPassword,
       role: "owner",
       phoneNumber: phoneNumber, // เพิ่มฟิลด์นี้ในข้อมูลที่บันทึก
+      firstName, 
+      lastName, 
+      bank,
+      accountNumber,
       adminId,
       createdAt: new Date(),
     });
