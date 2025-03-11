@@ -50,30 +50,46 @@ const ArcherBooking = () => {
         console.error("❌ Error fetching data:", error);
       });
   }, []);
+  useEffect(() => {
+    axios
+        .get("http://localhost:5000/api/users/current", {
+          withCredentials: true, // 🔥 Ensures cookies or tokens are sent
+        })
+        .then((response) => {
+          console.log("✅ Current User:", response.data);
+          setUsername(response.data.id); // Use `id` for userId
+          setRole(response.data.role);
+        })
+        .catch((error) => {
+          console.error("❌ Error fetching current user:", error.response?.data || error);
+        });
+  }, []);
+  
+  
   const handleConfirmBooking = async () => {
     const selectedCourts = Object.keys(selectedCheckboxes).filter(
       (field) => selectedCheckboxes[field]
     );
   
     if (!selectedDate || !selectedBuilding || selectedCourts.length === 0) {
-      console.error("⚠️ Missing required fields:", { selectedDate, selectedBuilding, selectedCourts });
       alert("❌ กรุณากรอกข้อมูลให้ครบถ้วน!");
       return;
     }
   
     const bookingData = {
-      name: username || "chayanin talubngirn",
-      day: selectedDate,  // ✅ Ensure selectedDate is set
+      userId: username, // Assuming `username` is actually the userId from API
+      name: username || "Unknown User",
+      role: role || "user",
+      day: selectedDate,
       time: selectedTimes || "ไม่ระบุ",
       location: selectedBuilding,
-      field: Array.isArray(selectedCourts) ? selectedCourts.join(", ") : selectedCourts,
+      field: selectedCourts.join(", "),
       status: "reserve",
       price: totalPrice || 0,
       type: "archer",
       building: selectedBuilding,
-      role: "user",
       datepaid: selectedDatePaid ? new Date(selectedDatePaid).toISOString() : new Date().toISOString(),
-      timepaid: selectedTimePaid || ""
+      timepaid: selectedTimePaid || "",
     };
   
     console.log("📌 Booking Data Sent:", bookingData);
@@ -88,14 +104,14 @@ const ArcherBooking = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "เกิดข้อผิดพลาด");
   
-      console.log("✅ Booking successful:", result);
       alert("✅ จองสำเร็จ!");
       setShowImagePopup(false);
     } catch (error) {
-      console.error("❌ Booking failed:", error);
       alert("❌ เกิดข้อผิดพลาดในการจอง");
     }
   };
+  
+  
   // ✅ Function to handle checkbox selection
   const handleCheckboxChange = (field) => {
     setSelectedCheckboxes((prev) => {
@@ -167,33 +183,6 @@ const ArcherBooking = () => {
       console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
     }
   };
-
-  // ✅ Handle Booking Button Click
-  // const handleBooking = () => {
-  //   const selectedCourts = Object.keys(selectedCheckboxes).filter(
-  //     (field) => selectedCheckboxes[field]
-  //   );
-
-  //   if (!selectedDate) {
-  //     alert("❌ Please select a date.");
-  //     return;
-  //   }
-  //   if (!selectedBuilding) {
-  //     alert("❌ Please select a building.");
-  //     return;
-  //   }
-  //   if (selectedCourts.length === 0) {
-  //     alert("❌ Please select at least one court.");
-  //     return;
-  //   }
-
-  //   console.log("✅ Booking confirmed:");
-  //   console.log("📅 Date:", selectedDate);
-  //   console.log("🏢 Building:", selectedBuilding);
-  //   console.log("🎯 Courts:", selectedCourts);
-    
-  //   alert("✅ Booking successful!");
-  // };
 
   return (
     <div className="w-full">
