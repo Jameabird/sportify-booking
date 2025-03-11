@@ -97,13 +97,15 @@ app.get("/api/refund", async (req, res) => {
   }
 });
 
-
-
-
 app.post("/api/bookings", async (req, res) => {
-  console.log(req.body);
   try {
-    const {
+    const { name, day, time, location, field, status, price, type, building, role, userId, datepaid, timepaid } = req.body;
+
+    if (!userId || !role) {
+      return res.status(400).json({ message: "User ID and role are required" });
+    }
+
+    const newBooking = new Booking({
       name,
       day,
       time,
@@ -114,37 +116,19 @@ app.post("/api/bookings", async (req, res) => {
       type,
       building,
       role,
-      user,
+      userId, // Store user ID
       datepaid,
       timepaid,
-    } = req.body;
-
-    if (!name || !day || !time || !location || !field || !type || !building) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
-    }
-
-    const newBooking = new Bookings({
-      name,
-      day,
-      time,
-      location,
-      field,
-      status: status || "reserved",
-      price,
-      type,
-      building,
-      role,
-      user,
-      datepaid,
-      timepaid: timepaid || "",
     });
 
     await newBooking.save();
-    res.status(201).json({ message: "เพิ่มการจองสำเร็จ", booking: newBooking });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(201).json({ message: "Booking successful", booking: newBooking });
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 });
+
 
 // UPDATE booking by ID
 // UPDATE booking by ID (รวม image)
