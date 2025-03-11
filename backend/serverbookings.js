@@ -61,9 +61,30 @@ app.post("/api/refund", async (req, res) => {
 
 const Users = require("./models/user.js"); // ตรวจสอบให้แน่ใจว่ามีโมเดล Users
 
+app.get("/api/bookings", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const bookings = await Booking.find({ userId }); // ดึงข้อมูลเฉพาะของ userId
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
 app.get("/api/refund", async (req, res) => {
   try {
-    const refunds = await Refund.find({ status: "cancel" }).populate("userId", "accountNumber");
+    const { userId } = req.query; // รับ userId จาก request
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // ดึงเฉพาะรายการคืนเงินของผู้ใช้ที่มี status "cancel"
+    const refunds = await Refund.find({ userId, status: "cancel" }).populate("userId", "accountNumber");
 
     const result = refunds.map(refund => ({
       ...refund.toObject(),

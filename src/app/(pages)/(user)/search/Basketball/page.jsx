@@ -36,8 +36,10 @@ function SearchPages() {
         console.log("✅ Buildings data received:", res.data);
 
         // 🔹 กรองข้อมูลให้เหลือเฉพาะ Type "Archer"
-        const archerBuildings = res.data.filter((item) => item.Type === "Basketball");
-        
+        const archerBuildings = res.data.filter(
+          (item) => item.Type === "Basketball"
+        );
+
         setBuildings(archerBuildings);
       } catch (error) {
         console.error(
@@ -72,7 +74,7 @@ function SearchPages() {
                 alt="Map Preview"
               />
             </div>
-          
+
             <select
               className="province-dropdown"
               value={selectedProvince}
@@ -96,17 +98,34 @@ function SearchPages() {
               <div className="place-list">
                 {filteredBuildings.map((building, index) => (
                   <div className="place-card" key={index}>
-                    <div className="place-details">
-                      <img
+<img
                         src={building.image}
                         alt={building.name}
                         className="place-image"
                       />
+                    <div className="place-details">                     
                       <h3 className="place-name">{building.name}</h3>
+                      <p className="place-details-description">
+                        {building.details}
+                      </p>
+                      <p className="place-link">
+                        <a
+                          href={building.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {building.link}
+                        </a>
+                      </p>
                     </div>
-                    <button className="book-button">
-                      Book
-                    </button>
+                    <div>
+                      <button
+                        className="book-button"
+                        onClick={() => router.push("/booking/bookingbasketball")}
+                      >
+                        Book
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
