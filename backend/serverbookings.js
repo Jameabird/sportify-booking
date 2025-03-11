@@ -31,6 +31,39 @@ app.get("/api/bookings", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+const authenticate = (req, res, next) => {
+  let token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token && req.body.token) {
+    token = req.body.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
+  try {
+    console.log("🔹 Received Token:", token);
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("🔹 Decoded JWT:", decoded);
+
+    if (!decoded.userId) {
+      throw new Error("Invalid token payload: Missing userId");
+    }
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error("🚨 JWT Authentication Error:", error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token has expired, please log in again" });
+    }
+
+    return res.status(401).json({ message: "Invalid token", error: error.message });
+  }
+};
 app.post("/api/refund", async (req, res) => {
   try {
     const { name, day, time, status, price, datepaid, timepaid, userId } = req.body;

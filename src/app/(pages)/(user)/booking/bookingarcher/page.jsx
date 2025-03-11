@@ -51,19 +51,29 @@ const ArcherBooking = () => {
       });
   }, []);
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("❌ No token found in localStorage");
+      return;
+    }
+    console.log("Token in LocalStorage:", token);
     axios
-        .get("http://localhost:5000/api/users/current", {
-          withCredentials: true, // 🔥 Ensures cookies or tokens are sent
-        })
-        .then((response) => {
-          console.log("✅ Current User:", response.data);
-          setUsername(response.data.id); // Use `id` for userId
-          setRole(response.data.role);
-        })
-        .catch((error) => {
-          console.error("❌ Error fetching current user:", error.response?.data || error);
-        });
+      .get("http://localhost:5000/api/users/current", {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Corrected
+        },
+      })
+      .then((response) => {
+        console.log("✅ Current User:", response.data);
+        setUsername(response.data.id);
+        setRole(response.data.role);
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching current user:", error.response?.data || error);
+      });
   }, []);
+  
+  
   
   
   const handleConfirmBooking = async () => {
