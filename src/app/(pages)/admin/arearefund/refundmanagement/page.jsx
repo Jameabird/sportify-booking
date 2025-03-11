@@ -7,6 +7,27 @@ import axios from "axios";
 const AdminPaidTable = () => {
   const router = useRouter();
   const [rows, setRows] = useState([]);
+  const [userData, setUserData] = useState({});
+  const jwt = require("jsonwebtoken");
+
+const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // ตรวจสอบ token
+    req.user = decoded; // ใส่ข้อมูล user ใน request
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+module.exports = authenticate;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,6 +44,37 @@ const AdminPaidTable = () => {
 
     fetchData();
   }, []);
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/users");
+        const userArray = res.data; // ได้เป็น Array
+      
+        console.log("📌 Full User Data:", userArray); // เช็คข้อมูล API
+  
+        // หา user ที่มี _id ตรงกับที่ต้องการ
+        const matchedUser = userArray.find(user => user._id === "67bf3de50e51f05aa264045d");
+  
+        if (matchedUser) {
+          console.log("✅ Account Number:", matchedUser.accountNumber); // แสดงค่า accountNumber
+          setUserData(matchedUser); // อัปเดต state
+        } else {
+          console.log("❌ No matching user found!");
+        }
+      } catch (error) {
+        console.error("🚨 Error fetching user data:", error);
+      }
+    };
+  
+    fetchUserData();
+  }, []);
+  
+  
+  
+  
+  
+  
 
   const [showManagePopup, setShowManagePopup] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -55,6 +107,7 @@ const AdminPaidTable = () => {
       console.error("Error updating status:", error);
     }
   };
+  
 
   const handleRefundPayment = async () => {
     if (!selectedData) return;
@@ -98,10 +151,10 @@ const AdminPaidTable = () => {
                   <td className="p-3">{row?.status}</td>
                   <td className="p-3">{row?.price} baht</td>
                   <td className="p-3 flex justify-center gap-2">
-                    <img 
-                      src={row?.paymentDetails?.image || "/placeholder.png"} 
-                      className="w-6 h-6 cursor-pointer" 
-                      onClick={() => handleManageClick(row)} 
+                    <img
+                      src={row?.paymentDetails?.image || "/placeholder.png"}
+                      className="w-6 h-6 cursor-pointer"
+                      onClick={() => handleManageClick(row)}
                     />
                     <button
                       onClick={() => handleDeleteRow(row?._id)}
@@ -128,7 +181,7 @@ const AdminPaidTable = () => {
               <p><strong>Day:</strong> {selectedData.day}</p>
               <p><strong>Name:</strong> {selectedData.name}</p>
               <p><strong>Payment Method:</strong> Transfer money through bank account</p>
-              <p><strong>Bank Number:</strong> {selectedData.paymentDetails?.bankNumber || "N/A"}</p>
+              <p><strong>Bank Number:</strong> {userData ? userData.accountNumber : "Loading..."}</p>
               <button
                 className="bg-green-600 text-white px-4 py-2 mt-4 rounded-lg shadow hover:bg-green-700"
                 onClick={handleRefundPayment}
