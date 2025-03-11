@@ -1,69 +1,39 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import "../Search.css";
-import TopBar_User from "@components/Topbar_User";
+import React, { useState } from "react";
+import "./Search.css";
+import places from "./places";
+import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
-import provinces from "../provinces";
+import { Snackbar } from "@mui/material"; // นำเข้า Snackbar
+import { Alert } from "@mui/material"; // นำเข้า Alert
 
 function SearchPages() {
   const [search, setSearch] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [buildings, setBuildings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const router = useRouter();
 
-  // 📌 ฟังก์ชันดึงข้อมูลจากเซิร์ฟเวอร์
-  useEffect(() => {
-    const tokenData = JSON.parse(localStorage.getItem("token"));
-    const token = tokenData ? tokenData.token : null;
-
-    if (!token || Date.now() > tokenData?.expirationTime) {
-      console.log("❌ Token is missing or expired.");
-      setError("Token is missing or expired. Please log in again.");
-      setLoading(false);
-      return;
-    }
-
-    console.log("✅ Token is valid:", token);
-    const fetchBuildings = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get("http://localhost:4005/api/buildings", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log("✅ Buildings data received:", res.data);
-
-        // 🔹 กรองข้อมูลให้เหลือเฉพาะ Type "Archer"
-        const archerBuildings = res.data.filter((item) => item.Type === "Volleyball");
-        
-        setBuildings(archerBuildings);
-      } catch (error) {
-        console.error(
-          "🚨 Error fetching buildings:",
-          error.response?.data || error.message
-        );
-        setError(error.response?.data?.message || "Failed to load buildings");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBuildings();
-  }, []);
-
-  // 📌 ฟิลเตอร์ตามจังหวัดและคำค้นหา
-  const filteredBuildings = buildings.filter(
-    (building) =>
-      (selectedProvince === "" || building.location === selectedProvince) &&
-      building.name.toLowerCase().includes(search.toLowerCase())
+  const filteredPlaces = places.filter(place =>
+    place.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleBook = (placeName) => {
+    // แสดง snackbar ก่อนที่จะไปที่หน้า login
+    setOpenSnackbar(true);
+    sessionStorage.setItem("booking_place", placeName);
+    setTimeout(() => {
+      router.push("/login"); // ไปที่หน้า login หลังจากแสดง snackbar
+    }, 2000); // รอ 2 วินาที
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   return (
     <div>
-      <TopBar_User />
+      <TopBar />
       <div className="container">
+        <h2 className="header">Your location: Sriracha</h2>
         <div className="main-content">
           <div className="left-column">
             <div className="map-container">
@@ -72,66 +42,47 @@ function SearchPages() {
                 alt="Map Preview"
               />
             </div>
-           
-            <select
-              className="province-dropdown"
-              value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.target.value)}
-            >
-              <option value="">All Provinces</option>
-              {provinces.map((province, index) => (
-                <option key={index} value={province}>
-                  {province}
-                </option>
-              ))}
-            </select>
+            <input
+              type="text"
+              className="search-bar"
+              placeholder="Text search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
 
           <div className="right-column">
-            {loading ? (
-              <p>Loading...</p>
-            ) : error ? (
-              <p className="error">{error}</p>
-            ) : (
-              <div className="place-list">
-                {filteredBuildings.map((building, index) => (
-                  <div className="place-card" key={index}>
+            <div className="place-list">
+              {filteredPlaces.map((place, index) =>
+                <div className="place-card" key={index}>
+                  <div className="place-details">
                     <img
-                        src={building.image}
-                        alt={building.name}
-                        className="place-image"
-                      />
-                    <div className="place-details">                     
-                      <h3 className="place-name">{building.name}</h3>
-                      <p className="place-details-description">
-                        {building.details}
-                      </p>
-                      <p className="place-link">
-                        <a
-                          href={building.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {building.link}
-                        </a>
-                      </p>
-                    </div>
-                    <div>
-                      <button
-                        className="book-button"
-                        onClick={() => router.push("/booking/bookingvolleyball")}
-                      >
-                        Book
-                      </button>
-                    </div>
-
+                      src={place.image}
+                      alt={place.name}
+                      className="place-image"
+                    />
+                    <h3 className="place-name">
+                      {place.name}
+                    </h3>
                   </div>
-                ))}
-              </div>
-            )}
+                  <button className="book-button" onClick={() => handleBook(place.name)}>Book</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+      {/* Snackbar for message */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000} // จะหายไปหลังจาก 2 วินาที
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="info">
+          โปรคสมัครเข้าใช้งาน/เข้าสู่ระบบการจองสนามกีฬา
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
