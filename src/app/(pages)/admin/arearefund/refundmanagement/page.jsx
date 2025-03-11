@@ -10,71 +10,61 @@ const AdminPaidTable = () => {
   const [userData, setUserData] = useState({});
   const jwt = require("jsonwebtoken");
 
-const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
-  }
+  const authenticate = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-  const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1];
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // ตรวจสอบ token
-    req.user = decoded; // ใส่ข้อมูล user ใน request
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
-  }
-};
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); // ตรวจสอบ token
+      req.user = decoded; // ใส่ข้อมูล user ใน request
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+  };
 
-module.exports = authenticate;
+  module.exports = authenticate;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5002/api/bookings-old");
-        const filteredData = response.data?.filter(
+        // ดึง bookings
+        const bookingsRes = await axios.get("http://localhost:5002/api/bookings-old");
+        const filteredBookings = bookingsRes.data?.filter(
           (booking) => booking && booking.status?.trim().toLowerCase() === "cancel"
         );
-        setRows(filteredData || []);
+
+        // ดึง users
+        const usersRes = await axios.get("http://localhost:5000/api/users");
+        const usersArray = usersRes.data;
+
+        console.log("📌 Users Data:", usersArray);
+        console.log("📌 Bookings Data:", filteredBookings);
+
+        // จับคู่ userId กับ accountNumber
+        const enrichedBookings = filteredBookings.map((booking) => {
+          const matchedUser = usersArray.find(user => user._id === booking.userId);
+          return {
+            ...booking,
+            accountNumber: matchedUser ? matchedUser.accountNumber : "N/A"
+          };
+        });
+
+        console.log("✅ Merged Bookings Data:", enrichedBookings);
+        setRows(enrichedBookings); // อัปเดต state
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("🚨 Error fetching data:", error);
       }
     };
 
     fetchData();
   }, []);
-  
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/users");
-        const userArray = res.data; // ได้เป็น Array
-      
-        console.log("📌 Full User Data:", userArray); // เช็คข้อมูล API
-  
-        // หา user ที่มี _id ตรงกับที่ต้องการ
-        const matchedUser = userArray.find(user => user._id === "67bf3de50e51f05aa264045d");
-  
-        if (matchedUser) {
-          console.log("✅ Account Number:", matchedUser.accountNumber); // แสดงค่า accountNumber
-          setUserData(matchedUser); // อัปเดต state
-        } else {
-          console.log("❌ No matching user found!");
-        }
-      } catch (error) {
-        console.error("🚨 Error fetching user data:", error);
-      }
-    };
-  
-    fetchUserData();
-  }, []);
-  
-  
-  
-  
-  
-  
+
+
 
   const [showManagePopup, setShowManagePopup] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -84,10 +74,17 @@ module.exports = authenticate;
     router.push("/admin/");
   };
 
+
   const handleManageClick = (row) => {
     setSelectedData(row);
+
+    // ค้นหาข้อมูล user จาก userId
+    const matchedUser = rows.find(user => user.userId === row.userId);
+    setUserData(matchedUser || {});
+
     setShowManagePopup(true);
   };
+
 
   const handleCloseManagePopup = () => {
     setShowManagePopup(false);
@@ -107,7 +104,7 @@ module.exports = authenticate;
       console.error("Error updating status:", error);
     }
   };
-  
+
 
   const handleRefundPayment = async () => {
     if (!selectedData) return;
@@ -181,7 +178,9 @@ module.exports = authenticate;
               <p><strong>Day:</strong> {selectedData.day}</p>
               <p><strong>Name:</strong> {selectedData.name}</p>
               <p><strong>Payment Method:</strong> Transfer money through bank account</p>
-              <p><strong>Bank Number:</strong> {userData ? userData.accountNumber : "Loading..."}</p>
+              <p><strong>User ID:</strong> {selectedData?.userId || "N/A"}</p>
+              <p><strong>Bank Number:</strong> {userData?.accountNumber || "Loading..."}</p>
+
               <button
                 className="bg-green-600 text-white px-4 py-2 mt-4 rounded-lg shadow hover:bg-green-700"
                 onClick={handleRefundPayment}
