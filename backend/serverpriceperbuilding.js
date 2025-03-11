@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const Building = require("./models/buildings.js");
+const Place = require("./models/Place");
 
 dotenv.config();
 const app = express();
@@ -49,6 +50,26 @@ app.post("/api/buildings", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.post("/api/Place", async (req, res) => {
+  console.log("ข้อมูลที่รับมา:", req.body);
+
+  const { type, name, location, link, details, image } = req.body;
+
+  if (!type || !name || !location || !link || !details || !image) {
+    return res.status(400).json({ error: "ข้อมูลไม่ครบ" });
+  }
+
+  try {
+    const newPlace = new Place({ type, name, location, link, details, image });
+    await newPlace.save();
+    res.json({ message: "บันทึกสำเร็จ" });
+  } catch (error) {
+    res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+  }
+});
+
+
 
 app.put("/api/update-buildings", async (req, res) => {
   const { Type, Building: buildingData } = req.body;
