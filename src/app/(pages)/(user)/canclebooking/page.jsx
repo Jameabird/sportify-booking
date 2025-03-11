@@ -25,41 +25,88 @@ const BookingList = () => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    if (!user) return; // ถ้ายังไม่มีข้อมูลผู้ใช้ ให้รอ
+  // useEffect(() => {
+  //   if (!user) return; // ถ้ายังไม่มีข้อมูลผู้ใช้ ให้รอ
 
+  //   const fetchBookings = async () => {
+  //     try {
+  //       const response = await axios.get(`http://localhost:5002/api/bookings?userId=${user._id}`);
+  //       const formattedData = response.data.map((booking) => ({
+  //         _id: booking._id,
+  //         image: `/assets/${booking.type}/${booking.type}.jpg`,
+  //         location: `${booking.building} ${booking.location}`,
+  //         day: booking.day,
+  //         time: booking.time,
+  //       }));
+  //       setBookings(formattedData);
+  //     } catch (error) {
+  //       console.error("Error fetching bookings:", error);
+  //     }
+  //   };
+
+  //   fetchBookings();
+  // }, [user]);
+
+  useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await axios.get(`http://localhost:5002/api/bookings?userId=${user._id}`);
-        const formattedData = response.data.map((booking) => ({
-          _id: booking._id,
-          image: `/assets/${booking.type}/${booking.type}.jpg`,
-          location: `${booking.building} ${booking.location}`,
-          day: booking.day,
-          time: booking.time,
-        }));
-        setBookings(formattedData);
+        const response = await axios.get(`http://localhost:5002/api/bookings-old`);
+    
+        // Filter only bookings where status is "refunded"
+        const refundedBookings = response.data
+          .filter((booking) => booking.status === "reserve") // Only keep refunded bookings
+          .map((booking) => ({
+            _id: booking._id,
+            name: booking.name,
+            image: `/assets/${booking.type}/${booking.type}.png`,
+            location: `${booking.building} ${booking.location}`,
+            day: booking.day,
+            time: booking.time,
+            status: booking.status,
+            price: booking.price,
+            datepaid: booking.datepaid,
+            timepaid: booking.timepaid,
+          }));
+    
+        setBookings(refundedBookings);
       } catch (error) {
         console.error("Error fetching bookings:", error);
       }
     };
+    
 
     fetchBookings();
-  }, [user]);
+  });
 
-  const handleCancel = async (id) => {
+  const handleCancel = async (booking) => {
     try {
-      const response = await axios.delete(`http://localhost:5002/api/bookings/${id}`);
-      if (response.status === 200) {
-        setBookings((prevBookings) => prevBookings.filter((booking) => booking._id !== id));
+      // Step 1: Update booking status to "cancel"
+      const updateResponse = await axios.put(`http://localhost:5002/api/bookings/${booking._id}`, {
+        status: "cancel",
+      });
+  
+      if (updateResponse.status === 200) {
+        console.log("✅ Status updated to 'cancel'");
+  
+        // // Step 2: Delete the booking after updating the status
+        // const deleteResponse = await axios.delete(`http://localhost:5002/api/bookings/${booking._id}`);
+        
+        // if (deleteResponse.status === 200) {
+        //   setBookings((prevBookings) => prevBookings.filter((b) => b._id !== booking._id));
+        //   alert("✅ Booking successfully canceled!");
+        // } else {
+        //   console.error("❌ Failed to delete booking");
+        // }
       } else {
-        console.error("Failed to cancel booking");
+        console.error("❌ Failed to update status");
       }
     } catch (error) {
-      console.error("Error cancelling booking:", error);
+      console.error("❌ Error cancelling booking:", error);
+      alert("❌ An error occurred while canceling the booking.");
     }
   };
-
+  
+  
   return (
     <div>
       <TopBar_User textColor="black" />
@@ -82,7 +129,7 @@ const BookingList = () => {
                   <p className="text-blue-600 font-bold mt-2">Time</p>
                   <p>{booking.time}</p>
                   <button
-                    onClick={() => handleCancel(booking._id)}
+                    onClick={() => handleCancel(booking)}
                     className="mt-4 bg-red-500 text-white w-full py-2 rounded-md hover:bg-red-700"
                   >
                     ยกเลิก
