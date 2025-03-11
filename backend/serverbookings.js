@@ -34,6 +34,67 @@ app.get("/api/bookings-old", async (req, res) => {
   }
 });
 
+const authenticate = (req, res, next) => {
+  let token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token && req.body.token) {
+    token = req.body.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
+  try {
+    console.log("🔹 Received Token:", token);
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("🔹 Decoded JWT:", decoded);
+
+    if (!decoded.userId) {
+      throw new Error("Invalid token payload: Missing userId");
+    }
+
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error("🚨 JWT Authentication Error:", error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token has expired, please log in again" });
+    }
+
+    return res.status(401).json({ message: "Invalid token", error: error.message });
+  }
+};
+
+app.post("/api/refund", async (req, res) => {
+  try {
+    const { name, day, time, status, price, datepaid, timepaid, userId } = req.body;
+
+    // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
+    if (!name || !day || !time || !status || !price || !timepaid) {
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+    }
+
+    const newRefund = new Refund({
+      name,
+      day,
+      time,
+      status,
+      price,
+      datepaid,
+      timepaid,
+      userId,
+    });
+
+    await newRefund.save();
+    res.status(201).json({ message: "สร้างการคืนเงินสำเร็จ", refund: newRefund });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ✅ Get bookings for a specific user
 app.get("/api/bookings", async (req, res) => {
   try {
