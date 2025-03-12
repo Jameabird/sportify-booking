@@ -4,6 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import TopBar_User from "@components/Topbar_User";
 
+
 const BookingList = () => {
   const [bookings, setBookings] = useState([]);
   const [user, setUser] = useState(null);
@@ -51,7 +52,7 @@ const BookingList = () => {
     const fetchBookings = async () => {
       try {
         const response = await axios.get(`http://localhost:5002/api/bookings`);
-    
+
         // Filter only bookings where status is "refunded"
         const refundedBookings = response.data
           .filter((booking) => booking.status === "reserve") // Only keep refunded bookings
@@ -67,13 +68,12 @@ const BookingList = () => {
             datepaid: booking.datepaid,
             timepaid: booking.timepaid,
           }));
-    
+
         setBookings(refundedBookings);
       } catch (error) {
         console.error("Error fetching bookings:", error);
       }
     };
-    
 
     fetchBookings();
   });
@@ -81,16 +81,19 @@ const BookingList = () => {
   const handleCancel = async (booking) => {
     try {
       // Step 1: Update booking status to "cancel"
-      const updateResponse = await axios.put(`http://localhost:5002/api/bookings/${booking._id}`, {
-        status: "cancel",
-      });
-  
+      const updateResponse = await axios.put(
+        `http://localhost:5002/api/bookings/${booking._id}`,
+        {
+          status: "cancel",
+        }
+      );
+
       if (updateResponse.status === 200) {
         console.log("✅ Status updated to 'cancel'");
-  
+
         // // Step 2: Delete the booking after updating the status
         // const deleteResponse = await axios.delete(`http://localhost:5002/api/bookings/${booking._id}`);
-        
+
         // if (deleteResponse.status === 200) {
         //   setBookings((prevBookings) => prevBookings.filter((b) => b._id !== booking._id));
         //   alert("✅ Booking successfully canceled!");
@@ -105,8 +108,7 @@ const BookingList = () => {
       alert("❌ An error occurred while canceling the booking.");
     }
   };
-  
-  
+
   return (
     <div>
       <TopBar_User textColor="black" />
@@ -115,19 +117,41 @@ const BookingList = () => {
         {bookings.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {bookings.map((booking) => (
-              <div key={booking._id} className="bg-white shadow-md rounded-lg p-4">
+              <div
+                key={booking._id}
+                className="bg-white shadow-md rounded-lg p-4"
+              >
                 <img
                   src={booking.image}
                   alt="Sport field"
                   className="w-full h-40 object-cover rounded-md"
                 />
                 <div className="mt-2">
-                  <p className="text-blue-600 font-bold">Location</p>
-                  <p>{booking.location}</p>
-                  <p className="text-blue-600 font-bold mt-2">Date</p>
-                  <p>{booking.day}</p>
-                  <p className="text-blue-600 font-bold mt-2">Time</p>
-                  <p>{booking.time}</p>
+                  <p>
+                    <strong>Type: </strong>
+                    {booking.type}
+                  </p>
+                  <p>
+                    <strong>Location: </strong>
+                    {booking.location}
+                  </p>
+                  <p>
+                    <strong>Date: </strong>
+                    {booking.day}
+                  </p>
+                  <p>
+                    <strong>Time: </strong>
+                    {booking.time}
+                  </p>
+                  <p>
+                    <strong>Price: </strong>
+                    {booking.price}
+                  </p>
+                  <p>
+                    <strong>Status: </strong>
+                    {booking.status}
+                  </p>
+
                   <button
                     onClick={() => handleCancel(booking)}
                     className="mt-4 bg-red-500 text-white w-full py-2 rounded-md hover:bg-red-700"
