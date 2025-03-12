@@ -29,7 +29,7 @@ function SearchPages() {
     const fetchBuildings = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4005/api/buildings", {
+        const res = await axios.get("http://localhost:5005/api/buildings", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("✅ Buildings data received:", res.data);
