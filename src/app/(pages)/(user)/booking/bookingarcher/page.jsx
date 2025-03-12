@@ -425,6 +425,9 @@ const ArcherBooking = () => {
           <div className="header">รายละเอียดการจอง</div>
           <div className="content">
             <div className="booking-details">
+            <p>
+                <span>Type:</span> <span>archer</span>
+              </p>
               <p>
                 <span>สถานที่:</span> <span>{name || "กรุณาเลือกสถานที่"}</span>
               </p>
