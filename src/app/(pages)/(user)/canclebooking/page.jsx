@@ -50,7 +50,7 @@ const BookingList = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await axios.get(`http://localhost:5002/api/bookings-old`);
+        const response = await axios.get(`http://localhost:5002/api/bookings`);
     
         // Filter only bookings where status is "refunded"
         const refundedBookings = response.data

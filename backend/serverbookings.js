@@ -4,15 +4,15 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const sharp = require("sharp");
 const Refund = require("./models/refund.js");
+const Users = require("./models/user.js");
 const Bookings = require("./models/Bookings.js");
-const Users = require("./models/user.js"); 
 
 dotenv.config();
 const app = express();
 
-// ✅ Increase payload size limit
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+// ✅ Increase payload size limit (to 10MB)
+app.use(express.json({ limit: "5mb" })); 
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(cors());
 
 mongoose
@@ -22,59 +22,138 @@ mongoose
     dbName: "SE",
   })
   .then(() => console.log("✅ MongoDB Connected to SE"))
-  .catch((err) => console.error(err));
+  .catch((err) => console.error("🚨 MongoDB Connection Error:", err));
 
-// ✅ Get all bookings (old route)
-app.get("/api/bookings-old", async (req, res) => {
+/**
+ * 📌 Get all bookings or filter by userId (if provided)
+ */
+app.get("/api/bookings", async (req, res) => {
   try {
-    const bookings = await Bookings.find();
+    const { userId } = req.query;
+    const query = userId ? { userId } : {}; // If userId exists, filter by it
+    const bookings = await Bookings.find(query);
     res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+/**
+ * 📌 Create a new booking
+ */
+app.post("/api/bookings", async (req, res) => {
+  try {
+    console.log("📩 Incoming booking request:", req.body);
+
+    const {
+      name,
+      day,
+      time,
+      location,
+      field,
+      status,
+      price,
+      type,
+      building,
+      role,
+      userId,
+      datepaid,
+      timepaid,
+      image,
+    } = req.body;
+
+    if (!userId || !role) {  
+      console.warn("⚠️ Missing user ID or role:", { userId, role });
+      return res.status(400).json({ message: "User ID and role are required" });
+    }
+
+    let processedImage = image; // Use `let` to allow reassignment
+
+    if (image) {
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+
+      const compressedImageBuffer = await sharp(buffer)
+        .resize({ width: 800 }) 
+        .jpeg({ quality: 85 }) 
+        .toBuffer();
+
+      processedImage = `data:image/jpeg;base64,${compressedImageBuffer.toString("base64")}`;
+    }
+
+    const newBooking = new Bookings({
+      name,
+      day,
+      time,
+      location,
+      field,
+      status,
+      price,
+      type,
+      building,
+      role,
+      userId,
+      datepaid,
+      timepaid: timepaid || "",
+      image: processedImage,
+    });
+
+    await newBooking.save();
+    console.log("✅ Booking successfully created:", newBooking);
+    res.status(201).json({ message: "Booking successful", booking: newBooking });
+
+  } catch (error) {
+    console.error("🚨 Error creating booking:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+/**
+ * 📌 Update a booking by ID
+ */
+app.put("/api/bookings/:id", async (req, res) => {
+  try {
+    console.log("📌 Updating booking with data:", req.body);
+    const { id } = req.params;
+
+    const updatedBooking = await Bookings.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.status(200).json(updatedBooking);
   } catch (err) {
+    console.error("🚨 Error updating booking:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-const authenticate = (req, res, next) => {
-  let token = req.header("Authorization")?.replace("Bearer ", "");
-
-  if (!token && req.body.token) {
-    token = req.body.token;
-  }
-
-  if (!token) {
-    return res.status(401).json({ message: "Authentication required" });
-  }
-
+/**
+ * 📌 Delete a booking by ID
+ */
+app.delete("/api/bookings/:id", async (req, res) => {
   try {
-    console.log("🔹 Received Token:", token);
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("🔹 Decoded JWT:", decoded);
-
-    if (!decoded.userId) {
-      throw new Error("Invalid token payload: Missing userId");
-    }
-
-    req.user = decoded;
-    next();
-  } catch (error) {
-    console.error("🚨 JWT Authentication Error:", error.message);
-
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Token has expired, please log in again" });
-    }
-
-    return res.status(401).json({ message: "Invalid token", error: error.message });
+    const { id } = req.params;
+    await Bookings.findByIdAndDelete(id);
+    res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (err) {
+    console.error("🚨 Error deleting booking:", err);
+    res.status(500).json({ error: err.message });
   }
-};
+});
 
+/**
+ * 📌 Create a refund request
+ */
 app.post("/api/refund", async (req, res) => {
   try {
     const { name, day, time, status, price, datepaid, timepaid, userId } = req.body;
 
-    // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
     if (!name || !day || !time || !status || !price || !timepaid) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const newRefund = new Refund({
@@ -89,28 +168,16 @@ app.post("/api/refund", async (req, res) => {
     });
 
     await newRefund.save();
-    res.status(201).json({ message: "สร้างการคืนเงินสำเร็จ", refund: newRefund });
+    res.status(201).json({ message: "Refund request created", refund: newRefund });
   } catch (err) {
+    console.error("🚨 Error processing refund:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ Get bookings for a specific user
-app.get("/api/bookings", async (req, res) => {
-  try {
-    const { userId } = req.query;
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
-    const bookings = await Bookings.find({ userId });
-    res.json(bookings);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-});
-
-// ✅ Get refunds for a user (with accountNumber)
+/**
+ * 📌 Get refunds for a user (filtered by 'cancel' status)
+ */
 app.get("/api/refund", async (req, res) => {
   try {
     const { userId } = req.query;
@@ -127,136 +194,12 @@ app.get("/api/refund", async (req, res) => {
 
     res.json(result);
   } catch (err) {
+    console.error("🚨 Error fetching refunds:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ Create new booking (with image compression)
-app.post("/api/bookings", async (req, res) => {
-  console.log(req.body);
-  try {
-    let {
-      name,
-      day,
-      time,
-      location,
-      field,
-      status,
-      price,
-      type,
-      building,
-      role,
-      user,
-      datepaid,
-      timepaid,
-      image,
-    } = req.body;
-
-    if (!name || !day || !time || !location || !field || !type || !building) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
-    }
-
-    // ✅ Compress image if provided
-    if (image) {
-      const base64Data = image.replace(/^data:image\/\w+;base64,/, ""); // Remove metadata
-      const buffer = Buffer.from(base64Data, "base64"); // Convert to buffer
-
-      const compressedImageBuffer = await sharp(buffer)
-        .resize({ width: 700 }) // Resize max width 500px
-        .jpeg({ quality: 80 }) // Convert to JPEG with 70% quality
-        .toBuffer();
-
-      image = `data:image/jpeg;base64,${compressedImageBuffer.toString("base64")}`;
-    }
-
-    const newBooking = new Bookings({
-      name,
-      day,
-      time,
-      location,
-      field,
-      status: status || "reserved",
-      price,
-      type,
-      building,
-      role,
-      user,
-      datepaid,
-      timepaid: timepaid || "",
-      image, // ✅ Compressed image saved
-    });
-
-    await newBooking.save();
-    res.status(201).json({ message: "เพิ่มการจองสำเร็จ", booking: newBooking });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ✅ Update booking by ID
-app.put("/api/bookings/:id", async (req, res) => {
-  try {
-    console.log("📌 datepaid:", req.body.datepaid);
-    console.log("📌 status:", req.body.status);
-
-    const { id } = req.params;
-    if (!req.body) {
-      return res.status(400).json({ message: "ไม่มีข้อมูลสำหรับอัปเดต" });
-    }
-
-    const updatedBooking = await Bookings.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-
-    if (!updatedBooking) {
-      return res.status(404).json({ message: "ไม่พบการจองที่ต้องการอัปเดต" });
-    }
-    res.status(200).json(updatedBooking);
-  } catch (err) {
-    console.error("Error updating booking:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ✅ Delete booking by ID
-app.delete("/api/bookings/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Bookings.findByIdAndDelete(id);
-    res.status(200).json({ message: "ลบการจองสำเร็จ" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ✅ Create refund request
-app.post("/api/refund", async (req, res) => {
-  try {
-    const { name, day, time, status, price, datepaid, timepaid, userId } = req.body;
-
-    if (!name || !day || !time || !status || !price || !timepaid) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
-    }
-
-    const newRefund = new Refund({
-      name,
-      day,
-      time,
-      status,
-      price,
-      datepaid,
-      timepaid,
-      userId,
-    });
-
-    await newRefund.save();
-    res.status(201).json({ message: "สร้างการคืนเงินสำเร็จ", refund: newRefund });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ✅ Start server
+// ✅ Start the server
 const PORT = process.env.PORT2 || 5002;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

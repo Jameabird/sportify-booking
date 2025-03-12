@@ -15,6 +15,7 @@ const BookingsSchema = new mongoose.Schema({
   datepaid: { type: Date, default: Date.now },
   timepaid: { type: String, required: true },
   image: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   accountNumber: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, // เชื่อมกับ Users
 });
 
