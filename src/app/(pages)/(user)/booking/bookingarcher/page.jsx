@@ -27,6 +27,9 @@ const ArcherBooking = () => {
   const [selectedCourts, setSelectedCourts] = useState("");
   const [selectedDatePaid, setSelectedDatePaid] = useState("");
   const [selectedTimePaid, setSelectedTimePaid] = useState("");
+  const [Userid, setUserid] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
@@ -99,12 +102,14 @@ const ArcherBooking = () => {
       });
   }, []);
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const tokenData = JSON.parse(localStorage.getItem("token")); // Parse stored JSON
+    const token = tokenData?.token; // Extract the token string
     if (!token) {
-      console.error("❌ No token found in localStorage");
-      return;
+        console.error("❌ No valid token found");
+        return;
     }
-    console.log("Token in LocalStorage:", token);
+
+    console.log("Token being sent:", token);
     axios
       .get("http://localhost:5000/api/users/current", {
         headers: {
@@ -117,13 +122,25 @@ const ArcherBooking = () => {
         setRole(response.data.role);
       })
       .catch((error) => {
-        console.error(
-          "❌ Error fetching current user:",
-          error.response?.data || error
-        );
+        console.error("❌ Error fetching current user:", error.response?.data || error);
       });
   }, []);
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      setTimeLeft(15 * 60); // รีเซ็ตเป็น 15 นาที
+      setShowImagePopup(false);
+      setShowPopup(false);
+      setShowQRPopup(false);
+      return;
+    }
 
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
+    }, 1000);
+
+    return () => clearInterval(timer); // ล้าง interval เมื่อ component ถูก unmount
+  }, [timeLeft]);
+  
   const handleConfirmBooking = async () => {
     const selectedCourts = Object.keys(selectedCheckboxes).filter(
       (field) => selectedCheckboxes[field]
@@ -137,7 +154,9 @@ const ArcherBooking = () => {
     const finalPrice = discountedPrice !== null ? discountedPrice : totalPrice;
 
     const bookingData = {
-      name: username || "testmint",
+      userId: Userid, // Assuming `username` is actually the userId from API
+      name: username || "Unknown User",
+      role: role || "user",
       day: selectedDate,
       time: selectedTimes || "ไม่ระบุ",
       location: name,
@@ -150,7 +169,7 @@ const ArcherBooking = () => {
         ? new Date(selectedDatePaid).toISOString()
         : new Date().toISOString(),
       timepaid: selectedTimePaid || "",
-      image: uploadedImage || "",
+      image: uploadedImage,
     };
 
     try {
@@ -285,7 +304,7 @@ const ArcherBooking = () => {
       console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
     }
   };
-
+  
   return (
     <div className="w-full">
       {/* Top Navigation */}

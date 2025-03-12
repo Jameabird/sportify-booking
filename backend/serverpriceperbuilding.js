@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const Building = require("./models/buildings.js");
+const jwt = require("jsonwebtoken");
 const Place = require("./models/Place");
 
 dotenv.config();
@@ -21,35 +22,58 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected to SE"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// 🔹 Middleware ตรวจสอบ JWT
 const authenticate = (req, res, next) => {
   let token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) return res.status(401).json({ message: "Authentication required" });
+
+  if (!token && req.body.token) {
+    token = req.body.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
 
   try {
+    console.log("🔹 Received Token:", token);
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("🔹 Decoded JWT:", decoded);
+
+    if (!decoded.userId) {
+      throw new Error("Invalid token payload: Missing userId");
+    }
+
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    console.error("🚨 JWT Authentication Error:", error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token has expired, please log in again" });
+    }
+
+    return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
+app.get("/api/bookings/current", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.userId; // Extract user ID from JWT
+    console.log("🔹 Fetching current bookings for userId:", userId);
 
-// 🔹 สร้าง Schema และ Model
-const BookingHistory = mongoose.model("history", new mongoose.Schema({
-  name: String,
-  type: String,
-  coupons: String,
-  user: { _id: mongoose.Schema.Types.ObjectId },
-}, { strict: false }), "history");
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
 
-const Promotion = mongoose.model("promotions", new mongoose.Schema({
-  name: String,
-  description: String,
-  status: String,
-  sale: Number,
-  free: String,
-}, { strict: false }), "promotions");
+    const objectId = new mongoose.Types.ObjectId(userId);
+    const currentBookings = await BookingHistory.find({ "user._id": objectId });
+
+    console.log("✅ Retrieved bookings:", currentBookings);
+    res.json(currentBookings);
+  } catch (error) {
+    console.error("🚨 Error retrieving current bookings:", error.message);
+    res.status(500).json({ message: "Error retrieving bookings", error: error.message });
+  }
+});
 
 /** ================================
  * ✅ GET: ดึงข้อมูลสนามทั้งหมด
