@@ -82,7 +82,7 @@ app.delete("/api/bookings/:id", async (req, res) => {
 
 
 
-const PORT = process.env.PORT2 || 5003;
+const PORT = process.env.PORT3 || 5003;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

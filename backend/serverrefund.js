@@ -50,12 +50,17 @@ app.post("/api/refund", async (req, res) => {
 
     // ตรวจสอบว่า userId มีอยู่ในฐานข้อมูลหรือไม่
     for (const refund of req.body) {
+      if (!mongoose.Types.ObjectId.isValid(refund.userId)) {
+        return res.status(400).json({ error: `Invalid userId: ${refund.userId}` });
+      }
+
       const user = await User.findById(refund.userId);
       if (!user) {
         return res.status(404).json({ error: `User with ID ${refund.userId} not found.` });
       }
     }
 
+    // บันทึกข้อมูล Refund
     const newRefunds = await Refund.insertMany(req.body);
     console.log("✅ Refunds Created:", newRefunds);
 

@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken"); // ใช้สำหรับสร้า�
 const nodemailer = require("nodemailer");
 const { OAuth2Client } = require("google-auth-library");
 
+
 const app = express();
 app.use(
   cors({
@@ -770,33 +771,46 @@ app.get("/api/users", async (req, res) => {
 });
 
 const authenticateUser = (req, res, next) => {
-  const token = req.header("Authorization")?.replace("Bearer ", ""); // Check cookies or Bearer token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
 
-  if (!token) {
-    return res.status(401).json({ message: "No token, authorization denied" });
-  }
+    const token = authHeader.split(" ")[1];
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user to request
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Token is invalid" });
-  }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // ✅ Now `req.user.userId` exists
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
 };
-
+module.exports = authenticateUser;
+const Bookings = require("./models/Bookings.js");
 // Protect route with middleware
-app.get("/api/users/current", authenticateUser, async (req, res) => {
+app.get("/api/bookings/current", authenticateUser, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
+      console.log("🔹 Decoded User from JWT:", req.user); // ✅ Log the full user object
+      const userId = req.user.userId;
 
-    res.status(200).json(user);
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+          console.error("❌ Invalid user ID format:", userId);
+          return res.status(400).json({ message: "Invalid user ID format" });
+      }
+
+      const objectId = new mongoose.Types.ObjectId(userId);
+      console.log("🔍 Querying Bookings for ObjectId:", objectId);
+
+      const currentBookings = await User.find({ "_id": objectId });
+      console.log("✅ Retrieved bookings:", currentBookings);
+
+      res.json(currentBookings);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+      console.error("🚨 Error retrieving current bookings:", error.message);
+      res.status(500).json({ message: "Error retrieving bookings", error: error.message });
   }
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); // แจ้งเตือนเมื่อเซิร์ฟเวอร์เริ่มทำงาน

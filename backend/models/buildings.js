@@ -29,5 +29,5 @@ const PlaceSchema = new mongoose.Schema({
 });
 
 
-const Building = mongoose.model("Building", BuildingSchema,"Buildings", PlaceSchema);
+const Building = mongoose.model("Building", BuildingSchema,"buildings", PlaceSchema);
 module.exports = Building;

@@ -60,9 +60,20 @@ const HistoryPage = () => {
     }
     return acc;
   }, {});
+
+  const bookingCoupons = filteredHistory.reduce((acc, item) => {
+    if (item.coupons !== "true" && item.status !== "cancel") {
+      acc[item.type] = (acc[item.type] || 0) + 1;
+    }
+    return acc;
+  }, {});
   
 
-  const totalBookings = filteredHistory.filter(item => item.status !== "cancel").length;
+  const totalBookings = filteredHistory.filter(
+    (item) => item.status !== "cancel"
+  ).length;
+
+  
 
   return (
     <>
@@ -90,23 +101,20 @@ const HistoryPage = () => {
             </div>
 
             {/* ปุ่มคูปอง */}
-            {/* <div className="coupon-button-container">
-              <button
-                className="coupon-button"
-                onClick={() => setShowCouponDetails(!showCouponDetails)}
-              >
-                คงเหลือที่ใช้ส่วนลดได้
+            <div className="coupon-button-container">
+              <button className="coupon-button" onClick={() => setShowCouponDetails(!showCouponDetails)}>
+                คงเหลือที่ใช้ส่วนลดได้ 
               </button>
               {showCouponDetails && (
                 <div className="coupon-details">
-                  {Object.entries(couponCounts).map(([type, count]) => (
+                  {Object.entries(bookingCoupons).map(([type, count]) => (
                     <div key={type} className="detail-item">
                       {type} {count} ครั้ง
                     </div>
                   ))}
                 </div>
               )}
-            </div> */}
+            </div>
           </div>
         </div>
 
@@ -125,7 +133,7 @@ const HistoryPage = () => {
                 />
 
                 <div className="booking-info">
-                <p>
+                  <p>
                     <strong>Type:</strong> {item.type}
                   </p>
                   <p>
