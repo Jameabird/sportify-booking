@@ -54,6 +54,23 @@ const authenticate = (req, res, next) => {
     return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
+app.post("/api/Place", async (req, res) => {
+  console.log("ข้อมูลที่รับมา:", req.body);
+
+  const { type, name, location, link, details, image } = req.body;
+
+  if (!type || !name || !location || !link || !details || !image) {
+    return res.status(400).json({ error: "ข้อมูลไม่ครบ" });
+  }
+
+  try {
+    const newPlace = new Place({ type, name, location, link, details, image });
+    await newPlace.save();
+    res.json({ message: "บันทึกสำเร็จ" });
+  } catch (error) {
+    res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+  }
+});
 app.get("/api/bookings/current", authenticate, async (req, res) => {
   try {
     const userId = req.user.userId; // Extract user ID from JWT
