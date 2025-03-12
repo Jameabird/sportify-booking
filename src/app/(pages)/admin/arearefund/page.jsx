@@ -23,6 +23,7 @@ export default function PlacesPage() {
   const handlePlaceClick = (id) => {
     // You can change the URL based on the clicked place's ID or name
     router.push(`/admin/arearefund/refundmanagement`); // Example route pattern
+    
   };
 
   return (
