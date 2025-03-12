@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -20,6 +21,22 @@ mongoose
   })
   .then(() => console.log("✅ MongoDB Connected to SE"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
+
+  const BookingHistory = mongoose.model("history", new mongoose.Schema({
+    name: String,
+    type: String,
+    coupons: String,  
+    user: { _id: mongoose.Schema.Types.ObjectId },
+  }, { strict: false }), "history");
+  
+  const Promotion = mongoose.model("promotions", new mongoose.Schema({
+    name: String,
+    description: String,
+    status: String,
+    sale: Number,
+    free: String,
+  }, { strict: false }), "promotions");
+  
 
 const authenticate = (req, res, next) => {
   let token = req.header("Authorization")?.replace("Bearer ", "");

@@ -166,7 +166,7 @@ const ArcherBooking = () => {
     const finalPrice = discountedPrice !== null ? discountedPrice : totalPrice;
 
     const bookingData = {
-      userId: Userid, // Assuming `username` is actually the userId from API
+      userId: Userid,
       name: username || "Unknown User",
       role: role || "user",
       day: selectedDate,
@@ -174,7 +174,8 @@ const ArcherBooking = () => {
       location: name,
       field: selectedCourts.join(", "),
       status: "reserve",
-      price: finalPrice, // ✅ ใช้ราคาที่มีส่วนลด
+      price: finalPrice, 
+      // เพิ่มตรงนี้
       type: "archer",
       building: selectedBuilding,
       datepaid: selectedDatePaid
