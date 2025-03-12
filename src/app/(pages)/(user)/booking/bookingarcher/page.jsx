@@ -101,28 +101,42 @@ const ArcherBooking = () => {
   }, []);
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem("token")); // Parse stored JSON
-    const token = tokenData?.token; // Extract the token string
+    const token = tokenData?.token; // Extract token
+  
     if (!token) {
-        console.error("❌ No valid token found");
-        return;
+      console.error("❌ No valid token found");
+      return;
     }
-
+  
     console.log("Token being sent:", token);
+    
     axios
-      .get("http://localhost:5000/api/users/current", {
+      .get("http://localhost:5000/api/bookings/current", {
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ Corrected
+          Authorization: `Bearer ${token}`, // ✅ Correct format
         },
       })
       .then((response) => {
-        console.log("✅ Current User:", response.data);
-        setUsername(response.data.id);
-        setRole(response.data.role);
+        console.log("✅ Current User Data:", response.data);
+        
+        // ✅ Ensure response is an array and extract the first object
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          const user = response.data[0]; // Extract first user
+          setUsername(user.username); // ✅ Corrected
+          setRole(user.role);
+          setUserid(user._id) // ✅ Corrected
+          console.log("Username:", user.username);
+          console.log("Role:", user.role);
+          console.log("Role:", user._id);
+        } else {
+          console.error("❌ No user data received");
+        }
       })
       .catch((error) => {
         console.error("❌ Error fetching current user:", error.response?.data || error);
       });
   }, []);
+  
   useEffect(() => {
     if (timeLeft <= 0) {
       setTimeLeft(15 * 60); // รีเซ็ตเป็น 15 นาที
