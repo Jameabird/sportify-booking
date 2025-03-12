@@ -28,8 +28,6 @@ const ArcherBooking = () => {
   const [selectedDatePaid, setSelectedDatePaid] = useState("");
   const [selectedTimePaid, setSelectedTimePaid] = useState("");
   const [Userid, setUserid] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
