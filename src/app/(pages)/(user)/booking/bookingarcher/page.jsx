@@ -111,34 +111,36 @@ const ArcherBooking = () => {
 
     console.log("Token being sent:", token);
     axios
-        .get("http://localhost:5000/api/bookings/current", {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-        .then((response) => {
-            console.log("✅ Current User:", response.data);
+      .get("http://localhost:5000/api/users/current", {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Corrected
+        },
+      })
+      .then((response) => {
+        console.log("✅ Current User:", response.data);
+        setUsername(response.data.id);
+        setRole(response.data.role);
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching current user:", error.response?.data || error);
+      });
+  }, []);
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      setTimeLeft(15 * 60); // รีเซ็ตเป็น 15 นาที
+      setShowImagePopup(false);
+      setShowPopup(false);
+      setShowQRPopup(false);
+      return;
+    }
 
-            // ✅ Access the first object in the array
-            if (response.data.length > 0) {
-                const user = response.data[0]; // Get the first user object
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
+    }, 1000);
 
-                setUserid(user._id);
-                setUsername(user.username);
-                setRole(user.role);
-
-                console.log(user._id);
-                console.log(user.username);
-                console.log(user.role);
-            } else {
-                console.warn("⚠️ No user data received!");
-            }
-        })
-        .catch((error) => {
-            console.error("❌ Error fetching current user:", error.response?.data || error);
-        });
-}, []);
-
+    return () => clearInterval(timer); // ล้าง interval เมื่อ component ถูก unmount
+  }, [timeLeft]);
+  
   const handleConfirmBooking = async () => {
     const selectedCourts = Object.keys(selectedCheckboxes).filter(
       (field) => selectedCheckboxes[field]
