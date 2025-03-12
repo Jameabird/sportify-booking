@@ -67,6 +67,7 @@ const BookingList = () => {
             price: booking.price,
             datepaid: booking.datepaid,
             timepaid: booking.timepaid,
+            type: booking.type
           }));
 
         setBookings(refundedBookings);
