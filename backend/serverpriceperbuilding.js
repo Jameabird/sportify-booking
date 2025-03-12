@@ -4,7 +4,6 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const Building = require("./models/buildings.js");
-const jwt = require("jsonwebtoken");
 const Place = require("./models/Place");
 
 dotenv.config();
