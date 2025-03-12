@@ -178,7 +178,7 @@ const AdminPaidTable = () => {
               <p><strong>Day:</strong> {selectedData.day}</p>
               <p><strong>Name:</strong> {selectedData.name}</p>
               <p><strong>Payment Method:</strong> Transfer money through bank account</p>
-              <p><strong>User ID:</strong> {selectedData?.userId || "N/A"}</p>
+              
               <p><strong>Bank Number:</strong> {userData?.accountNumber || "Loading..."}</p>
 
               <button
