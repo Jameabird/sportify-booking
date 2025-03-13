@@ -78,16 +78,16 @@ const userSchema = new mongoose.Schema({
   adminId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: function () {
+    /* required: function () {
       return this.role === "owner"; // ถ้าเป็น owner ต้องมี adminId
-    },
+    }, */
   },  
   ownerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // เชื่อมโยงกับเจ้าของ
-    required: function () {
+    /* required: function () {
       return this.role === "officer"; // ถ้าเป็น officer ต้องมี ownerId
-    },
+    }, */
   },
 });
 

@@ -25,7 +25,7 @@ export default function AccountPage() {
           return;
         }
 
-        const { data } = await axios.get("http://localhost:5000/api/owners", {
+        const { data } = await axios.get("http://localhost:5011/api/owners", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -54,7 +54,7 @@ export default function AccountPage() {
         return;
       }
 
-      await axios.delete(`http://localhost:5000/api/owners/${id}`, {
+      await axios.delete(`http://localhost:5011/api/owners/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

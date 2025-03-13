@@ -47,7 +47,7 @@ export default function Profile() {
     }
 
     try {
-      await axios.put("http://localhost:5000/api/users/me", updatedData, {
+      await axios.put("http://localhost:5011/api/users/me", updatedData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ export default function Profile() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/users/me/reset-password", {
+      const response = await fetch("http://localhost:5011/api/users/me/reset-password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -164,7 +164,7 @@ export default function Profile() {
       const fetchUserData = async () => {
         setLoading(true);
         try {
-          const res = await axios.get("http://localhost:5000/api/users/me", {
+          const res = await axios.get("http://localhost:5011/api/users/me", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
