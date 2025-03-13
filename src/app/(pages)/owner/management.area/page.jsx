@@ -7,6 +7,7 @@ import "@app/globals.css";
 import axios from "axios";
 import {provinces} from "./mockdata";
 import imageCompression from "browser-image-compression";
+import { useRouter } from "next/navigation";
 
 
 export default function AddNewPlace() {
@@ -16,7 +17,13 @@ export default function AddNewPlace() {
   const [link, setLink] = useState("");
   const [image, setImage] = useState(null);
   const [details, setDetails] = useState("");
-  const [type, setType] = useState("");
+  const [userid, setUserID] = useState("");
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [username, setUsername] = useState("");
+  const [role, setRole] = useState("");
+  const router = useRouter();
+  // ✅ List of Thai provinces (can be modified)
 
   const handleSave = async () => {
     console.log("Type ที่บันทึก:", type); // ✅ Debug ค่า Type
@@ -100,6 +107,7 @@ export default function AddNewPlace() {
     setLink("");
     setDetails("");
     setImage(null);
+    router.push("/owner")
   };
 
   // const handleImageChange = (e) => {

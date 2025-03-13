@@ -122,15 +122,28 @@ app.get("/api/bookings/current", authenticate, async (req, res) => {
  * ================================ */
 app.get("/api/buildings", async (req, res) => {
   try {
-    const buildings = await Building.find();
-    if (!buildings || buildings.length === 0) {
-      return res.status(404).json({ message: "No data found" });
+    const { userid } = req.query;
+
+    if (!userid) {
+      console.log("❌ Missing user ID in request");
+      return res.status(400).json({ message: "User ID is required" });
     }
+
+    console.log("📌 Searching for buildings with userid:", userid);
+
+    const buildings = await Building.find({ userid }); // ✅ Correct query
+
+    if (!buildings || buildings.length === 0) {
+      return res.status(404).json({ message: "No buildings found for this user" });
+    }
+
     res.json(buildings.map((building) => building.toJSON()));
   } catch (err) {
+    console.error("❌ Error fetching buildings:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /** ================================
  * ✅ POST: เพิ่มอาคารใหม่
