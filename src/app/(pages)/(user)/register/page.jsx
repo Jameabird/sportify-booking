@@ -93,7 +93,7 @@ const RegisterPage = () => {
       // Log user data before sending
       console.log(userData);
   
-      const response = await axios.post("http://localhost:5000/api/register", userData, {
+      const response = await axios.post("http://localhost:5011/api/register", userData, {
         headers: {
           "Content-Type": "application/json", // Use JSON instead of FormData
         },

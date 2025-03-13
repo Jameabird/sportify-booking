@@ -45,7 +45,7 @@ const CombinedPage = () => {
 
     try {
       // ส่งคำขอไปที่ API สำหรับรีเซ็ตรหัสผ่าน
-      const response = await axios.post('http://localhost:5000/api/reset-password', {
+      const response = await axios.post('http://localhost:5011/api/reset-password', {
         otp: otp,               // OTP ที่ผู้ใช้กรอก
         newPassword: newPassword,
         confirmPassword: confirmPassword
@@ -86,7 +86,7 @@ const CombinedPage = () => {
       }
   
       try {
-        const response = await axios.post("http://localhost:5000/api/verify-otp", { otp });
+        const response = await axios.post("http://localhost:5011/api/verify-otp", { otp });
         setSnackbarMessage("OTP ถูกต้อง!");
         setSnackbarSeverity("success");
         setOpenSnackbar(true);
