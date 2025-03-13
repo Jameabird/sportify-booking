@@ -81,7 +81,7 @@ const ArcherBooking = () => {
   // ✅ Fetch Data from API and Filter Type "Archer"
   useEffect(() => {
     axios
-      .get("http://localhost:5005/api/buildings-user") // ✅ Ensure correct API route
+      .get("http://localhost:5005/api/building-user") // ✅ Ensure correct API route
       .then((response) => {
         console.log("API Response:", response.data);
 
