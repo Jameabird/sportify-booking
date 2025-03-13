@@ -47,7 +47,7 @@ const PlacesPage = () => {
 
     const fetchBuildings = async () => {
       try {
-        const response = await axios.get(`http://localhost:5005/api/buildings?userid=${String(Userid)}`, {
+        const response = await axios.get(`http://localhost:5005/api/buildings`, {
           params: { userId: Userid }, // ✅ Pass userId as a query param
         });
 
@@ -62,11 +62,9 @@ const PlacesPage = () => {
     fetchBuildings();
   }, [Userid]); // ✅ Runs only when `Userid` updates
 
-  const handlePlaceClick = (name, userid) => {
-    const encodedName = encodeURIComponent(name); // ✅ Encode name for URL safety
-    router.push(`/owner/areafield/field.management?name=${encodedName}&userid=${userid}`);
+  const handlePlaceClick = (id) => {
+    router.push(`/owner/areafield/field.management?buildingId=${id}`);
   };
-  
 
   const filteredBuildings = buildings.filter((building) =>
     building.name.toLowerCase().includes(search.toLowerCase())
@@ -95,12 +93,11 @@ const PlacesPage = () => {
               <div
                 key={building._id}
                 className="relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-sm"
-                onClick={() => handlePlaceClick(building.name, building.userid)} // ✅ Pass `name` and `userid`
+                onClick={() => handlePlaceClick(building._id)}
               >
                 <img src={building.image} alt={building.name} className="w-full h-40 object-cover" />
                 <div className="bg-blue-200 p-2 text-center font-bold">{building.name}</div>
               </div>
-
             ))
           ) : (
             <p className="text-center text-gray-500">No buildings found.</p>
