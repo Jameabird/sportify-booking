@@ -338,6 +338,41 @@ app.delete("/api/buildings/:id", async (req, res) => {
   }
 });
 
+app.delete("/api/buildings/:buildingId/fields/:fieldId", async (req, res) => {
+  try {
+    let { buildingId, fieldId } = req.params;
+    console.log(`🗑️ Deleting field "${fieldId}" from building ID: ${buildingId}`);
+
+    // Ensure buildingId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(buildingId)) {
+      return res.status(400).json({ message: "❌ Invalid building ID format" });
+    }
+
+    // Find the building
+    const building = await Building.findById(buildingId);
+    if (!building) {
+      return res.status(404).json({ message: "❌ Building not found" });
+    }
+
+    // Check if the field exists in the building
+    if (!building.Building || !building.Building[fieldId]) {
+      return res.status(404).json({ message: "❌ Field not found in this building" });
+    }
+
+    // Remove the field from the Building object
+    delete building.Building[fieldId];
+
+    // Save the updated building document
+    await building.save();
+
+    res.status(200).json({ message: "✅ Field deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting field:", error);
+    res.status(500).json({ message: "❌ Server error while deleting field" });
+  }
+});
+
+
 /** ================================
  * ✅ เปิดเซิร์ฟเวอร์
  * ================================ */

@@ -38,7 +38,7 @@ export default function AddNewPlace() {
     console.log("Token being sent:", token);
     
     axios
-      .get("http://localhost:5000/api/bookings/current", {
+      .get("http://localhost:5011/api/bookings/current", {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Correct format
         },
