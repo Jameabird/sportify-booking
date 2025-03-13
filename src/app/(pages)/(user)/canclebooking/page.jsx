@@ -41,7 +41,6 @@ const BookingList = () => {
     fetchUser();
   }, []);
   
-
   useEffect(() => {
     if (!Userid) {
       console.log("✅ User ID is OK.");
@@ -80,6 +79,7 @@ const BookingList = () => {
         }));
   
         setBookings(bookingData); // ✅ Update state with filtered bookings
+
       } catch (error) {
         console.error("❌ Error fetching bookings:", error);
       }

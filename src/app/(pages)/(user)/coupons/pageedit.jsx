@@ -272,16 +272,16 @@ const ArcherBooking = () => {
     setShowImagePopup(true);
     selectedTimes;
   };
-  // const handleFileUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setUploadedImage(reader.result); // ตั้งค่าภาพที่อัปโหลด
-  //     };
-  //     reader.readAsDataURL(file); // อ่านไฟล์เป็น URL
-  //   }
-  // };
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result); // ตั้งค่าภาพที่อัปโหลด
+      };
+      reader.readAsDataURL(file); // อ่านไฟล์เป็น URL
+    }
+  };
 
   // ✅ Compute selected times
   const selectedTimes =
@@ -436,7 +436,7 @@ const ArcherBooking = () => {
           <div className="content">
             <div className="booking-details">
             <p>
-                <span>Type:</span> <span>archer</span>
+                <span>Tัpe:</span> <span>archer</span>
               </p>
               <p>
                 <span>สถานที่:</span> <span>{name || "กรุณาเลือกสถานที่"}</span>

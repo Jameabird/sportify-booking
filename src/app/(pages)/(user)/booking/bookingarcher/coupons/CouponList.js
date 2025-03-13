@@ -3,7 +3,10 @@ import React from "react";
 const CouponList = ({ promotions, onSelect, onClose }) => {
   return (
     <>
+      {/* ✅ Backdrop (พื้นหลังเบลอ) */}
       <div className="modal-backdrop" onClick={onClose}></div>
+
+      {/* ✅ Popup คูปอง */}
       <div className="modal">
         <button className="close-btn" onClick={onClose}>✖</button>
         <h2>เลือกคูปอง</h2>
