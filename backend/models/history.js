@@ -7,7 +7,7 @@ const historySchema = new mongoose.Schema({
   day: { type: String, required: true },
   time: { type: String, required: true },
   price: { type: Number, required: true },
-  image: { type: String },
+  image: { type: String, default: null }, // ✅ ตั้งค่า default
   createdAt: { type: Date, default: Date.now }
 });
 

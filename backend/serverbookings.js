@@ -160,6 +160,7 @@ app.post("/api/refund", async (req, res) => {
       name,
       day,
       time,
+      type,
       status,
       price,
       datepaid,
