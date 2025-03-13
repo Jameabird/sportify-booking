@@ -16,19 +16,13 @@ export default function AddNewPlace() {
   const [link, setLink] = useState("");
   const [image, setImage] = useState(null);
   const [details, setDetails] = useState("");
-  const [userid, setUserID] = useState("");
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [username, setUsername] = useState("");
-  const [role, setRole] = useState("");
-  // ✅ List of Thai provinces (can be modified)
+  const [type, setType] = useState("");
 
-  useEffect(() => {
-    const tokenData = JSON.parse(localStorage.getItem("token")); // Parse stored JSON
-    const token = tokenData?.token; // Extract token
-  
-    if (!token) {
-      console.error("❌ No valid token found");
+  const handleSave = async () => {
+    console.log("Type ที่บันทึก:", type); // ✅ Debug ค่า Type
+
+    if (!name || !location || !link || !details || !type || !image) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
   
@@ -63,29 +57,8 @@ export default function AddNewPlace() {
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
+    const formData = { type, name, location, link, details, image };
 
-    if (file) {
-      const options = {
-        maxSizeMB: 5, // Limit file size to 1MB
-        maxWidthOrHeight: 800, // Resize if needed
-        initialQuality: 0.8,
-        useWebWorker: true, // Improve performance
-      };
-
-      try {
-        const compressedFile = await imageCompression(file, options);
-        const reader = new FileReader();
-
-        reader.readAsDataURL(compressedFile);
-        reader.onloadend = () => {
-          setUploadedImage(reader.result); // ✅ Store compressed base64 image
-          setPreview(reader.result); // ✅ Show preview
-        };
-      } catch (error) {
-        console.error("❌ Error compressing image:", error);
-      }
-    }
-  };
 
   const handleSave = async () => {
     if (!name || !location || !link || !uploadedImage) {
@@ -190,7 +163,20 @@ export default function AddNewPlace() {
 
               <TextField label="Details" variant="outlined" fullWidth value={details} onChange={(e) => setDetails(e.target.value)} />
               <TextField label="Google Map" variant="outlined" fullWidth value={link} onChange={(e) => setLink(e.target.value)} />
-
+              <TextField
+                label="Google Map"
+                variant="outlined"
+                fullWidth
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+              />
+              <TextField
+                label="Type"
+                variant="outlined"
+                fullWidth
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              />
               <Box display="flex" justifyContent="space-between">
                 <Button variant="contained" color="primary" onClick={handleSave}>
                   SAVE

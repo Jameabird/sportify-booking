@@ -18,14 +18,7 @@ mongoose
   .then(() => console.log("MongoDB Connected to SE"))
   .catch((err) => console.error(err));
 
-  app.get("/api/confirm", async (req, res) => {
-    try {
-      const confirm = await Confirm.find({}, "date item amount officer status"); // ดึงเฉพาะฟิลด์ที่ต้องการ
-      res.json(confirm);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+  
   
 
   app.post("/api/confirm", async (req, res) => {
@@ -46,7 +39,16 @@ mongoose
       res.status(500).json({ error: err.message });
     }
   });
- 
+  app.get("/api/confirm", async (req, res) => {
+    try {
+      const confirm = await Confirm.find({}, "day location price total_price"); // ✅ ต้องมี total_price
+      res.json(confirm);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  
 // UPDATE booking by ID
 app.put("/api/bookings/:id", async (req, res) => {
   try {
@@ -82,7 +84,7 @@ app.delete("/api/bookings/:id", async (req, res) => {
 
 
 
-const PORT = process.env.PORT3 || 5003;
+const PORT = process.env.PORT3 || 5009;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -7,8 +7,10 @@ const ConfirmSchema = new mongoose.Schema({
   status: String,
   image: String,
   price: Number,
-  location: String,  // เพิ่ม location
+  location: String,
+  total_price: Number,  // ✅ เพิ่ม total_price
 });
 
 const Confirm = mongoose.model("Confirm", ConfirmSchema);
 module.exports = Confirm;
+
