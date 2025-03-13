@@ -43,30 +43,49 @@ const PlacesPage = () => {
 
   // ✅ Fetch Buildings Only for This User
   useEffect(() => {
-    if (!Userid) return; // ✅ Ensures we only fetch when Userid is set
+    if (!Userid) return;
 
     const fetchBuildings = async () => {
       try {
-        const response = await axios.get(`http://localhost:5005/api/buildings?userid=${String(Userid)}`, {
-          params: { userId: Userid }, // ✅ Pass userId as a query param
+        console.log("📌 Fetching buildings for User ID:", Userid, "and Name:", search || "ANY");
+
+        const response = await axios.get(`http://localhost:5005/api/buildings`, {
+          params: { userid: Userid, name: search || "" }, // ✅ Use `Userid` & `search` directly
         });
 
-        const userBuildings = response.data.filter((building) => building.userid === Userid); // ✅ Extra safety check
-        setBuildings(userBuildings);
-        console.log("✅ Buildings fetched:", userBuildings);
+        setBuildings(response.data); // ✅ Use API response directly
+        console.log("✅ Buildings fetched:", response.data);
       } catch (error) {
-        console.error("❌ Error fetching buildings:", error);
+        console.error("❌ Error fetching buildings:", error.response?.data || error.message);
       }
     };
 
     fetchBuildings();
-  }, [Userid]); // ✅ Runs only when `Userid` updates
+  }, [Userid, search]); // ✅ Runs when `Userid` OR `search` changes
 
-  const handlePlaceClick = (name, userid) => {
-    const encodedName = encodeURIComponent(name); // ✅ Encode name for URL safety
-    router.push(`/owner/areafield/field.management?name=${encodedName}&userid=${userid}`);
+  // ✅ Delete Function
+  const handleDelete = async (id, event) => {
+    event.stopPropagation(); // Prevents clicking on the card
+
+    if (!window.confirm("Are you sure you want to delete this building?")) return;
+
+    try {
+      console.log(`🗑️ Deleting building ID: ${id}`);
+      await axios.delete(`http://localhost:5005/api/buildings/${id}`);
+
+      // ✅ Remove from UI after deletion
+      setBuildings((prevBuildings) => prevBuildings.filter((building) => building._id !== id));
+
+      console.log("✅ Building deleted successfully");
+    } catch (error) {
+      console.error("❌ Error deleting building:", error.response?.data || error.message);
+    }
   };
-  
+
+  const handlePlaceClick = (name) => {
+    const encodedName = encodeURIComponent(name); // ✅ Encode name safely
+    router.push(`/owner/areafield/field.management?name=${encodedName}&userid=${Userid}`);
+  };
 
   const filteredBuildings = buildings.filter((building) =>
     building.name.toLowerCase().includes(search.toLowerCase())
@@ -97,10 +116,20 @@ const PlacesPage = () => {
                 className="relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-sm"
                 onClick={() => handlePlaceClick(building.name, building.userid)} // ✅ Pass `name` and `userid`
               >
+                {/* Delete Button (🗑️) */}
+                <button
+                  className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs"
+                  onClick={(event) => handleDelete(building._id, event)}
+                >
+                  🗑️
+                </button>
+
+                {/* Image */}
                 <img src={building.image} alt={building.name} className="w-full h-40 object-cover" />
+
+                {/* Building Name */}
                 <div className="bg-blue-200 p-2 text-center font-bold">{building.name}</div>
               </div>
-
             ))
           ) : (
             <p className="text-center text-gray-500">No buildings found.</p>

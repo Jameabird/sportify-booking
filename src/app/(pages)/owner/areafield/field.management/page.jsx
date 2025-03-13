@@ -105,6 +105,7 @@ const CourtManagement = () => {
         const newStatus = !currentStatus; // ✅ Toggle the booking status
 
         const requestData = {
+            Name: name,
             Type: type,
             Building: {
                 [buildingName]: {
@@ -147,12 +148,15 @@ const CourtManagement = () => {
 
                 {courtData.length > 0 ? (
                     courtData.map((courtGroup, typeIndex) => (
-                        <Box key={courtGroup.id} className={styles.typeSection}> {/* ✅ Use `_id` as unique key */}
+                        <Box key={courtGroup._id} className={styles.typeSection}> {/* ✅ Use `_id` as unique key */}
                             <Typography variant="h5" fontWeight="bold" color="secondary" gutterBottom>
                                 ประเภทกีฬา: {courtGroup.type}
                             </Typography>
+                            <Typography variant="h5" fontWeight="bold" color="secondary" gutterBottom>
+                                ประเภทกีฬา: {courtGroup.username}
+                            </Typography>
                             {courtGroup.buildings.map((building, buildingIndex) => (
-                                <Box key={`${courtGroup.id}-${buildingIndex}`} sx={{ mb: 4 }}> {/* ✅ Unique Key */}
+                                <Box key={`${courtGroup._id}-${buildingIndex}`} sx={{ mb: 4 }}> {/* ✅ Unique Key */}
                                     <Typography variant="h6" fontWeight="bold">
                                         อาคาร: {building.name}
                                     </Typography>
