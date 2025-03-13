@@ -54,6 +54,7 @@ app.get("/api/promotions", authenticate, async (req, res) => {
     const usersHistory = await BookingHistory.find({
       "user._id": new mongoose.Types.ObjectId(req.user.userId),
       coupons: "false",
+      status: "reserve",
     });
 
     const couponCounts = usersHistory.reduce((acc, item) => {
@@ -80,12 +81,13 @@ app.get("/api/promotions", authenticate, async (req, res) => {
       };
     });
 
-    res.json(finalCoupons);
+    res.json({ promotions: finalCoupons, couponCounts }); // ✅ ส่ง couponCounts ออกไปด้วย
   } catch (error) {
     console.error("🚨 Error retrieving promotions:", error.message);
     res.status(500).json({ message: "Error retrieving promotions", error: error.message });
   }
 });
+
 
 
 // ✅ รันเซิร์ฟเวอร์

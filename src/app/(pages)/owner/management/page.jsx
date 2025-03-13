@@ -29,7 +29,7 @@ export default function AccountPage() {
           console.log("✅ Token is valid:", token);
 
           // ส่งคำขอ GET ไปยัง API
-          const { data } = await axios.get("http://localhost:5000/api/officers", {
+          const { data } = await axios.get("http://localhost:5011/api/officers", {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -67,7 +67,7 @@ export default function AccountPage() {
         console.log("✅ Token is valid:", token);
 
         // ส่งคำขอ DELETE ไปยัง API
-        await axios.delete(`http://localhost:5000/api/officers/${id}`, {
+        await axios.delete(`http://localhost:5011/api/officers/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
