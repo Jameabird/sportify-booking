@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import "./Search.css";
+import "../Search.css";
 import places from "./places";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
@@ -61,26 +61,9 @@ function SearchPages() {
                       alt={place.name}
                       className="place-image"
                     />
-                   <div className="place-details">                     
-                      <h3 className="place-name">
-                        <strong>🏠 Sports Venue: </strong> 
-                        {building.name}</h3>
-                      <p className="place-details-description">
-                      <strong>📍 Location: </strong>
-                        {building.details}
-                      </p>
-                      <p >
-                      <strong>🗺️  Link location: </strong>
-                        <a
-                          href={building.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="place-link"
-                        >                           
-                          {building.link}
-                        </a>
-                      </p>
-                    </div>
+                    <h3 className="place-name">
+                      {place.name}
+                    </h3>
                   </div>
                   <button className="book-button" onClick={() => handleBook(place.name)}>Book</button>
                 </div>

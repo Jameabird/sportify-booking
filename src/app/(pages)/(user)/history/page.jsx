@@ -140,6 +140,9 @@ const HistoryPage = () => {
                     <strong>Location:</strong> {item.location}
                   </p>
                   <p>
+                    <strong>Details:</strong> {item.field} {item.building}
+                  </p>
+                  <p>
                     <strong>Date:</strong> {item.day}
                   </p>
                   <p>
