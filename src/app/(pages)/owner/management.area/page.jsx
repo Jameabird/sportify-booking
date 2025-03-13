@@ -5,14 +5,15 @@ import { Box, Button, TextField, Typography, MenuItem, Select, FormControl, Inpu
 import TopBar_Owner from "@components/Topbar_Owner";
 import "@app/globals.css";
 import axios from "axios";
-import {provinces} from "./mockdata";
+import {provinces, types} from "./mockdata";
 import imageCompression from "browser-image-compression";
 import { useRouter } from "next/navigation";
 
 
 export default function AddNewPlace() {
   const [name, setName] = useState("");
-  const [location, setLocation] = useState(""); // ✅ จังหวัด stored here
+  const [location, setLocation] = useState("");
+  const [type, setType] = useState(""); // ✅ จังหวัด stored here
   const [buildings, setBuildings] = useState("");
   const [link, setLink] = useState("");
   const [image, setImage] = useState(null);
@@ -91,20 +92,38 @@ export default function AddNewPlace() {
 
   const handleSave = async () => {
     if (!name || !location || !link || !uploadedImage) {
-      console.log(!name,!location,!link,!uploadedImage);
+      console.log(!name, !location, !link, !uploadedImage);
       alert("❌ กรุณากรอกข้อมูลให้ครบถ้วน!");
       return;
     }
   
+    const defaultBuildingData = {
+      "Building1": {
+        "Field1": { "Price": "250", "Booking": false, "close": "16:00", "open": "15:00" },
+        "Field2": { "Price": "300", "Booking": true, "close": "17:00", "open": "16:00" },
+        "Field3": { "Price": "350", "Booking": true, "close": "18:00", "open": "17:00" },
+        "Field4": { "Price": "300", "Booking": false, "close": "19:00", "open": "18:00" },
+        "Field5": { "Price": "315", "Booking": true, "close": "20:00", "open": "19:00" }
+      },
+      "Building2": {
+        "Field1": { "Price": "150", "Booking": false, "close": "16:00", "open": "15:00" },
+        "Field2": { "Price": "150", "Booking": false, "close": "17:00", "open": "16:00" },
+        "Field3": { "Price": "150", "Booking": false, "close": "18:00", "open": "17:00" },
+        "Field4": { "Price": "150", "Booking": false, "close": "19:00", "open": "18:00" },
+        "Field5": { "Price": "150", "Booking": false, "close": "20:00", "open": "19:00" }
+      }
+    };
+  
     const formData = new FormData();
     formData.append("userid", userid);
-    console.log(userid);
     formData.append("username", username);
+    formData.append("Type", type);
     formData.append("name", name);
     formData.append("location", location);
     formData.append("link", link);
     formData.append("details", details);
     formData.append("image", uploadedImage); // File should be appended like this
+    formData.append("Building", JSON.stringify(defaultBuildingData)); // Append the Building data as a JSON string
   
     try {
       const response = await fetch("http://localhost:5005/api/buildings", {
@@ -115,12 +134,12 @@ export default function AddNewPlace() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "เกิดข้อผิดพลาด");
   
+      console.log("Data sent to API:", result);
       alert("✅ จองสำเร็จ!");
     } catch (error) {
       alert(`❌ เกิดข้อผิดพลาด: ${error.message}`);
     }
   };
-  
   
   const handleCancel = () => {
     setName("");
@@ -129,6 +148,7 @@ export default function AddNewPlace() {
     setLink("");
     setDetails("");
     setImage(null);
+    setType("");
     router.push("/owner")
   };
 
@@ -191,9 +211,18 @@ export default function AddNewPlace() {
                 </Select>
               </FormControl>
 
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>ประเภทกีฬา</InputLabel>
+                <Select value={type} onChange={(e) => setType(e.target.value)} label="ประเภทกีฬา">
+                  {types.map((types, index) => (
+                    <MenuItem key={index} value={types}>{types}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <TextField label="Details" variant="outlined" fullWidth value={details} onChange={(e) => setDetails(e.target.value)} />
               <TextField label="Google Map" variant="outlined" fullWidth value={link} onChange={(e) => setLink(e.target.value)} />
-
+                  
               <Box display="flex" justifyContent="space-between">
                 <Button variant="contained" color="primary" onClick={handleSave}>
                   SAVE
