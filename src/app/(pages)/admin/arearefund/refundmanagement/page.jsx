@@ -33,7 +33,7 @@ const AdminPaidTable = () => {
     const fetchData = async () => {
       try {
         // ดึง bookings
-        const bookingsRes = await axios.get("http://localhost:5002/api/bookings-old");
+        const bookingsRes = await axios.get("http://localhost:5002/api/bookings");
         const filteredBookings = bookingsRes.data?.filter(
           (booking) => booking && booking.status?.trim().toLowerCase() === "cancel"
         );
@@ -178,7 +178,7 @@ const AdminPaidTable = () => {
               <p><strong>Day:</strong> {selectedData.day}</p>
               <p><strong>Name:</strong> {selectedData.name}</p>
               <p><strong>Payment Method:</strong> Transfer money through bank account</p>
-              <p><strong>User ID:</strong> {selectedData?.userId || "N/A"}</p>
+              
               <p><strong>Bank Number:</strong> {userData?.accountNumber || "Loading..."}</p>
 
               <button

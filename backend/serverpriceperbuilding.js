@@ -6,12 +6,21 @@ const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const Building = require("./models/buildings.js");
 const Place = require("./models/Place");
+const multer = require("multer");
+const sharp = require("sharp");
+const fs = require("fs");
+const path = require("path");
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.use(express.json({ limit: "10mb" })); // Increase limit to 10MB
+app.use(express.urlencoded({ limit: "10mb", extended: true })); // Increase limit
+
+const storage = multer.memoryStorage(); // Store image in memory before processing
+const upload = multer({ storage });
 // ✅ เชื่อมต่อ MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -71,6 +80,23 @@ const authenticate = (req, res, next) => {
     return res.status(401).json({ message: "Invalid token", error: error.message });
   }
 };
+app.post("/api/Place", async (req, res) => {
+  console.log("ข้อมูลที่รับมา:", req.body);
+
+  const { type, name, location, link, details, image } = req.body;
+
+  if (!type || !name || !location || !link || !details || !image) {
+    return res.status(400).json({ error: "ข้อมูลไม่ครบ" });
+  }
+
+  try {
+    const newPlace = new Place({ type, name, location, link, details, image });
+    await newPlace.save();
+    res.json({ message: "บันทึกสำเร็จ" });
+  } catch (error) {
+    res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+  }
+});
 app.get("/api/bookings/current", authenticate, async (req, res) => {
   try {
     const userId = req.user.userId; // Extract user ID from JWT
@@ -92,33 +118,99 @@ app.get("/api/bookings/current", authenticate, async (req, res) => {
 });
 
 /** ================================
- * ✅ GET: ดึงข้อมูลสนามทั้งหมด
+ * ✅ GET: ดึงข้อมูลสนามทั้งหมด (ไม่ใช้ userid)
  * ================================ */
-app.get("/api/buildings", async (req, res) => {
+app.get("/api/building-user", async (req, res) => {
   try {
-    const buildings = await Building.find();
+    console.log("📌 Fetching all buildings...");
+
+    const buildings = await Building.find(); // ✅ Fetch all buildings
+
     if (!buildings || buildings.length === 0) {
-      return res.status(404).json({ message: "No data found" });
+      return res.status(404).json({ message: "❌ No buildings found" });
     }
+
     res.json(buildings.map((building) => building.toJSON()));
   } catch (err) {
+    console.error("❌ Error fetching buildings:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
+
+/** ================================
+ * ✅ GET: ดึงข้อมูลสนามทั้งหมด
+ * ================================ */
+app.get("/api/buildings", async (req, res) => {
+  try {
+    const { userid } = req.query;
+
+    if (!userid) {
+      console.log("❌ Missing user ID in request");
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    console.log("📌 Searching for buildings with userid:", userid);
+
+    const buildings = await Building.find({ userid }); // ✅ Correct query
+
+    if (!buildings || buildings.length === 0) {
+      return res.status(404).json({ message: "No buildings found for this user" });
+    }
+
+    res.json(buildings.map((building) => building.toJSON()));
+  } catch (err) {
+    console.error("❌ Error fetching buildings:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 /** ================================
  * ✅ POST: เพิ่มอาคารใหม่
  * ================================ */
-app.post("/api/buildings", async (req, res) => {
+app.post("/api/buildings", upload.single("image"), async (req, res) => {
   try {
-    const { type, building, courts } = req.body;
-    if (!type || !building || !courts) {
+    console.log("🔹 Request received:", req.body);
+
+    const { userid, username, name, location, link, details, image } = req.body;
+
+    if (!name || !location || !link || !image) {
       return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
-    const newBuilding = new Building({ type, building, courts });
+
+    // ✅ Compress and save image as a file instead of Base64
+    let processedImage = image; // Use `let` to allow reassignment
+    
+        if (image) {
+          const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+          const buffer = Buffer.from(base64Data, "base64");
+    
+          const compressedImageBuffer = await sharp(buffer)
+            .resize({ width: 800 }) 
+            .jpeg({ quality: 85 }) 
+            .toBuffer();
+    
+          processedImage = `data:image/jpeg;base64,${compressedImageBuffer.toString("base64")}`;
+        }
+
+    // ✅ Store only the file path, not Base64!
+    const newBuilding = new Building({
+      userid,
+      username,
+      name,
+      location,
+      link,
+      details,
+      image: processedImage,
+    });
+
     await newBuilding.save();
+    console.log("🔹 Request sent:", newBuilding);
     res.status(201).json({ message: "เพิ่มข้อมูลสำเร็จ", building: newBuilding });
+
   } catch (err) {
+    console.error("🚨 Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -166,6 +258,29 @@ app.get("/api/promotions", authenticate, async (req, res) => {
     res.status(500).json({ message: "Error retrieving promotions", error: error.message });
   }
 });
+
+/** ================================
+ * ✅ DELETE: ลบอาคารโดยใช้ ID
+ * ================================ */
+app.delete("/api/buildings/:id", async (req, res) => {
+  try {
+    const buildingId = req.params.id;
+    console.log(`🗑️ Deleting building with ID: ${buildingId}`);
+
+    // ค้นหาและลบอาคาร
+    const deletedBuilding = await Building.findByIdAndDelete(buildingId);
+
+    if (!deletedBuilding) {
+      return res.status(404).json({ message: "❌ Building not found" });
+    }
+
+    res.status(200).json({ message: "✅ Building deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting building:", error);
+    res.status(500).json({ message: "❌ Server error while deleting building" });
+  }
+});
+
 
 /** ================================
  * ✅ เปิดเซิร์ฟเวอร์
