@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -20,6 +21,22 @@ mongoose
   })
   .then(() => console.log("✅ MongoDB Connected to SE"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
+
+const BookingHistory = mongoose.model("history", new mongoose.Schema({
+  name: String,
+  type: String,
+  coupons: String,  
+  user: { _id: mongoose.Schema.Types.ObjectId },
+}, { strict: false }), "history");
+
+const Promotion = mongoose.model("promotions", new mongoose.Schema({
+  name: String,
+  description: String,
+  status: String,
+  sale: Number,
+  free: String,
+}, { strict: false }), "promotions");
+  
 
 const authenticate = (req, res, next) => {
   let token = req.header("Authorization")?.replace("Bearer ", "");
@@ -106,32 +123,46 @@ app.post("/api/buildings", async (req, res) => {
   }
 });
 
-// ✅ API ดึงคูปองที่ออนไลน์อยู่ทั้งหมด (ใช้ authenticate)
+// ================== API ดึงคูปอง ============================ //
 app.get("/api/promotions", authenticate, async (req, res) => {
   try {
+    console.log("🔹 Fetching promotions for userId:", req.user.userId);
+
     const promotions = await Promotion.find({ status: "online" });
+
     const usersHistory = await BookingHistory.find({
       "user._id": new mongoose.Types.ObjectId(req.user.userId),
       coupons: "false",
+      status: "reserve",
     });
 
     const couponCounts = usersHistory.reduce((acc, item) => {
-      acc[item.type.trim()] = (acc[item.type.trim()] || 0) + 1;
+      const normalizedType = item.type.trim();
+      acc[normalizedType] = (acc[normalizedType] || 0) + 1;
       return acc;
     }, {});
 
     const finalCoupons = promotions.map((promo) => {
-      let canUse = Object.keys(couponCounts).some(type => couponCounts[type] === promo.sale);
-      return {
-        ...promo._doc,
+      const required = promo.sale;
+      let canUse = false;
+
+      Object.keys(couponCounts).forEach((type) => {
+        if (couponCounts[type] === required) {
+          canUse = true;
+        }
+      });
+
+      return { 
+        ...promo._doc, 
         canUse,
         startdate: promo.startdate ? new Date(promo.startdate).toLocaleDateString("th-TH") : "ไม่ระบุ",
         enddate: promo.enddate ? new Date(promo.enddate).toLocaleDateString("th-TH") : "ไม่ระบุ",
       };
     });
 
-    res.json(finalCoupons);
+    res.json({ promotions: finalCoupons, couponCounts }); // ✅ ส่ง couponCounts ออกไปด้วย
   } catch (error) {
+    console.error("🚨 Error retrieving promotions:", error.message);
     res.status(500).json({ message: "Error retrieving promotions", error: error.message });
   }
 });
