@@ -23,7 +23,7 @@ export default function AddNewPlace() {
       return;
     }
 
-    const formData = { type, name, location, link, details ,image};
+    const formData = { type, name, location, link, details, image };
 
     try {
       const response = await axios.post("http://localhost:5005/api/Place", formData);
@@ -145,7 +145,6 @@ export default function AddNewPlace() {
                 onChange={(e) => setDetails(e.target.value)}
               />
 
-
               <TextField
                 label="Google Map"
                 variant="outlined"
@@ -153,16 +152,13 @@ export default function AddNewPlace() {
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
               />
-
               <TextField
                 label="Type"
                 variant="outlined"
                 fullWidth
-                value={type || ""}
+                value={type}
                 onChange={(e) => setType(e.target.value)}
               />
-
-
 
               <Box display="flex" justifyContent="space-between">
                 <Button variant="contained" color="primary" onClick={handleSave}>

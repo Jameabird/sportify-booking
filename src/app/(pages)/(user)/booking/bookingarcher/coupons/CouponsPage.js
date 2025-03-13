@@ -16,6 +16,7 @@ const CouponsPage = () => {
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [price, setPrice] = useState(1000);
   const [discountedPrice, setDiscountedPrice] = useState(null);
+  const [bookingType, setBookingType] = useState("archer");
 
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem("token"));
@@ -47,7 +48,8 @@ const CouponsPage = () => {
     <>
       <div className="container">
         {/* ✅ แสดงราคาก่อน/หลังใช้คูปอง */}
-       
+        <p>รวมทั้งสิ้น : {discountedPrice} บาท</p> 
+        <p>Type : {bookingType} </p>      
         <h1>คูปอง</h1>
 
         {/* ✅ ปุ่มเลือกคูปอง */}
@@ -63,7 +65,7 @@ const CouponsPage = () => {
          
           {discountedPrice !== null ? (
             <div className="discount-box">
-              <h2>รวมทั้งสิ้น : {discountedPrice} บาท</h2>
+              
               <button
                 className="cancel-btn"
                 onClick={() => setDiscountedPrice(null)}
@@ -73,6 +75,7 @@ const CouponsPage = () => {
             </div>
           ) : (
             <div className="discount-box">
+             
               <p>🔹 ยังไม่มีการใช้คูปอง</p>
               <button
                 className="cancel-btn"

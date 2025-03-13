@@ -43,48 +43,27 @@ const PlacesPage = () => {
 
   // ✅ Fetch Buildings Only for This User
   useEffect(() => {
-    if (!Userid) return;
+    if (!Userid) return; // ✅ Ensures we only fetch when Userid is set
 
     const fetchBuildings = async () => {
       try {
-        console.log("📌 Fetching buildings for User ID:", Userid, "and Name:", search || "ANY");
-
         const response = await axios.get(`http://localhost:5005/api/buildings`, {
-          params: { userid: Userid, name: search || "" }, // ✅ Use `Userid` & `search` directly
+          params: { userId: Userid }, // ✅ Pass userId as a query param
         });
 
-        setBuildings(response.data); // ✅ Use API response directly
-        console.log("✅ Buildings fetched:", response.data);
+        const userBuildings = response.data.filter((building) => building.userid === Userid); // ✅ Extra safety check
+        setBuildings(userBuildings);
+        console.log("✅ Buildings fetched:", userBuildings);
       } catch (error) {
-        console.error("❌ Error fetching buildings:", error.response?.data || error.message);
+        console.error("❌ Error fetching buildings:", error);
       }
     };
 
     fetchBuildings();
-  }, [Userid, search]); // ✅ Runs when `Userid` OR `search` changes
+  }, [Userid]); // ✅ Runs only when `Userid` updates
 
-  // ✅ Delete Function
-  const handleDelete = async (id, event) => {
-    event.stopPropagation(); // Prevents clicking on the card
-
-    if (!window.confirm("Are you sure you want to delete this building?")) return;
-
-    try {
-      console.log(`🗑️ Deleting building ID: ${id}`);
-      await axios.delete(`http://localhost:5005/api/buildings/${id}`);
-
-      // ✅ Remove from UI after deletion
-      setBuildings((prevBuildings) => prevBuildings.filter((building) => building._id !== id));
-
-      console.log("✅ Building deleted successfully");
-    } catch (error) {
-      console.error("❌ Error deleting building:", error.response?.data || error.message);
-    }
-  };
-
-  const handlePlaceClick = (name) => {
-    const encodedName = encodeURIComponent(name); // ✅ Encode name safely
-    router.push(`/owner/areafield/field.management?name=${encodedName}&userid=${Userid}`);
+  const handlePlaceClick = (id) => {
+    router.push(`/owner/areafield/field.management?buildingId=${id}`);
   };
 
   const filteredBuildings = buildings.filter((building) =>
@@ -114,20 +93,9 @@ const PlacesPage = () => {
               <div
                 key={building._id}
                 className="relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-sm"
-                onClick={() => handlePlaceClick(building.name, building.userid)} // ✅ Pass `name` and `userid`
+                onClick={() => handlePlaceClick(building._id)}
               >
-                {/* Delete Button (🗑️) */}
-                <button
-                  className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs"
-                  onClick={(event) => handleDelete(building._id, event)}
-                >
-                  🗑️
-                </button>
-
-                {/* Image */}
                 <img src={building.image} alt={building.name} className="w-full h-40 object-cover" />
-
-                {/* Building Name */}
                 <div className="bg-blue-200 p-2 text-center font-bold">{building.name}</div>
               </div>
             ))

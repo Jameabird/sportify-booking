@@ -160,6 +160,7 @@ app.post("/api/refund", async (req, res) => {
       name,
       day,
       time,
+      type,
       status,
       price,
       datepaid,
@@ -196,6 +197,47 @@ app.get("/api/refund", async (req, res) => {
   } catch (err) {
     console.error("🚨 Error fetching refunds:", err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+const authenticateUser = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // ✅ Now `req.user.userId` exists
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
+};
+module.exports = authenticateUser;
+// Protect route with middleware
+app.get("/api/bookings/current", authenticateUser, async (req, res) => {
+  try {
+      console.log("🔹 Decoded User from JWT:", req.user); // ✅ Log the full user object
+      const userId = req.user.userId;
+
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+          console.error("❌ Invalid user ID format:", userId);
+          return res.status(400).json({ message: "Invalid user ID format" });
+      }
+
+      const objectId = new mongoose.Types.ObjectId(userId);
+      console.log("🔍 Querying Bookings for ObjectId:", objectId);
+
+      const currentBookings = await User.find({ "_id": objectId });
+      console.log("✅ Retrieved bookings:", currentBookings);
+
+      res.json(currentBookings);
+  } catch (error) {
+      console.error("🚨 Error retrieving current bookings:", error.message);
+      res.status(500).json({ message: "Error retrieving bookings", error: error.message });
   }
 });
 

@@ -24,7 +24,7 @@ const ForgetPasswordPage = () => {
 
     try {
       // ส่งคำขอไปยัง backend เพื่อเช็คอีเมล
-      const response = await axios.post('http://localhost:5000/api/forget-password', { email: normalizedEmail });
+      const response = await axios.post('http://localhost:5011/api/forget-password', { email: normalizedEmail });
 
       setSnackbarMessage(response.data.message || "ลิงค์รีเซ็ตรหัสผ่านถูกส่งไปที่อีเมลของคุณแล้ว");
       setOpenSnackbar(true);
