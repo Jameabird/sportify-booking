@@ -7,6 +7,7 @@ import "@app/globals.css";
 import axios from "axios";
 import {provinces} from "./mockdata";
 import imageCompression from "browser-image-compression";
+import { useRouter } from "next/navigation";
 
 
 export default function AddNewPlace() {
@@ -21,6 +22,7 @@ export default function AddNewPlace() {
   const [preview, setPreview] = useState(null);
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("");
+  const router = useRouter();
   // ✅ List of Thai provinces (can be modified)
 
   useEffect(() => {
@@ -127,6 +129,7 @@ export default function AddNewPlace() {
     setLink("");
     setDetails("");
     setImage(null);
+    router.push("/owner")
   };
 
   // const handleImageChange = (e) => {

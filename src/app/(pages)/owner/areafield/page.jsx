@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import TopBar_Owner from '@components/Topbar_Owner';
 
 const places = [
@@ -11,9 +11,10 @@ const places = [
   { id: 5, name: "GT Club Pattaya", image: "/ที่ 5.jpg" },
 ];
 
-export default function PlacesPage() {
+const PlacesPage = () => {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [user, setUser] = useState(null);
   const router = useRouter(); // Ensure useRouter is inside the component
 
   const filteredPlaces = places.filter((place) =>
@@ -21,9 +22,24 @@ export default function PlacesPage() {
   );
 
   const handlePlaceClick = (id) => {
-    // You can change the URL based on the clicked place's ID or name
-    router.push(`/owner/areafield/field.management`); // Example route pattern
+    router.push(`/owner/areafield/field.management`); 
   };
+
+  useEffect(() => {
+    // ดึงข้อมูลผู้ใช้จาก Local Storage หรือ API (กรณีใช้ JWT หรือ Session)
+    const fetchUser = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <>
@@ -60,4 +76,6 @@ export default function PlacesPage() {
       </div>
     </>
   );
-}
+};
+
+export default PlacesPage;
