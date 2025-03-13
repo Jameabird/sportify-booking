@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 
 const financeSchema = new mongoose.Schema({
-  date: { type: Date, required: true }, // วัน
-  location: { type: String, required: true }, // สถานที่
-  totalRevenue: { type: Number, required: true }, // รายได้รวม
-  refund: { type: Number, required: true, default: 0 }, // คืนเงิน
-  deduction5Percent: { type: Number, required: true }, // หัก 5%
-  payout: { type: Number, required: true } // เงินออก
-}, { timestamps: true }); // เพิ่ม createdAt และ updatedAt อัตโนมัติ
+  _id: { type: String, required: true },  // ✅ เปลี่ยนจาก ObjectId เป็น String
+  date: { type: Date, required: true },
+  location: { type: String, required: true },
+  totalRevenue: { type: Number, required: true },
+  refund: { type: Number, required: true, default: 0 },
+  deduction5Percent: { type: Number, required: true },
+  payout: { type: Number, required: true }
+}, { timestamps: true });
 
 module.exports = mongoose.model("Finance", financeSchema);

@@ -25,7 +25,7 @@ const AdminPaidTable = () => {
           .filter((row) => row.status === "reserve")
           .map((row) => ({
             ...row,
-            location: row.name || "N/A", // กำหนดค่าเริ่มต้นเป็น "N/A" ถ้าไม่มีข้อมูล
+            location: row.location || "N/A", // กำหนดค่าเริ่มต้นเป็น "N/A" ถ้าไม่มีข้อมูล
           }));
         setRows(filteredData);
       })

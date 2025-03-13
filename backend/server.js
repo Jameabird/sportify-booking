@@ -115,6 +115,26 @@ app.get("/api/owners", authenticate, async (req, res) => { // เพิ่ม `/
     res.status(500).json({ error: "Failed to fetch owners" });
   }
 });
+app.get("/api/owners/all", authenticate, async (req, res) => {
+  try {
+    const adminId = req.user.userId; // ดึง userId จาก JWT
+
+    // ตรวจสอบว่า user เป็น admin จริงหรือไม่
+    const admin = await User.findById(adminId);
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ error: "Permission denied" });
+    }
+
+    // ✅ ดึงเฉพาะผู้ใช้ที่มี role เป็น "owner"
+    const owners = await User.find({ role: "owner" });
+
+    res.status(200).json(owners);
+  } catch (error) {
+    console.error("Error fetching all owners:", error);
+    res.status(500).json({ error: "Failed to fetch owners" });
+  }
+});
+
 
 // ✅ อัปเดตข้อมูล Owner (Admin เท่านั้น)
 app.put("/api/owners/:ownerId", authenticate, async (req, res) => { // เพิ่ม `/api` ใน path
