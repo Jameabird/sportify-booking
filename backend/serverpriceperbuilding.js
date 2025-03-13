@@ -118,19 +118,53 @@ app.get("/api/bookings/current", authenticate, async (req, res) => {
 });
 
 /** ================================
+ * ✅ GET: ดึงข้อมูลสนามทั้งหมด (ไม่ใช้ userid)
+ * ================================ */
+app.get("/api/building-user", async (req, res) => {
+  try {
+    console.log("📌 Fetching all buildings...");
+
+    const buildings = await Building.find(); // ✅ Fetch all buildings
+
+    if (!buildings || buildings.length === 0) {
+      return res.status(404).json({ message: "❌ No buildings found" });
+    }
+
+    res.json(buildings.map((building) => building.toJSON()));
+  } catch (err) {
+    console.error("❌ Error fetching buildings:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+/** ================================
  * ✅ GET: ดึงข้อมูลสนามทั้งหมด
  * ================================ */
 app.get("/api/buildings", async (req, res) => {
   try {
-    const buildings = await Building.find();
-    if (!buildings || buildings.length === 0) {
-      return res.status(404).json({ message: "No data found" });
+    const { userid } = req.query;
+
+    if (!userid) {
+      console.log("❌ Missing user ID in request");
+      return res.status(400).json({ message: "User ID is required" });
     }
+
+    console.log("📌 Searching for buildings with userid:", userid);
+
+    const buildings = await Building.find({ userid }); // ✅ Correct query
+
+    if (!buildings || buildings.length === 0) {
+      return res.status(404).json({ message: "No buildings found for this user" });
+    }
+
     res.json(buildings.map((building) => building.toJSON()));
   } catch (err) {
+    console.error("❌ Error fetching buildings:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /** ================================
  * ✅ POST: เพิ่มอาคารใหม่
@@ -222,6 +256,28 @@ app.get("/api/promotions", authenticate, async (req, res) => {
   } catch (error) {
     console.error("🚨 Error retrieving promotions:", error.message);
     res.status(500).json({ message: "Error retrieving promotions", error: error.message });
+  }
+});
+
+/** ================================
+ * ✅ DELETE: ลบอาคารโดยใช้ ID
+ * ================================ */
+app.delete("/api/buildings/:id", async (req, res) => {
+  try {
+    const buildingId = req.params.id;
+    console.log(`🗑️ Deleting building with ID: ${buildingId}`);
+
+    // ค้นหาและลบอาคาร
+    const deletedBuilding = await Building.findByIdAndDelete(buildingId);
+
+    if (!deletedBuilding) {
+      return res.status(404).json({ message: "❌ Building not found" });
+    }
+
+    res.status(200).json({ message: "✅ Building deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting building:", error);
+    res.status(500).json({ message: "❌ Server error while deleting building" });
   }
 });
 

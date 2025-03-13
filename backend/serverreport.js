@@ -43,6 +43,7 @@ app.get("/api/finance/:id", async (req, res) => {
 });
 app.post("/api/finance", async (req, res) => {
     try {
+      console.log(req.body); // Log ข้อมูลที่ได้รับ
       const { date, location, totalRevenue, refund, deduction5Percent, payout } = req.body;
   
       const newFinance = new Finance({

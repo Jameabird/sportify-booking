@@ -36,7 +36,7 @@ const LoginPage = () => {
       const googleToken = response.credential; // รับ Google Token
 
       // ส่ง Token ไปยัง backend สำหรับการตรวจสอบและเข้าสู่ระบบ
-      const res = await axios.post("http://localhost:5000/api/google-login", { token: googleToken });
+      const res = await axios.post("http://localhost:5011/api/google-login", { token: googleToken });
       console.log("Google Login Response:", res);
 
       // ดึงข้อมูลจาก response
@@ -120,7 +120,7 @@ const LoginPage = () => {
 
     try {
       // ส่งข้อมูลอีเมลและรหัสผ่านไปยัง backend
-      const response = await axios.post("http://localhost:5000/api/login", { email, password });
+      const response = await axios.post("http://localhost:5011/api/login", { email, password });
       console.log("Login response:", response);
 
       // ดึงข้อมูลจาก response
@@ -134,7 +134,7 @@ const LoginPage = () => {
         console.log("Token saved:", localStorage.getItem("token"));
 
         // ใช้ token เพื่อร้องขอข้อมูลผู้ใช้
-        const userResponse = await axios.get("http://localhost:5000/api/users/me", {
+        const userResponse = await axios.get("http://localhost:5011/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("User data:", userResponse.data);
