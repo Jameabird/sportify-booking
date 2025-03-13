@@ -19,7 +19,7 @@ const AdminPaidTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5002/api/bookings-old")
+      .get("http://localhost:5002/api/bookings")
       .then((response) => {
         const filteredData = response.data
           .filter((row) => row.status === "reserve")
@@ -94,7 +94,7 @@ const AdminPaidTable = () => {
   }));
     console.log("📌 Data to Save:", selectedRowsData);
     axios
-      .post("http://localhost:5003/api/confirm", selectedRowsData)
+      .post("http://localhost:5009/api/confirm", selectedRowsData)
       .then(() => {
         alert("Confirmed bookings saved successfully!");
 
