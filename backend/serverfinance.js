@@ -21,26 +21,15 @@ mongoose
   .then(() => console.log("MongoDB Connected to SE"))
   .catch((err) => console.error(err));
 
-  app.post("/api/finance", async (req, res) => {
+  router.post("/api/finance", async (req, res) => {
     try {
-      console.log("📩 Received Data:", req.body); // ✅ Debug Data ที่รับมา
-  
-      const financeData = req.body;
-      if (!Array.isArray(financeData) || financeData.length === 0) {
-        return res.status(400).json({ message: "❌ ไม่มีข้อมูลสำหรับบันทึก" });
-      }
-  
-      const newFinanceRecords = await Finance.insertMany(financeData);
-      console.log("✅ Data saved:", newFinanceRecords);  // ✅ Debug ข้อมูลที่บันทึกลง DB
-  
-      res.status(201).json({ message: "✅ Data saved successfully!", data: newFinanceRecords });
+      const financeEntries = await Finance.insertMany(req.body);
+      res.status(201).json(financeEntries);
     } catch (error) {
-      console.error("🚨 Server Error:", error);  // ❌ ดู Error ที่เกิดขึ้น
-      res.status(500).json({ message: "❌ Server Error", error });
+      console.error("🚨 Error saving finance data:", error);
+      res.status(500).json({ error: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" });
     }
   });
-  
-
   
 
 const PORT = process.env.PORT3 || 5008;

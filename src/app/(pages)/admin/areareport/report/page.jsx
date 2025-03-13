@@ -12,6 +12,7 @@ const FinancialReport = () => {
   const [mergedData, setmergedData] = useState()
   const [combinedData, setcombinedData] = useState() // ✅ เก็บข้อมูลสำหรับ Popup
   const router = useRouter();
+  const selectedData = Object.values(selectedRows);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -154,10 +155,8 @@ const FinancialReport = () => {
     fetchOwners();
   }, []);
 
-
-
-
   const handleCheckboxChange = (row) => {
+    const selectedData = Object.values(selectedRows);
     setSelectedRows((prev) => {
       const newSelectedRows = { ...prev };
       if (newSelectedRows[row.id]) {
@@ -177,13 +176,21 @@ const FinancialReport = () => {
   };
 
   const handleSave = async () => {
-    const selectedData = Object.values(selectedRows);
-
+    const selectedData = Object.values(selectedRows).map(row => ({
+      _id: uuidv4(), // สร้าง ID แบบ UUID
+      date: row.date,
+      location: row.location,
+      totalRevenue: row.totalRevenue,
+      refund: row.refund || 0,
+      deduction5Percent: row.deduction5Percent,
+      payout: row.payout
+    }));
+  
     if (selectedData.length === 0) {
       alert("⚠️ โปรดเลือกข้อมูลที่ต้องการบันทึก");
       return;
     }
-
+  
     try {
       const response = await axios.post("http://localhost:5008/api/finance", selectedData);
       if (response.status === 201) {
@@ -194,11 +201,7 @@ const FinancialReport = () => {
       alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
-
-
-
-
-
+  
 
   return (
     <>
@@ -274,7 +277,7 @@ const FinancialReport = () => {
             <p><strong>หัก 5%:</strong> {modalData.deduction} ฿</p>
             <p><strong>เงินออก:</strong> {modalData.payout} ฿</p>
             <p><strong>firstname:</strong> {modalData.ownerInfo.firstName} </p>
-            <p><strong>email:</strong> {modalData.ownerInfo.bank} </p>
+            <p><strong>bank:</strong> {modalData.ownerInfo.bank} </p>
             <p><strong>accountNumber:</strong> {modalData.ownerInfo.accountNumber}</p>
             <div className="mt-4 text-right">
               <button
