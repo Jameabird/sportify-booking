@@ -40,7 +40,7 @@ app.get("/api/finance", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT3 || 5008;
+const PORT = process.env.PORT || 5008;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
