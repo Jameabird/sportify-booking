@@ -18,6 +18,7 @@ const BuildingSchema = new mongoose.Schema({
     required: false
   },
   userid: { type: String, required: false },
+  useridofficer: { type: String, required: false },
   username: { type: String, required: false },
   name: { type: String, required: false },
   location: { type: String, required: false },
