@@ -165,6 +165,30 @@ app.get("/api/buildings", async (req, res) => {
   }
 });
 
+app.get("/api/buildings-officer", async (req, res) => {
+  try {
+    const { useridofficer } = req.query;
+
+    if (!useridofficer) {
+      console.log("❌ Missing user ID in request");
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    console.log("📌 Searching for buildings with userid:", useridofficer);
+
+    const buildings = await Building.find({ useridofficer }); // ✅ Correct query
+
+    if (!buildings || buildings.length === 0) {
+      return res.status(404).json({ message: "No buildings found for this user" });
+    }
+
+    res.json(buildings.map((building) => building.toJSON()));
+  } catch (err) {
+    console.error("❌ Error fetching buildings:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put("/api/update-buildings", async (req, res) => {
   try {
     console.log("🔹 Update Request Received:", JSON.stringify(req.body, null, 2));
