@@ -184,7 +184,7 @@ export default function AddAccountPage() {
             </button>
 
             <button
-              onClick={() => router.push("/admin/management")}
+              onClick={() => router.push("/owner/management")}
               className="bg-red-600 text-white px-5 py-3 rounded-lg w-1/2 hover:bg-red-700 transition ease-in-out"
             >
               Cancel
