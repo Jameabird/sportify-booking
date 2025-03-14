@@ -31,6 +31,8 @@ const bookingSchema = new mongoose.Schema({
   price: String,
   type: String,
   role: String,
+  field:String,
+  building:String,
   user: {
     _id: mongoose.Schema.Types.ObjectId,
     username: String,
