@@ -44,12 +44,18 @@ const FinancialReport = () => {
           acc[owner._id] = owner;
           return acc;
         }, {});
-
-        // ✅ รวมข้อมูล history กับ owner
+        
         const mergedData = historyRes.data.map(item => ({
           ...item,
-          ownerInfo: ownersMap[item.owner._id] || null // ถ้าไม่พบ owner ให้เป็น null
+          ownerInfo: ownersMap[item.owner._id] || null
         }));
+        historyRes.data.forEach(item => {
+          console.log("🔍 Checking owner ID:", item.owner?._id);
+          console.log("🗂 Found in ownersMap:", ownersMap[item.owner?._id] || "❌ Not found");
+        });
+        
+
+
         setmergedData(mergedData)
         console.log(mergedData);
         const today = new Date().toISOString().split("T")[0];
@@ -101,15 +107,16 @@ const FinancialReport = () => {
         });
         // ✅ สร้าง Map จาก finalData เพื่อเข้าถึงข้อมูลได้เร็วขึ้น
         const mergedMap = mergedData.reduce((acc, item) => {
-          acc[item.location] = item; // บันทึกข้อมูล location เป็น key
+          acc[item.location] = item.ownerInfo || null; // ✅ เก็บ ownerInfo ไปเลย
           return acc;
         }, {});
         
-        // ✅ ดึงเฉพาะข้อมูลที่มีอยู่ใน finalData และเติม ownerInfo ถ้ามี
         const matchedData = finalData.map(item => ({
           ...item,
-          ownerInfo: mergedMap[item.location]?.ownerInfo || null // เติมข้อมูล owner ถ้ามี
+          ownerInfo: mergedMap[item.location] || null, // ✅ ดึง ownerInfo ที่ถูกต้อง
         }));
+        
+
 
         setcombinedData(matchedData)
         setData(finalData);
@@ -177,20 +184,27 @@ const FinancialReport = () => {
 
   const handleSave = async () => {
     const selectedData = Object.values(selectedRows).map(row => ({
-      _id: uuidv4(), // สร้าง ID แบบ UUID
+      _id: uuidv4(),
       date: row.date,
       location: row.location,
       totalRevenue: row.totalRevenue,
       refund: row.refund || 0,
       deduction5Percent: row.deduction5Percent,
-      payout: row.payout
+      payout: row.payout,
+      ownerInfo: row.ownerInfo ? {
+        firstName: row.ownerInfo.firstName,
+        bank: row.ownerInfo.bank,
+        accountNumber: row.ownerInfo.accountNumber
+      } : null
     }));
-  
+
+    console.log("📝 Data to save:", JSON.stringify(selectedData, null, 2)); // ✅ ตรวจสอบข้อมูลก่อนบันทึก
+
     if (selectedData.length === 0) {
       alert("⚠️ โปรดเลือกข้อมูลที่ต้องการบันทึก");
       return;
     }
-  
+
     try {
       const response = await axios.post("http://localhost:5008/api/finance", selectedData);
       if (response.status === 201) {
@@ -201,7 +215,9 @@ const FinancialReport = () => {
       alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
-  
+
+
+
 
   return (
     <>
@@ -222,38 +238,40 @@ const FinancialReport = () => {
               </tr>
             </thead>
             <tbody>
-              {combinedData ? combinedData.map((row) => (
-                <tr key={row.id} className="bg-white">
-                  <td className="p-3 text-center">
-                    <input
-                      type="checkbox"
-                      checked={!!selectedRows[row.id]}
-                      onChange={() => handleCheckboxChange(row)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="p-3">{row.day}</td>
-                  <td className="p-3">{row.location}</td>
-                  <td className="p-3">{row.price.toFixed(2)} ฿</td>
-                  <td className="p-3">{row.refunded.toFixed(2)} ฿</td>
-                  <td className="p-3">{row.deduction} ฿</td>
-                  <td className="p-3">{row.payout} ฿</td>
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => {
-                        setModalData(row)
-                        console.log("🔹 data:",data)
-                        console.log("🔹 mergedData:", mergedData);
-                        console.log("🔹 combinedData:", combinedData)
-                      }}
-                      className="bg-green-500 text-white px-2 py-1 rounded-lg text-sm hover:bg-green-600"
-                    >
-                      ดูรายละเอียด
-                    </button>
-                  </td>
+              {combinedData ? (
+                combinedData.map((row) => (
+                  <tr key={row.id} className="bg-white">
+                    <td className="p-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedRows[row.id]}
+                        onChange={() => handleCheckboxChange(row)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="p-3">{row.day}</td>
+                    <td className="p-3">{row.location}</td>
+                    <td className="p-3">{row.price.toFixed(2)} ฿</td>
+                    <td className="p-3">{row.refunded.toFixed(2)} ฿</td>
+                    <td className="p-3">{row.deduction} ฿</td>
+                    <td className="p-3">{row.payout} ฿</td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => setModalData(row)}
+                        className="bg-green-500 text-white px-2 py-1 rounded-lg text-sm hover:bg-green-600"
+                      >
+                        ดูรายละเอียด
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center p-3">Loading...</td>
                 </tr>
-              )):<>Loading...</>}
+              )}
             </tbody>
+
           </table>
         </div>
 
@@ -276,9 +294,10 @@ const FinancialReport = () => {
             <p><strong>คืนเงิน:</strong> {modalData.refunded.toFixed(2)} ฿</p>
             <p><strong>หัก 5%:</strong> {modalData.deduction} ฿</p>
             <p><strong>เงินออก:</strong> {modalData.payout} ฿</p>
-            <p><strong>firstname:</strong> {modalData.ownerInfo.firstName} </p>
-            <p><strong>bank:</strong> {modalData.ownerInfo.bank} </p>
-            <p><strong>accountNumber:</strong> {modalData.ownerInfo.accountNumber}</p>
+            <p><strong>Firstname:</strong> {modalData.ownerInfo ? modalData.ownerInfo.firstName : 'N/A'} </p>
+            <p><strong>Bank:</strong> {modalData.ownerInfo ? modalData.ownerInfo.bank : 'N/A'} </p>
+            <p><strong>Account Number:</strong> {modalData.ownerInfo ? modalData.ownerInfo.accountNumber : 'N/A'}</p>
+
             <div className="mt-4 text-right">
               <button
                 onClick={() => setModalData(null)}
