@@ -558,7 +558,7 @@ const ArcherBooking = () => {
               />
               {/* ข้อความที่แสดง */}
               <p className="qr-description">
-                Arena Pattaya co.ltd
+                {name}
                 <span>
                   ฿
                   {discountedPrice !== null

@@ -44,6 +44,7 @@ const bookingSchema = new mongoose.Schema({
     username: String,
     email: String,
     role: String,
+    
   },
 },
 { strict: false });
