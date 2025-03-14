@@ -22,7 +22,7 @@ const PlacesPage = () => {
         }
 
         console.log("Token being sent:", token);
-        const response = await axios.get("http://localhost:5000/api/bookings/current", {
+        const response = await axios.get("http://localhost:5011/api/bookings/current", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
