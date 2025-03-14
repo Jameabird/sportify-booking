@@ -39,7 +39,7 @@ const AdminPaidTable = () => {
         );
 
         // ดึง users
-        const usersRes = await axios.get("http://localhost:5000/api/users");
+        const usersRes = await axios.get("http://localhost:5011/api/users");
         const usersArray = usersRes.data;
 
         console.log("📌 Users Data:", usersArray);
