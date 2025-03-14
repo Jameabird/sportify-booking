@@ -9,3 +9,8 @@ export const provinces = [
     "สระแก้ว", "สระบุรี", "สิงห์บุรี", "สุโขทัย", "สุพรรณบุรี", "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย",
     "หนองบัวลำภู", "อ่างทอง", "อำนาจเจริญ", "อุดรธานี", "อุตรดิตถ์", "อุทัยธานี", "อุบลราชธานี"
 ];
+
+export const types = [
+    "Archer","Badminton","Baseball","Basketball","Bowling","Carracing","Football","Futsal","Golf","Hockey","Iceskating",
+    "Icehockey","Rugby","Tabletennis","Tennis","Thaiboxing","Waterpool","Volleyball"
+]

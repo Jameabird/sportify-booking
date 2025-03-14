@@ -31,6 +31,8 @@ const bookingSchema = new mongoose.Schema({
   price: String,
   type: String,
   role: String,
+  field:String,
+  building:String,
   user: {
     _id: mongoose.Schema.Types.ObjectId,
     username: String,
@@ -42,6 +44,7 @@ const bookingSchema = new mongoose.Schema({
     username: String,
     email: String,
     role: String,
+    
   },
 },
 { strict: false });

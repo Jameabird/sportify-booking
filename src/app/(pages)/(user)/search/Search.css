@@ -45,7 +45,7 @@ h2 {
 .map-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .map-container img {
@@ -90,7 +90,7 @@ h2 {
 
 .place-details {
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   gap: 10px;
 }
 
@@ -218,7 +218,7 @@ h2 {
 
   .place-card {
     flex-direction: column; 
-    text-align: center;
+    /* text-align: center; */
   }
 
   .place-details {

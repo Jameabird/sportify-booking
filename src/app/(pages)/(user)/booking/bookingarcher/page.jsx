@@ -31,6 +31,7 @@ const ArcherBooking = () => {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const [types, setType] = useState("");
   const showfirstPopup = () => {
     setShowPopup(true);
   };
@@ -95,7 +96,8 @@ const ArcherBooking = () => {
         if (archerData && archerData.Type === "Archer") {
           setData(archerData.Building);
           setSelectedBuilding(Object.keys(archerData.Building)[0]);
-          setName(archerData.name); // Auto-select first building
+          setName(archerData.name);
+          setType(archerData.Type); // Auto-select first building
         } else {
           console.error("⚠️ No Archer data found.");
         }
@@ -121,7 +123,7 @@ const ArcherBooking = () => {
     console.log("Token being sent:", token);
     
     axios
-      .get("http://localhost:5000/api/bookings/current", {
+      .get("http://localhost:5011/api/bookings/current", {
         headers: {
           Authorization: `Bearer ${token}`, // ✅ Correct format
         },
@@ -401,7 +403,7 @@ const ArcherBooking = () => {
                   <td className="p-2">{field}</td>
                   <td className="p-2">{details.Price}</td>
                   <td className="p-2">
-                    {details.open},{details.close}
+                    {details.open}-{details.close}
                   </td>
                 </tr>
               ))}
@@ -436,7 +438,7 @@ const ArcherBooking = () => {
           <div className="content">
             <div className="booking-details">
             <p>
-                <span>Type:</span> <span>archer</span>
+                <span>Type:</span> <span>{types}</span>
               </p>
               <p>
                 <span>สถานที่:</span> <span>{name || "กรุณาเลือกสถานที่"}</span>
@@ -556,7 +558,7 @@ const ArcherBooking = () => {
               />
               {/* ข้อความที่แสดง */}
               <p className="qr-description">
-                Arena Pattaya co.ltd
+                {name}
                 <span>
                   ฿
                   {discountedPrice !== null
