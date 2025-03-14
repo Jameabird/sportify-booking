@@ -60,20 +60,17 @@ const CourtManagement = () => {
                         name: buildingName,
                         fields: Object.entries(fields || {})
                             .filter(([fieldName]) => fieldName.toLowerCase() !== "_id")
-                            .map(([fieldName, fieldData]) => {
-                                const fieldBookings = bookings.filter(b => b.fieldId === fieldName);
-                                const isBooked = fieldBookings.length > 0;
-
-                                return {
-                                    id: fieldName,
-                                    price: fieldData?.Price || "N/A",
-                                    open: fieldData?.open || "00:00",
-                                    close: fieldData?.close || "00:00",
-                                    status: isBooked ? "🔴 Booked" : "🟢 Available"
-                                };
-                            })
+                            .map(([fieldName, fieldData]) => ({
+                                id: fieldName,
+                                price: fieldData?.Price || "N/A",
+                                open: fieldData?.open || "00:00",
+                                close: fieldData?.close || "00:00",
+                                bookingEnabled: !!fieldData?.Booking, // Ensuring it's a boolean
+                                status: fieldData?.Booking ? "🔴 Booked" : "🟢 Available"
+                            }))
                     }))
                 }));
+                
 
                 setCourtData(formattedData);
             } catch (error) {
