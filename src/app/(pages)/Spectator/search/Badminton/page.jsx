@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import "./Search.css";
+import "../Search.css";
 import places from "./places";
 import TopBar from "@components/Topbar";
 import { useRouter } from "next/navigation";
