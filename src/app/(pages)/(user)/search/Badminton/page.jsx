@@ -103,16 +103,21 @@ function SearchPages() {
                         className="place-image"
                       />
                     <div className="place-details">                     
-                      <h3 className="place-name">{building.name}</h3>
+                      <h3 className="place-name">
+                        <strong>🏠 Sports Venue: </strong> 
+                        {building.name}</h3>
                       <p className="place-details-description">
+                      <strong>📍 Location: </strong>
                         {building.details}
                       </p>
-                      <p className="place-link">
+                      <p >
+                      <strong>🗺️  Link location: </strong>
                         <a
                           href={building.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                        >
+                          className="place-link"
+                        >                           
                           {building.link}
                         </a>
                       </p>
