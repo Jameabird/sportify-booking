@@ -14,7 +14,6 @@ function SearchPages() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-  // 📌 ฟังก์ชันดึงข้อมูลจากเซิร์ฟเวอร์
   useEffect(() => {
     const tokenData = JSON.parse(localStorage.getItem("token"));
     const token = tokenData ? tokenData.token : null;
@@ -30,12 +29,11 @@ function SearchPages() {
     const fetchBuildings = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:4005/api/buildings", {
+        const res = await axios.get("http://localhost:5005/api/building-user", {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("✅ Buildings data received:", res.data);
 
-        // 🔹 กรองข้อมูลให้เหลือเฉพาะ Type "Archer"
         const archerBuildings = res.data.filter(
           (item) => item.Type === "Badminton"
         );
@@ -55,12 +53,13 @@ function SearchPages() {
     fetchBuildings();
   }, []);
 
-  // 📌 ฟิลเตอร์ตามจังหวัดและคำค้นหา
   const filteredBuildings = buildings.filter(
     (building) =>
       (selectedProvince === "" || building.location === selectedProvince) &&
       building.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   return (
     <div>
@@ -98,7 +97,7 @@ function SearchPages() {
               <div className="place-list">
                 {filteredBuildings.map((building, index) => (
                   <div className="place-card" key={index}>
-                    <img
+                     <img
                         src={building.image}
                         alt={building.name}
                         className="place-image"
@@ -123,6 +122,7 @@ function SearchPages() {
                         </a>
                       </p>
                     </div>
+
                     <div>
                       <button
                         className="book-button"

@@ -165,6 +165,47 @@ app.get("/api/buildings", async (req, res) => {
   }
 });
 
+app.put("/api/update-buildings", async (req, res) => {
+  try {
+    console.log("🔹 Update Request Received:", JSON.stringify(req.body, null, 2));
+
+    const { Name, Type, Building } = req.body;
+
+    if (!Name || !Type || !Building || Object.keys(Building).length === 0) {
+      return res.status(400).json({ message: "❌ Missing required fields!" });
+    }
+
+    const buildingName = Object.keys(Building)[0]; // Get first building key
+    const fieldKey = Object.keys(Building[buildingName])[0]; // Get first field key
+    const newBookingStatus = Building[buildingName][fieldKey].Booking;
+
+    if (buildingName === undefined || fieldKey === undefined || newBookingStatus === undefined) {
+      return res.status(400).json({ message: "❌ Invalid data structure!" });
+    }
+
+    console.log("📌 Updating:", { Name, Type, buildingName, fieldKey, newBookingStatus });
+
+    const updatedBuilding = await BuildingModel.findOneAndUpdate(
+      { name: Name, Type: Type },
+      { $set: { [`Building.${buildingName}.${fieldKey}.Booking`]: newBookingStatus } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedBuilding) {
+      return res.status(404).json({ message: "❌ Building not found!" });
+    }
+
+    console.log("✅ Updated Building:", updatedBuilding);
+    res.status(200).json({ message: "✅ Booking updated successfully!", updatedBuilding });
+
+  } catch (err) {
+    console.error("🚨 Error updating building:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 
 /** ================================
  * ✅ POST: เพิ่มอาคารใหม่
@@ -173,29 +214,44 @@ app.post("/api/buildings", upload.single("image"), async (req, res) => {
   try {
     console.log("🔹 Request received:", req.body);
 
-    const { userid, username, name, location, link, details, image } = req.body;
+    const { userid, username, name, location, link, details, image, Type } = req.body;
+    let { buildingData } = req.body; 
 
-    if (!name || !location || !link || !image) {
+    if (!name || !location || !link || !image || !Type) {
       return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
 
-    // ✅ Compress and save image as a file instead of Base64
-    let processedImage = image; // Use `let` to allow reassignment
-    
-        if (image) {
-          const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
-          const buffer = Buffer.from(base64Data, "base64");
-    
-          const compressedImageBuffer = await sharp(buffer)
-            .resize({ width: 800 }) 
-            .jpeg({ quality: 85 }) 
-            .toBuffer();
-    
-          processedImage = `data:image/jpeg;base64,${compressedImageBuffer.toString("base64")}`;
-        }
+    // ✅ Debugging: Ensure `buildingData` exists
+    console.log("✅ Raw buildingData:", buildingData);
+    if (typeof buildingData === "string") {
+      try {
+        buildingData = JSON.parse(buildingData);
+        console.log("✅ Parsed buildingData:", buildingData);
+      } catch (error) {
+        console.error("❌ Error parsing buildingData:", error);
+        return res.status(400).json({ message: "Invalid buildingData format" });
+      }
+    } else {
+      console.log("✅ Direct buildingData:", buildingData);
+    }
 
-    // ✅ Store only the file path, not Base64!
+    // ✅ Compress Image
+    let processedImage = image;
+    if (image) {
+      const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+
+      const compressedImageBuffer = await sharp(buffer)
+        .resize({ width: 800 })
+        .jpeg({ quality: 85 })
+        .toBuffer();
+
+      processedImage = `data:image/jpeg;base64,${compressedImageBuffer.toString("base64")}`;
+    }
+
+    // ✅ Save to MongoDB
     const newBuilding = new Building({
+      Type,
       userid,
       username,
       name,
@@ -203,10 +259,11 @@ app.post("/api/buildings", upload.single("image"), async (req, res) => {
       link,
       details,
       image: processedImage,
+      Building: buildingData || {}, // ✅ Ensure it's always an object
     });
 
     await newBuilding.save();
-    console.log("🔹 Request sent:", newBuilding);
+    console.log("✅ Successfully saved:", JSON.stringify(newBuilding, null, 2));
     res.status(201).json({ message: "เพิ่มข้อมูลสำเร็จ", building: newBuilding });
 
   } catch (err) {
@@ -280,6 +337,41 @@ app.delete("/api/buildings/:id", async (req, res) => {
     res.status(500).json({ message: "❌ Server error while deleting building" });
   }
 });
+
+app.delete("/api/buildings/:buildingId/fields/:fieldId", async (req, res) => {
+  try {
+    let { buildingId, fieldId } = req.params;
+    console.log(`🗑️ Deleting field "${fieldId}" from building ID: ${buildingId}`);
+
+    // Ensure buildingId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(buildingId)) {
+      return res.status(400).json({ message: "❌ Invalid building ID format" });
+    }
+
+    // Find the building
+    const building = await Building.findById(buildingId);
+    if (!building) {
+      return res.status(404).json({ message: "❌ Building not found" });
+    }
+
+    // Check if the field exists in the building
+    if (!building.Building || !building.Building[fieldId]) {
+      return res.status(404).json({ message: "❌ Field not found in this building" });
+    }
+
+    // Remove the field from the Building object
+    delete building.Building[fieldId];
+
+    // Save the updated building document
+    await building.save();
+
+    res.status(200).json({ message: "✅ Field deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting field:", error);
+    res.status(500).json({ message: "❌ Server error while deleting field" });
+  }
+});
+
 
 /** ================================
  * ✅ เปิดเซิร์ฟเวอร์
